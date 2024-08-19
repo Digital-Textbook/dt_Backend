@@ -1,24 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { StudentProfile } from '../entities/studentProfile.entity';
+import { UserProfile } from '../entities/UserProfile.entity';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
 
 @Injectable()
 export class StudentProfileService {
   constructor(
-    @InjectRepository(StudentProfile)
-    private profileRepository: Repository<StudentProfile>,
+    @InjectRepository(UserProfile)
+    private profileRepository: Repository<UserProfile>,
   ) {}
 
-  async getAllProfile(): Promise<StudentProfile[]> {
-    const profiles = await this.profileRepository.find();
-    console.log('Retrieved Profiles:', profiles);
-    console.log('Retrieved Profiles');
-    return profiles;
-  }
-
-  async getProfileById(id: string): Promise<StudentProfile> {
+  async getProfileById(id: string): Promise<UserProfile> {
     if (!id) {
       throw new Error('ID is required');
     }
@@ -35,15 +28,15 @@ export class StudentProfileService {
 
   async updateProfile(
     id: string,
-    studentData: UpdateProfileDto,
-  ): Promise<StudentProfile> {
+    userData: UpdateProfileDto,
+  ): Promise<UserProfile> {
     const profile = await this.profileRepository.findOne({ where: { id } });
 
     if (!profile) {
       throw new NotFoundException(`Profile with ID ${id} was not found`);
     }
 
-    Object.assign(profile, studentData);
+    Object.assign(profile, userData);
 
     return await this.profileRepository.save(profile);
   }
