@@ -1,39 +1,50 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { Admin } from '../user/entities/admin.entity';
+import { Students } from '../user/entities/students.entity';
+import { Users } from '../user/entities/users.entity';
+import { StudentProfile } from '../user/entities/studentProfile.entity';
+import { StudentService } from '../user/service/students.service';
+import { StudentController } from '../user/controller/students.controller';
+import { UserController } from '../user/controller/users.controller';
+import { UserService } from '../user/service/users.service';
+import { StudentProfileService } from '../user/service/studentProfile.service';
+import { AdminService } from '../user/service/admin.service';
+import { AdminController } from '../user/controller/admin.controller';
+import { StudentProfileController } from '../user/controller/studentProfile.controller';
+import { AuthService } from './service/auth.service';
 import { PassportModule } from '@nestjs/passport';
-
-import { ApiConfigService } from '../../shared/services/api-config.service';
-import { UserModule } from '../user/user.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
-import { PublicStrategy } from './public.strategy';
-
+import { AuthController } from './controller/auth.controller';
 @Module({
   imports: [
-    forwardRef(() => UserModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      useFactory: (configService: ApiConfigService) => ({
-        privateKey: configService.authConfig.privateKey,
-        publicKey: configService.authConfig.publicKey,
-        signOptions: {
-          algorithm: 'RS256',
-          //     expiresIn: configService.getNumber('JWT_EXPIRATION_TIME'),
-        },
-        verifyOptions: {
-          algorithms: ['RS256'],
-        },
-        // if you want to use token with expiration date
-        // signOptions: {
-        //     expiresIn: configService.getNumber('JWT_EXPIRATION_TIME'),
-        // },
-      }),
-      inject: [ApiConfigService],
+    JwtModule.register({
+      secret: 'topSecret51',
+      signOptions: {
+        expiresIn: 3600,
+      },
     }),
+    TypeOrmModule.forFeature([Admin, Users, Students, StudentProfile]),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PublicStrategy],
-  exports: [JwtModule, AuthService],
+  controllers: [
+    StudentController,
+    UserController,
+    AdminController,
+    StudentProfileController,
+    AuthController,
+  ],
+  providers: [
+    StudentService,
+    UserService,
+    StudentProfileService,
+    AdminService,
+    AuthService,
+    JwtStrategy,
+  ],
+
+  exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
