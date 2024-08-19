@@ -17,26 +17,26 @@ import { Users } from '../entities/users.entity';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get('/getUser')
-  async getAllUsers(): Promise<Users[]> {
-    try {
-      return await this.userService.getAllUsers();
-    } catch (error) {
-      throw new Error('Error retrieving users');
-    }
-  }
+  //   @Get('/getUser')
+  //   async getAllUsers(): Promise<Users[]> {
+  //     try {
+  //       return await this.userService.getAllUsers();
+  //     } catch (error) {
+  //       throw new Error('Error retrieving users');
+  //     }
+  //   }
 
-  @Get('/:cid_no')
-  async getUserByCid(@Param('cid_no') cid_no: string): Promise<Users> {
-    return await this.userService.getUserByCid(cid_no);
-  }
+  //   @Get('/:cid_no')
+  //   async getUserByCid(@Param('cid_no') cid_no: string): Promise<Users> {
+  //     return await this.userService.getUserByCid(cid_no);
+  //   }
 
-  @Get('/:id')
-  async getUserById(
-    @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<Users> {
-    return await this.userService.getUserById(id);
-  }
+  //   @Get('/:id')
+  //   async getUserById(
+  //     @Param('id', new ParseUUIDPipe()) id: string,
+  //   ): Promise<Users> {
+  //     return await this.userService.getUserById(id);
+  //   }
 
   @Post('/register')
   @UsePipes(ValidationPipe)

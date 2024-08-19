@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsInt, IsString, Length } from 'class-validator';
 
-export class CreateStudentProfileDto {
+export class CreateUserProfileDto {
   @IsNotEmpty({
     message: 'Name is required',
   })
