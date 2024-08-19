@@ -1,521 +1,163 @@
-/* eslint-disable unicorn/no-null */
-import { applyDecorators } from '@nestjs/common';
-import type { ApiPropertyOptions } from '@nestjs/swagger';
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsBoolean,
-  IsDate,
-  IsDefined,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsNumber,
-  IsPositive,
-  IsString,
-  IsUrl,
-  IsUUID,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
-  NotEquals,
-  ValidateNested,
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
 } from 'class-validator';
 
-import { supportedLanguageCount } from '../constants';
-import type { Constructor } from '../types';
-import { ApiEnumProperty, ApiUUIDProperty } from './property.decorators';
-import {
-  PhoneNumberSerializer,
-  ToArray,
-  ToBoolean,
-  ToLowerCase,
-  ToUpperCase,
-} from './transform.decorators';
-import {
-  IsNullable,
-  IsPassword,
-  IsPhoneNumber,
-  IsTmpKey as IsTemporaryKey,
-  IsUndefinable,
-} from './validator.decorators';
-
-type RequireField<T, K extends keyof T> = T & Required<Pick<T, K>>;
-
-interface IFieldOptions {
-  each?: boolean;
-  swagger?: boolean;
-  nullable?: boolean;
-  groups?: string[];
-}
-
-interface INumberFieldOptions extends IFieldOptions {
-  min?: number;
-  max?: number;
-  int?: boolean;
-  isPositive?: boolean;
-}
-
-interface IStringFieldOptions extends IFieldOptions {
-  minLength?: number;
-  maxLength?: number;
-  toLowerCase?: boolean;
-  toUpperCase?: boolean;
-}
-
-type IClassFieldOptions = IFieldOptions;
-type IBooleanFieldOptions = IFieldOptions;
-type IEnumFieldOptions = IFieldOptions;
-
-export function NumberField(
-  options: Omit<ApiPropertyOptions, 'type'> & INumberFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [Type(() => Number)];
-
-  if (options.nullable) {
-    decorators.push(IsNullable({ each: options.each }));
-  } else {
-    decorators.push(NotEquals(null, { each: options.each }));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: Number, ...options }));
-  }
-
-  if (options.each) {
-    decorators.push(ToArray());
-  }
-
-  if (options.int) {
-    decorators.push(IsInt({ each: options.each }));
-  } else {
-    decorators.push(IsNumber({}, { each: options.each }));
-  }
-
-  if (typeof options.min === 'number') {
-    decorators.push(Min(options.min, { each: options.each }));
-  }
-
-  if (typeof options.max === 'number') {
-    decorators.push(Max(options.max, { each: options.each }));
-  }
-
-  if (options.isPositive) {
-    decorators.push(IsPositive({ each: options.each }));
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function NumberFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> &
-    INumberFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    NumberField({ required: false, ...options }),
-  );
-}
-
-export function StringField(
-  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [Type(() => String), IsString({ each: options.each })];
-
-  if (options.nullable) {
-    decorators.push(IsNullable({ each: options.each }));
-  } else {
-    decorators.push(NotEquals(null, { each: options.each }));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(
-      ApiProperty({ type: String, ...options, isArray: options.each }),
+@ValidatorConstraint({ async: false })
+export class IsStudentCodeConstraint implements ValidatorConstraintInterface {
+  validate(student_code: any, args: ValidationArguments) {
+    const studentCodePattern = /^\d{3}\.\d{5}\.\d{2}\.\d{4}$/;
+    return (
+      typeof student_code === 'string' && studentCodePattern.test(student_code)
     );
   }
 
-  const minLength = options.minLength || 1;
-
-  decorators.push(MinLength(minLength, { each: options.each }));
-
-  if (options.maxLength) {
-    decorators.push(MaxLength(options.maxLength, { each: options.each }));
+  defaultMessage(args: ValidationArguments) {
+    return 'Student code must match the pattern 201.00345.33.0042';
   }
-
-  if (options.toLowerCase) {
-    decorators.push(ToLowerCase());
-  }
-
-  if (options.toUpperCase) {
-    decorators.push(ToUpperCase());
-  }
-
-  return applyDecorators(...decorators);
 }
 
-export function StringFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> &
-    IStringFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    StringField({ required: false, ...options }),
-  );
+export function IsStudentCode(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsStudentCodeConstraint,
+    });
+  };
 }
 
-export function PasswordField(
-  options: Omit<ApiPropertyOptions, 'type' | 'minLength'> &
-    IStringFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [StringField({ ...options, minLength: 6 }), IsPassword()];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
+@ValidatorConstraint({ async: false })
+export class IsEmailConstraint implements ValidatorConstraintInterface {
+  validate(email: any, args: ValidationArguments) {
+    // Basic email pattern for validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return typeof email === 'string' && emailRegex.test(email);
   }
 
-  return applyDecorators(...decorators);
+  defaultMessage(args: ValidationArguments) {
+    return 'Invalid email format';
+  }
 }
 
-export function PasswordFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required' | 'minLength'> &
-    IStringFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    PasswordField({ required: false, ...options }),
-  );
+// Create the custom decorator
+export function IsEmailField(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsEmailConstraint,
+    });
+  };
 }
 
-export function BooleanField(
-  options: Omit<ApiPropertyOptions, 'type'> & IBooleanFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [ToBoolean(), IsBoolean()];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
+@ValidatorConstraint({ async: false })
+export class IsPhoneNumberConstraint implements ValidatorConstraintInterface {
+  validate(phoneNumber: any, args: ValidationArguments) {
+    const phoneRegex = /^(17|77)\d{6}$/;
+    return typeof phoneNumber === 'string' && phoneRegex.test(phoneNumber);
   }
 
-  if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: Boolean, ...options }));
+  defaultMessage(args: ValidationArguments) {
+    return 'Phone number must start with 17 or 77 with 8 digits';
   }
-
-  return applyDecorators(...decorators);
 }
 
-export function BooleanFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> &
-    IBooleanFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    BooleanField({ required: false, ...options }),
-  );
+// Create the custom decorator
+export function IsPhoneNumber(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsPhoneNumberConstraint,
+    });
+  };
 }
 
-export function TranslationsField(
-  options: RequireField<Omit<ApiPropertyOptions, 'isArray'>, 'type'> &
-    IFieldOptions,
-): PropertyDecorator {
-  const decorators = [
-    ArrayMinSize(supportedLanguageCount),
-    ArrayMaxSize(supportedLanguageCount),
-    ValidateNested({
-      each: true,
-    }),
-    Type(() => options.type as FunctionConstructor),
-  ];
+@ValidatorConstraint({ async: false })
+export class IsStrongPasswordConstraint
+  implements ValidatorConstraintInterface
+{
+  validate(password: string, args: ValidationArguments) {
+    if (typeof password !== 'string') {
+      return false;
+    }
 
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
+    const minLength = 8;
+    const maxLength = 32;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumberOrSpecial = /((?=.*\d)|(?=.*\W+))/.test(password);
 
-  if (options.swagger !== false) {
-    decorators.push(ApiProperty({ isArray: true, ...options }));
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function TranslationsFieldOptional(
-  options: RequireField<Omit<ApiPropertyOptions, 'isArray'>, 'type'> &
-    IFieldOptions,
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    TranslationsField({ required: false, ...options }),
-  );
-}
-
-export function TmpKeyField(
-  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [
-    StringField(options),
-    IsTemporaryKey({ each: options.each }),
-  ];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(
-      ApiProperty({ type: String, ...options, isArray: options.each }),
+    return (
+      password.length >= minLength &&
+      password.length <= maxLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumberOrSpecial
     );
   }
 
-  return applyDecorators(...decorators);
+  defaultMessage(args: ValidationArguments) {
+    return [
+      'Password must be between 8 and 32 characters long',
+      'Password must contain at least 1 upper case letter',
+      'Password must contain at least 1 lower case letter',
+      'Password must contain at least 1 number or special character',
+    ].join('\n');
+  }
 }
 
-export function TmpKeyFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> &
-    IStringFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    TmpKeyField({ required: false, ...options }),
-  );
+export function IsStrongPassword(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsStrongPasswordConstraint,
+    });
+  };
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function EnumField<TEnum extends object>(
-  getEnum: () => TEnum,
-  options: Omit<ApiPropertyOptions, 'type' | 'enum' | 'enumName' | 'isArray'> &
-    IEnumFieldOptions = {},
-): PropertyDecorator {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types
-  const enumValue = getEnum();
-  const decorators = [IsEnum(enumValue, { each: options.each })];
+@ValidatorConstraint({ async: false })
+export class IsValidNameConstraint implements ValidatorConstraintInterface {
+  validate(name: string, args: ValidationArguments) {
+    if (typeof name !== 'string') {
+      return false;
+    }
 
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
+    const minLength = 2;
+    const maxLength = 32;
+    const hasValidLength = name.length >= minLength && name.length <= maxLength;
+    const hasValidCharacters = /^[A-Za-z\s]+$/.test(name);
+
+    return hasValidLength && hasValidCharacters;
   }
 
-  if (options.each) {
-    decorators.push(ToArray());
+  defaultMessage(args: ValidationArguments) {
+    return 'Name must be a string containing only letters and spaces, and must be between 2 and 32 characters long';
   }
-
-  if (options.swagger !== false) {
-    decorators.push(
-      ApiEnumProperty(getEnum, { ...options, isArray: options.each }),
-    );
-  }
-
-  return applyDecorators(...decorators);
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function ClassField<TClass extends Constructor>(
-  getClass: () => TClass,
-  options: Omit<ApiPropertyOptions, 'type'> & IClassFieldOptions = {},
-): PropertyDecorator {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const classValue = getClass();
-
-  const decorators = [
-    Type(() => classValue),
-    ValidateNested({ each: options.each }),
-  ];
-
-  if (options.required !== false) {
-    decorators.push(IsDefined());
-  }
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(
-      ApiProperty({
-        type: () => classValue,
-        ...options,
-      }),
-    );
-  }
-
-  // if (options.each) {
-  //   decorators.push(ToArray());
-  // }
-
-  return applyDecorators(...decorators);
-}
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function EnumFieldOptional<TEnum extends object>(
-  getEnum: () => TEnum,
-  options: Omit<ApiPropertyOptions, 'type' | 'required' | 'enum' | 'enumName'> &
-    IEnumFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    EnumField(getEnum, { required: false, ...options }),
-  );
-}
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function ClassFieldOptional<TClass extends Constructor>(
-  getClass: () => TClass,
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> &
-    IClassFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    ClassField(getClass, { required: false, ...options }),
-  );
-}
-
-export function EmailField(
-  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [
-    IsEmail(),
-    StringField({ toLowerCase: true, ...options }),
-  ];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function EmailFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    EmailField({ required: false, ...options }),
-  );
-}
-
-export function PhoneField(
-  options: Omit<ApiPropertyOptions, 'type'> & IFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [IsPhoneNumber(), PhoneNumberSerializer()];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function PhoneFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> & IFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    PhoneField({ required: false, ...options }),
-  );
-}
-
-export function UUIDField(
-  options: Omit<ApiPropertyOptions, 'type' | 'format' | 'isArray'> &
-    IFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [Type(() => String), IsUUID('4', { each: options.each })];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(ApiUUIDProperty(options));
-  }
-
-  if (options.each) {
-    decorators.push(ToArray());
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function UUIDFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required' | 'isArray'> &
-    IFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    UUIDField({ required: false, ...options }),
-  );
-}
-
-export function URLField(
-  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [StringField(options), IsUrl({}, { each: true })];
-
-  if (options.nullable) {
-    decorators.push(IsNullable({ each: options.each }));
-  } else {
-    decorators.push(NotEquals(null, { each: options.each }));
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function URLFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    URLField({ required: false, ...options }),
-  );
-}
-
-export function DateField(
-  options: Omit<ApiPropertyOptions, 'type'> & IFieldOptions = {},
-): PropertyDecorator {
-  const decorators = [Type(() => Date), IsDate()];
-
-  if (options.nullable) {
-    decorators.push(IsNullable());
-  } else {
-    decorators.push(NotEquals(null));
-  }
-
-  if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: Date, ...options }));
-  }
-
-  return applyDecorators(...decorators);
-}
-
-export function DateFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type' | 'required'> & IFieldOptions = {},
-): PropertyDecorator {
-  return applyDecorators(
-    IsUndefinable(),
-    DateField({ ...options, required: false }),
-  );
+// Create the custom decorator
+export function IsValidName(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsValidNameConstraint,
+    });
+  };
 }
