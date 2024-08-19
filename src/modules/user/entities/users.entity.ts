@@ -6,7 +6,8 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { StudentProfile } from './studentProfile.entity';
+import { UserProfile } from './UserProfile.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -51,7 +52,8 @@ export class Users extends BaseEntity {
   })
   updated_at: Date;
 
-  @OneToOne(() => StudentProfile, (profile) => profile.user, { cascade: true })
+  @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
   @JoinColumn({ name: 'profileId' })
-  profile: StudentProfile;
+  @Exclude({ toPlainOnly: true })
+  profile: UserProfile;
 }

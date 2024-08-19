@@ -4,12 +4,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
-  JoinColumn,
 } from 'typeorm';
 import { Users } from './users.entity';
 
-@Entity('student_profile')
-export class StudentProfile extends BaseEntity {
+@Entity('user_profile')
+export class UserProfile extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', {
     comment: 'This is the unique ID',
   })

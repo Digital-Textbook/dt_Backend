@@ -9,9 +9,8 @@ import { Repository } from 'typeorm';
 import { Users } from '../entities/users.entity';
 import { CreateUserDto } from '../dto/createUser.dto';
 import { Students } from '../entities/students.entity';
-import { StudentProfile } from '../entities/studentProfile.entity';
+import { UserProfile } from '../entities/UserProfile.entity';
 import * as bcrypt from 'bcrypt';
-import { QueryRunner } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -19,8 +18,8 @@ export class UserService {
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
     @InjectRepository(Students) private studentRepository: Repository<Students>,
-    @InjectRepository(StudentProfile)
-    private studentProfileRepository: Repository<StudentProfile>,
+    @InjectRepository(UserProfile)
+    private userProfileRepository: Repository<UserProfile>,
   ) {}
 
   async getAllUsers(): Promise<Users[]> {
@@ -75,7 +74,7 @@ export class UserService {
 
       const savedUser = await this.usersRepository.save(newUser);
 
-      const newProfile = this.studentProfileRepository.create({
+      const newProfile = this.userProfileRepository.create({
         user: savedUser,
         name: student.name,
         student_code: student.student_code,
@@ -85,7 +84,7 @@ export class UserService {
         mobile_no: user.mobile_no,
       });
 
-      const savedProfile = await this.studentProfileRepository.save(newProfile);
+      const savedProfile = await this.userProfileRepository.save(newProfile);
 
       savedUser.profile = savedProfile;
       await this.usersRepository.save(savedUser);
@@ -97,6 +96,7 @@ export class UserService {
       );
     }
   }
+
   async getStudentByCid(cid_no: string): Promise<Students> {
     if (!cid_no) {
       throw new Error('CID No is required');
