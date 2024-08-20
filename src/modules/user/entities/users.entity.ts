@@ -31,6 +31,9 @@ export class Users extends BaseEntity {
   @Column({ type: 'varchar', length: 20, unique: true })
   mobile_no: string;
 
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email: string;
+
   @Column({ type: 'varchar' })
   user_type: 'bhutanese' | 'non-bhutanese';
 
@@ -41,6 +44,12 @@ export class Users extends BaseEntity {
     type: 'varchar',
   })
   password: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  otp: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  otpExpiresAt: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
