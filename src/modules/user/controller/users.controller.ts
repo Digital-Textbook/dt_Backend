@@ -1,46 +1,45 @@
 import {
   Body,
   Controller,
-  Get,
-  Param,
-  ParseIntPipe,
   Post,
   UsePipes,
   ValidationPipe,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from '../service/users.service';
 import { CreateUserDto } from '../dto/createUser.dto';
-import { Users } from '../entities/users.entity';
+import { UserResponse } from './user-response.interface';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  //   @Get('/getUser')
-  //   async getAllUsers(): Promise<Users[]> {
-  //     try {
-  //       return await this.userService.getAllUsers();
-  //     } catch (error) {
-  //       throw new Error('Error retrieving users');
-  //     }
-  //   }
-
-  //   @Get('/:cid_no')
-  //   async getUserByCid(@Param('cid_no') cid_no: string): Promise<Users> {
-  //     return await this.userService.getUserByCid(cid_no);
-  //   }
-
-  //   @Get('/:id')
-  //   async getUserById(
-  //     @Param('id', new ParseUUIDPipe()) id: string,
-  //   ): Promise<Users> {
-  //     return await this.userService.getUserById(id);
-  //   }
-
   @Post('/register')
   @UsePipes(ValidationPipe)
-  async createStudent(@Body() studentData: CreateUserDto) {
-    return await this.userService.createNewUser(studentData);
+  async registerUser(
+    @Body() studentData: CreateUserDto,
+  ): Promise<{ msg: string }> {
+    return this.userService.initiateUserCreation(studentData);
+  }
+
+  //   @Post('/verify')
+  //   @UsePipes(ValidationPipe)
+  //   async verifyOtpAndCreateUser(
+  //     @Body() data: { user: CreateUserDto; otpCode: string },
+  //   ): Promise<UserResponse> {
+  //     return this.userService.verifyOtpAndCreateUser(data.user, data.otpCode);
+  //   }
+
+  @Post('/verify')
+  @UsePipes(ValidationPipe)
+  async verifyOtpAndCreateUser(
+    @Body()
+    data: {
+      mobile_no: string;
+      otpCode: string;
+      userDto: Partial<CreateUserDto>;
+    },
+  ): Promise<UserResponse> {
+    const { mobile_no, otpCode, userDto } = data;
+    return this.userService.verifyOtpAndCreateUser(mobile_no, otpCode, userDto);
   }
 }
