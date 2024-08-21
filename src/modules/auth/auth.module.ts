@@ -18,6 +18,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './controller/auth.controller';
+import { OtpEntity } from '../user/entities/otp.entity';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -27,7 +28,7 @@ import { AuthController } from './controller/auth.controller';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, Users, Students, UserProfile]),
+    TypeOrmModule.forFeature([Admin, Users, Students, UserProfile, OtpEntity]),
   ],
   controllers: [
     StudentController,

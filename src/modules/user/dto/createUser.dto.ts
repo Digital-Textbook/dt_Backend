@@ -36,4 +36,10 @@ export class CreateUserDto {
 
   @IsStrongPassword()
   password: string;
+
+  @IsNotEmpty({ message: 'OPT option is required' })
+  @IsIn(['email', 'phone'], {
+    message: 'OPT option must be either "email" or "phone"',
+  })
+  otpOption: 'email' | 'phone';
 }

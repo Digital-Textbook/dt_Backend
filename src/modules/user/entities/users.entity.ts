@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { UserProfile } from './UserProfile.entity';
 import { Exclude } from 'class-transformer';
+import { OtpEntity } from './otp.entity';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -38,18 +39,12 @@ export class Users extends BaseEntity {
   user_type: 'bhutanese' | 'non-bhutanese';
 
   @Column({ type: 'varchar' })
-  status: 'active' | 'incative';
+  status: 'active' | 'inactive';
 
   @Column({
     type: 'varchar',
   })
   password: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  otp: string;
-
-  @Column({ type: 'timestamp', nullable: true })
-  otpExpiresAt: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
@@ -60,6 +55,9 @@ export class Users extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
+
+  @OneToOne(() => OtpEntity, (otp) => otp.user)
+  otp: OtpEntity;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
   @JoinColumn({ name: 'profileId' })
