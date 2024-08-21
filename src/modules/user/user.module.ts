@@ -3,22 +3,25 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Admin } from '../user/entities/admin.entity';
 import { Students } from '../user/entities/students.entity';
 import { Users } from '../user/entities/users.entity';
-import { StudentProfile } from '../user/entities/studentProfile.entity';
+import { UserProfile } from './entities/UserProfile.entity';
 import { UserController } from './controller/users.controller';
 import { AdminController } from './controller/admin.controller';
-import { StudentProfileController } from './controller/studentProfile.controller';
+import { UserProfileController } from './controller/UserProfile.controller';
 import { StudentController } from './controller/students.controller';
 import { UserService } from './service/users.service';
 import { AdminService } from './service/admin.service';
-import { StudentProfileService } from './service/studentProfile.service';
+import { StudentProfileService } from './service/UserProfile.service';
 import { StudentService } from './service/students.service';
+import { OtpEntity } from './entities/otp.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, Users, Students, StudentProfile])],
+  imports: [
+    TypeOrmModule.forFeature([Admin, Users, Students, UserProfile, OtpEntity]),
+  ],
   controllers: [
     UserController,
     AdminController,
-    StudentProfileController,
+    UserProfileController,
     StudentController,
   ],
   providers: [UserService, AdminService, StudentProfileService, StudentService],
