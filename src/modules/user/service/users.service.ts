@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Twilio } from 'twilio';
 import { OtpEntity } from '../entities/otp.entity';
+import { Console } from 'console';
 
 @Injectable()
 export class UserService {
@@ -37,73 +39,6 @@ export class UserService {
   }
 
   /////////////////////////////////////////////////////////////
-  //   async createNewUser(user: CreateUserDto) {
-  //     const existingUser = await this.usersRepository.findOne({
-  //       where: { cid_no: user.cid_no },
-  //     });
-
-  //     if (existingUser) {
-  //       throw new ConflictException(
-  //         `User with this CID already exists: ${user.cid_no}`,
-  //       );
-  //     }
-
-  //     const existingUserByMobile = await this.usersRepository.findOne({
-  //       where: { mobile_no: user.mobile_no },
-  //     });
-
-  //     if (existingUserByMobile) {
-  //       throw new ConflictException(
-  //         `This phone number is already taken: ${user.mobile_no}`,
-  //       );
-  //     }
-
-  //     const existingUserByStudentCode = await this.usersRepository.findOne({
-  //       where: { student_code: user.student_code },
-  //     });
-
-  //     if (existingUserByStudentCode) {
-  //       throw new ConflictException(
-  //         `User with this student code already exists: ${user.student_code}`,
-  //       );
-  //     }
-
-  //     const student = await this.getStudentByCid(user.cid_no);
-
-  //     if (student) {
-  //       const hashedPassword = await bcrypt.hash(user.password, this.saltRounds);
-
-  //       let newUser = this.usersRepository.create({
-  //         ...user,
-  //         password: hashedPassword,
-  //         status: 'inactive',
-  //       });
-
-  //       const savedUser = await this.usersRepository.save(newUser);
-
-  //       const newProfile = this.userProfileRepository.create({
-  //         user: savedUser,
-  //         name: student.name,
-  //         student_code: student.student_code,
-  //         class: student.class,
-  //         school: student.school,
-  //         dzongkhag: student.dzongkhag,
-  //         mobile_no: user.mobile_no,
-  //         email: user.email,
-  //       });
-
-  //       const savedProfile = await this.userProfileRepository.save(newProfile);
-
-  //       savedUser.profile = savedProfile;
-  //       await this.usersRepository.save(savedUser);
-
-  //       return savedUser;
-  //     } else {
-  //       throw new NotFoundException(
-  //         `No matching student data found for the provided CID No: ${user.cid_no}`,
-  //       );
-  //     }
-  //   }
   async getStudentByCid(cid_no: string): Promise<Students> {
     if (!cid_no) {
       throw new Error('CID No is required');
@@ -124,33 +59,49 @@ export class UserService {
 
   async createNewUser(user: CreateUserDto) {
     const existingUser = await this.usersRepository.findOne({
-      where: { cid_no: user.cid_no },
+      where: [
+        { cid_no: user.cid_no, status: 'inactive' },
+        { mobile_no: user.mobile_no, status: 'inactive' },
+        { student_code: user.student_code, status: 'inactive' },
+        { email: user.email, status: 'inactive' },
+      ],
     });
 
     if (existingUser) {
-      throw new ConflictException(
-        `User with this CID already exists: ${user.cid_no}`,
-      );
-    }
+      if (user.otpOption === 'phone') {
+        let prefix = '+975';
+        let phone = prefix.concat(user.mobile_no);
 
-    const existingUserByMobile = await this.usersRepository.findOne({
-      where: { mobile_no: user.mobile_no },
-    });
+        const otpResponse = await this.sendOtp(phone);
+        // Generate a placeholder OTP since we can't retrieve it from Twilio
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-    if (existingUserByMobile) {
-      throw new ConflictException(
-        `This phone number is already taken: ${user.mobile_no}`,
-      );
-    }
+        // Save OTP in OTP table
+        const newOtpEntity = this.otpRepository.create({
+          otp,
+          otpExpiresAt,
+          user: existingUser,
+        });
+        await this.otpRepository.save(newOtpEntity);
 
-    const existingUserByStudentCode = await this.usersRepository.findOne({
-      where: { student_code: user.student_code },
-    });
+        console.log(`OTP sent to phone: ${otpResponse.msg}`);
+      } else if (user.otpOption === 'email') {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-    if (existingUserByStudentCode) {
-      throw new ConflictException(
-        `User with this student code already exists: ${user.student_code}`,
-      );
+        // Save OTP in OTP table
+        const newOtpEntity = this.otpRepository.create({
+          otp,
+          otpExpiresAt,
+          user: existingUser,
+        });
+        await this.otpRepository.save(newOtpEntity);
+
+        console.log(`OTP generated for email: ${otp}`);
+      }
+
+      return { msg: 'OTP sent or generated for existing inactive user.' };
     }
 
     const student = await this.getStudentByCid(user.cid_no);
@@ -173,7 +124,7 @@ export class UserService {
         class: student.class,
         school: student.school,
         dzongkhag: student.dzongkhag,
-        mobile_no: user.mobile_no,
+        mobile_no: `+975${user.mobile_no}`,
         email: user.email,
       });
 
@@ -187,16 +138,28 @@ export class UserService {
         let phone = prefix.concat(user.mobile_no);
 
         const otpResponse = await this.sendOtp(phone);
-        console.log(`OTP sent to phone: ${otpResponse.msg}`);
-      } else if (user.otpOption === 'email') {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
         const newOtpEntity = this.otpRepository.create({
           otp,
           otpExpiresAt,
           user: savedUser,
         });
         await this.otpRepository.save(newOtpEntity);
+
+        console.log(`OTP sent to phone: ${otpResponse.msg}`);
+      } else if (user.otpOption === 'email') {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+        const newOtpEntity = this.otpRepository.create({
+          otp,
+          otpExpiresAt,
+          user: savedUser,
+        });
+        await this.otpRepository.save(newOtpEntity);
+
         console.log(`OTP generated for email: ${otp}`);
       }
 
@@ -213,10 +176,77 @@ export class UserService {
       'TWILIO_VERIFICATION_SERVICE_SID',
     );
     let msg = '';
+
     await this.twilioClient.verify.v2
       .services(serviceSid)
       .verifications.create({ to: phoneNumber, channel: 'sms' })
+      .then((verification) => {
+        msg = verification.status;
+      });
+
+    return { msg: msg };
+  }
+
+  async verifyOtpByPhone(phoneNumber: string, code: string) {
+    const serviceSid = this.configService.get(
+      'TWILIO_VERIFICATION_SERVICE_SID',
+    );
+    let msg = '';
+    await this.twilioClient.verify.v2
+      .services(serviceSid)
+      .verificationChecks.create({ to: phoneNumber, code: code })
       .then((verification) => (msg = verification.status));
     return { msg: msg };
   }
+
+  async updateUserStatusByPhone(phone: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { mobile_no: phone },
+    });
+
+    if (user) {
+      user.status = 'active';
+      await this.usersRepository.save(user);
+    } else {
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  //   async verifyByEmail(otp: string): Promise<void> {
+  //     const user = await this.usersRepository.findOne({
+  //       where: { email: email },
+  //     });
+
+  //     console.log('User id: ', user.id);
+
+  //     if (!user) {
+  //       throw new NotFoundException('User not found');
+  //     }
+
+  //     // Find the OTP entry associated with the user and provided OTP
+  //     const otpEntry = await this.otpRepository.findOne({
+  //       where: {
+  //         id: user.id, // Adjust based on your actual column name if different
+  //         otp: otp,
+  //       },
+  //     });
+
+  //     if (!otpEntry) {
+  //       throw new BadRequestException('Invalid OTP');
+  //     }
+
+  //     // Check if OTP has expired
+  //     if (otpEntry.otpExpiresAt < new Date()) {
+  //       throw new BadRequestException('OTP has expired');
+  //     }
+
+  //     // Update user status to 'active'
+  //     user.status = 'active';
+  //     await this.usersRepository.save(user);
+
+  //     // Optionally, delete or invalidate the OTP entry after successful verification
+  //     await this.otpRepository.delete(otpEntry.id);
+
+  //     console.log(`User ${user.id} verified and status updated to active.`);
+  //   }
 }
