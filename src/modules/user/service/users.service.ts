@@ -14,7 +14,6 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Twilio } from 'twilio';
 import { OtpEntity } from '../entities/otp.entity';
-import { Console } from 'console';
 
 @Injectable()
 export class UserService {
@@ -73,11 +72,9 @@ export class UserService {
         let phone = prefix.concat(user.mobile_no);
 
         const otpResponse = await this.sendOtp(phone);
-        // Generate a placeholder OTP since we can't retrieve it from Twilio
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-        // Save OTP in OTP table
         const newOtpEntity = this.otpRepository.create({
           otp,
           otpExpiresAt,
@@ -90,13 +87,28 @@ export class UserService {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-        // Save OTP in OTP table
-        const newOtpEntity = this.otpRepository.create({
-          otp,
-          otpExpiresAt,
-          user: existingUser,
+        const otpEntity = await this.otpRepository.findOne({
+          where: {
+            user: { id: existingUser.id },
+          },
         });
-        await this.otpRepository.save(newOtpEntity);
+
+        if (otpEntity) {
+          otpEntity.otp = otp;
+          otpEntity.otpExpiresAt = otpExpiresAt;
+          otpEntity.createdAt = new Date(Date.now());
+          otpEntity.updatedAt = new Date(Date.now());
+
+          await this.otpRepository.save(otpEntity);
+        } else {
+          const newOtpEntity = this.otpRepository.create({
+            otp,
+            otpExpiresAt,
+            user: existingUser,
+          });
+
+          await this.otpRepository.save(newOtpEntity);
+        }
 
         console.log(`OTP generated for email: ${otp}`);
       }
