@@ -47,8 +47,10 @@ export class UserController {
     return verificationResult;
   }
 
-  //   @Post('/VerifyOtpEmail')
-  //   async verifyByEmail(@Body() data: { otp: string }): Promise<void> {
-  //     await this.userService.verifyByEmail(data.otp);
-  //   }
+  @Post('/VerifyOtpEmail')
+  async verifyByEmail(
+    @Body() data: { id: string; otp: string },
+  ): Promise<void> {
+    await this.userService.verifyByEmail(data.id, data.otp);
+  }
 }

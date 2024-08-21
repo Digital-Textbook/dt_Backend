@@ -15,6 +15,8 @@ import { ConfigService } from '@nestjs/config';
 import { Twilio } from 'twilio';
 import { OtpEntity } from '../entities/otp.entity';
 
+import { MailerService } from '@nestjs-modules/mailer';
+
 @Injectable()
 export class UserService {
   private saltRounds = 10;
@@ -31,13 +33,13 @@ export class UserService {
     private userProfileRepository: Repository<UserProfile>,
     @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
     private readonly configService: ConfigService,
+    private readonly mailerService: MailerService,
   ) {
     const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
     const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
     this.twilioClient = new Twilio(accountSid, authToken);
   }
 
-  /////////////////////////////////////////////////////////////
   async getStudentByCid(cid_no: string): Promise<Students> {
     if (!cid_no) {
       throw new Error('CID No is required');
@@ -110,6 +112,16 @@ export class UserService {
           await this.otpRepository.save(newOtpEntity);
         }
 
+        await this.mailerService.sendMail({
+          to: existingUser.email,
+          subject: 'Your OTP Code',
+          template: './otp',
+          context: {
+            otp,
+            name: existingUser.name,
+          },
+        });
+
         console.log(`OTP generated for email: ${otp}`);
       }
 
@@ -172,6 +184,16 @@ export class UserService {
         });
         await this.otpRepository.save(newOtpEntity);
 
+        await this.mailerService.sendMail({
+          to: savedProfile.email,
+          subject: 'Your OTP Code',
+          template: './otp',
+          context: {
+            otp,
+            name: savedProfile.name,
+          },
+        });
+
         console.log(`OTP generated for email: ${otp}`);
       }
 
@@ -224,41 +246,36 @@ export class UserService {
     }
   }
 
-  //   async verifyByEmail(otp: string): Promise<void> {
-  //     const user = await this.usersRepository.findOne({
-  //       where: { email: email },
-  //     });
+  async verifyByEmail(id: string, otp: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { id: id },
+    });
 
-  //     console.log('User id: ', user.id);
+    if (!user) {
+      throw new NotFoundException('User ID not found');
+    }
 
-  //     if (!user) {
-  //       throw new NotFoundException('User not found');
-  //     }
+    const otpEntry = await this.otpRepository.findOne({
+      where: {
+        user: { id: id },
+      },
+    });
 
-  //     // Find the OTP entry associated with the user and provided OTP
-  //     const otpEntry = await this.otpRepository.findOne({
-  //       where: {
-  //         id: user.id, // Adjust based on your actual column name if different
-  //         otp: otp,
-  //       },
-  //     });
+    console.log('OTP Entity: ', otpEntry);
 
-  //     if (!otpEntry) {
-  //       throw new BadRequestException('Invalid OTP');
-  //     }
+    if (!otpEntry) {
+      throw new BadRequestException('Invalid OTP');
+    }
 
-  //     // Check if OTP has expired
-  //     if (otpEntry.otpExpiresAt < new Date()) {
-  //       throw new BadRequestException('OTP has expired');
-  //     }
+    if (otpEntry.otpExpiresAt < new Date()) {
+      throw new BadRequestException('OTP has expired');
+    }
 
-  //     // Update user status to 'active'
-  //     user.status = 'active';
-  //     await this.usersRepository.save(user);
+    user.status = 'active';
+    await this.usersRepository.save(user);
 
-  //     // Optionally, delete or invalidate the OTP entry after successful verification
-  //     await this.otpRepository.delete(otpEntry.id);
+    await this.otpRepository.delete(otpEntry.id);
 
-  //     console.log(`User ${user.id} verified and status updated to active.`);
-  //   }
+    console.log(`User ${user.id} verified and status updated to active.`);
+  }
 }
