@@ -9,28 +9,22 @@ import {
   UsePipes,
   ValidationPipe,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { StudentProfileService } from '../service/studentProfile.service';
-import { StudentProfile } from '../entities/studentProfile.entity';
+import { StudentProfileService } from '../service/UserProfile.service';
+import { UserProfile } from '../entities/UserProfile.entity';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
-export class StudentProfileController {
+@UseGuards(AuthGuard())
+export class UserProfileController {
   constructor(private studentProfileService: StudentProfileService) {}
-
-  @Get('/profile')
-  async getAllProfile(): Promise<StudentProfile[]> {
-    try {
-      return await this.studentProfileService.getAllProfile();
-    } catch (error) {
-      throw new Error('Error retrieving profile');
-    }
-  }
 
   @Get('/profile/:id')
   async getProfileById(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<StudentProfile> {
+  ): Promise<UserProfile> {
     return await this.studentProfileService.getProfileById(id);
   }
 

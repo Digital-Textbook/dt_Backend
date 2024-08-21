@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsIn,
-  MinLength,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsIn, IsEmail } from 'class-validator';
 import {
   IsValidName,
   IsPhoneNumber,
@@ -26,6 +20,11 @@ export class CreateUserDto {
   @IsStudentCode()
   student_code: string;
 
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsString({ message: 'Email must be a string' })
+  @IsEmail({}, { message: 'Email must be a valid email address' })
+  email: string;
+
   @IsPhoneNumber()
   mobile_no: string;
 
@@ -37,4 +36,10 @@ export class CreateUserDto {
 
   @IsStrongPassword()
   password: string;
+
+  @IsNotEmpty({ message: 'OPT option is required' })
+  @IsIn(['email', 'phone'], {
+    message: 'OPT option must be either "email" or "phone"',
+  })
+  otpOption: 'email' | 'phone';
 }

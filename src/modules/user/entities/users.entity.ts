@@ -6,7 +6,9 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { StudentProfile } from './studentProfile.entity';
+import { UserProfile } from './UserProfile.entity';
+import { Exclude } from 'class-transformer';
+import { OtpEntity } from './otp.entity';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -30,11 +32,14 @@ export class Users extends BaseEntity {
   @Column({ type: 'varchar', length: 20, unique: true })
   mobile_no: string;
 
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email: string;
+
   @Column({ type: 'varchar' })
   user_type: 'bhutanese' | 'non-bhutanese';
 
   @Column({ type: 'varchar' })
-  status: 'active' | 'incative';
+  status: 'active' | 'inactive';
 
   @Column({
     type: 'varchar',
@@ -51,7 +56,11 @@ export class Users extends BaseEntity {
   })
   updated_at: Date;
 
-  @OneToOne(() => StudentProfile, (profile) => profile.user, { cascade: true })
+  @OneToOne(() => OtpEntity, (otp) => otp.user)
+  otp: OtpEntity;
+
+  @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
   @JoinColumn({ name: 'profileId' })
-  profile: StudentProfile;
+  @Exclude({ toPlainOnly: true })
+  profile: UserProfile;
 }

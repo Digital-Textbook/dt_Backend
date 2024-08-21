@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsInt, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsInt, IsString, Length, IsEmail } from 'class-validator';
 
-export class CreateStudentProfileDto {
+export class CreateUserProfileDto {
   @IsNotEmpty({
     message: 'Name is required',
   })
@@ -17,6 +17,11 @@ export class CreateStudentProfileDto {
   @IsNotEmpty({ message: 'Mobile number is required' })
   @IsInt({ message: 'Mobile number must be an string' })
   mobile_no: string;
+
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsString({ message: 'Email must be a string' })
+  @IsEmail({}, { message: 'Email must be a valid email address' })
+  email: string;
 
   @IsNotEmpty({ message: 'Class is required' })
   @IsString({ message: 'Class must be a string' })
