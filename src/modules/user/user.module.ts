@@ -12,9 +12,12 @@ import { UserService } from './service/users.service';
 import { AdminService } from './service/admin.service';
 import { StudentProfileService } from './service/UserProfile.service';
 import { StudentService } from './service/students.service';
+import { OtpEntity } from './entities/otp.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, Users, Students, UserProfile])],
+  imports: [
+    TypeOrmModule.forFeature([Admin, Users, Students, UserProfile, OtpEntity]),
+  ],
   controllers: [
     UserController,
     AdminController,

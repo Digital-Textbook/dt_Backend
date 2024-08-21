@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -29,6 +24,10 @@ export class AuthService {
     const existingUser = await this.usersRepository.findOne({
       where: { student_code: user.student_code },
     });
+
+    if (existingUser.status == 'inactive') {
+      throw new UnauthorizedException('Please verify your account');
+    }
 
     if (
       existingUser &&
