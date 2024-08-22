@@ -60,13 +60,34 @@ export class UserService {
 
   async createNewUser(user: CreateUserDto) {
     const existingUser = await this.usersRepository.findOne({
-      where: [
-        { cid_no: user.cid_no, status: 'inactive' },
-        { mobile_no: user.mobile_no, status: 'inactive' },
-        { student_code: user.student_code, status: 'inactive' },
-        { email: user.email, status: 'inactive' },
-      ],
+      where: {
+        cid_no: user.cid_no,
+        student_code: user.student_code,
+        status: 'inactive',
+      },
     });
+
+    const emailExists = await this.usersRepository.findOne({
+      where: {
+        email: user.email,
+        status: 'active',
+      },
+    });
+
+    if (emailExists) {
+      throw new BadRequestException('Email is already taken');
+    }
+
+    const userPhone = await this.usersRepository.findOne({
+      where: {
+        mobile_no: user.mobile_no,
+        status: 'active',
+      },
+    });
+
+    if (userPhone) {
+      throw new BadRequestException('Phone is already taken');
+    }
 
     if (existingUser) {
       if (user.otpOption === 'phone') {
@@ -89,40 +110,72 @@ export class UserService {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-        const otpEntity = await this.otpRepository.findOne({
-          where: {
-            user: { id: existingUser.id },
-          },
-        });
+        if (existingUser) {
+          existingUser.name = user.name;
+          existingUser.mobile_no = user.mobile_no;
+          existingUser.email = user.email;
+          existingUser.user_type = user.user_type;
+          existingUser.password = await bcrypt.hash(
+            user.password,
+            this.saltRounds,
+          );
+          existingUser.updated_at = new Date(Date.now());
 
-        if (otpEntity) {
-          otpEntity.otp = otp;
-          otpEntity.otpExpiresAt = otpExpiresAt;
-          otpEntity.createdAt = new Date(Date.now());
-          otpEntity.updatedAt = new Date(Date.now());
+          await this.usersRepository.save(existingUser);
 
-          await this.otpRepository.save(otpEntity);
-        } else {
-          const newOtpEntity = this.otpRepository.create({
-            otp,
-            otpExpiresAt,
-            user: existingUser,
+          const profile = await this.userProfileRepository.findOne({
+            where: {
+              student_code: user.student_code,
+            },
           });
 
-          await this.otpRepository.save(newOtpEntity);
+          profile.name = user.name;
+          profile.mobile_no = user.mobile_no;
+          profile.email = user.email;
+          profile.updated_at = new Date(Date.now());
+
+          await this.userProfileRepository.save(profile);
+
+          let otpEntity = await this.otpRepository.findOne({
+            where: {
+              user: { id: existingUser.id },
+            },
+          });
+
+          if (otpEntity) {
+            otpEntity.otp = otp;
+            otpEntity.otpExpiresAt = otpExpiresAt;
+            otpEntity.updatedAt = new Date(Date.now());
+          } else {
+            otpEntity = this.otpRepository.create({
+              otp,
+              otpExpiresAt,
+              user: existingUser,
+            });
+          }
+
+          await this.otpRepository.save(otpEntity);
+
+          await this.mailerService.sendMail({
+            to: existingUser.email,
+            subject: 'Your OTP Code',
+            template: './otp',
+            context: {
+              otp,
+              name: existingUser.name,
+            },
+          });
+
+          console.log(`OTP generated for email: ${otp}`);
+        } else {
+          throw new NotFoundException(
+            'No inactive user found with the provided cid_no and student_code',
+          );
         }
 
-        await this.mailerService.sendMail({
-          to: existingUser.email,
-          subject: 'Your OTP Code',
-          template: './otp',
-          context: {
-            otp,
-            name: existingUser.name,
-          },
-        });
-
-        console.log(`OTP generated for email: ${otp}`);
+        return {
+          msg: 'User updated and OTP sent or generated for existing inactive user.',
+        };
       }
 
       return { msg: 'OTP sent or generated for existing inactive user.' };
@@ -221,32 +274,7 @@ export class UserService {
     return { msg: msg };
   }
 
-  async verifyOtpByPhone(phoneNumber: string, code: string) {
-    const serviceSid = this.configService.get(
-      'TWILIO_VERIFICATION_SERVICE_SID',
-    );
-    let msg = '';
-    await this.twilioClient.verify.v2
-      .services(serviceSid)
-      .verificationChecks.create({ to: phoneNumber, code: code })
-      .then((verification) => (msg = verification.status));
-    return { msg: msg };
-  }
-
-  async updateUserStatusByPhone(phone: string): Promise<void> {
-    const user = await this.usersRepository.findOne({
-      where: { mobile_no: phone },
-    });
-
-    if (user) {
-      user.status = 'active';
-      await this.usersRepository.save(user);
-    } else {
-      throw new NotFoundException('User not found');
-    }
-  }
-
-  async verifyByEmail(id: string, otp: string): Promise<void> {
+  async verifyByEmail(id: string, otp: string): Promise<string> {
     const user = await this.usersRepository.findOne({
       where: { id: id },
     });
@@ -276,6 +304,6 @@ export class UserService {
 
     await this.otpRepository.delete(otpEntry.id);
 
-    console.log(`User ${user.id} verified and status updated to active.`);
+    return `User is verified and status updated to active.`;
   }
 }
