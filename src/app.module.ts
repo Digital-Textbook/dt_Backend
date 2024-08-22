@@ -10,6 +10,7 @@ import { PassportModule } from '@nestjs/passport';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ConfigService, ConditionalModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -21,27 +22,30 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
-    MailerModule.forRoot({
-      transport: {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: 'yuadhistrahangsubba10@gmail.com',
-          pass: 'cerhpogocwifsoqn',
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('EMAIL_HOST'),
+          port: configService.get<number>('EMAIL_PORT'),
+          secure: true,
+          auth: {
+            user: configService.get<string>('EMAIL_USER'),
+            pass: configService.get<string>('EMAIL_PASSWORD'),
+          },
         },
-      },
-
-      defaults: {
-        from: '"No Reply" <yuadhistrahangsubba10@gmail.com>',
-      },
-      template: {
-        dir: join(__dirname, '../src/template'),
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
+        defaults: {
+          from: `"Digital Textbook" <${configService.get<string>('MAIL_FROM')}>`,
         },
-      },
+        template: {
+          dir: join(__dirname, '../src/template'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
     }),
   ],
   controllers: [AppController],
