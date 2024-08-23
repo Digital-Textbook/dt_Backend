@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Users } from '../entities/users.entity';
-import { Students } from '../entities/students.entity';
+import { Students } from '../../student/entities/students.entity';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { OtpEntity } from '../entities/otp.entity';
 
@@ -367,7 +367,7 @@ export class UserService {
 
     await this.otpRepository.delete(otpEntry.id);
 
-    return `User is verified and status updated to active.`;
+    return `OTP is verified.`;
   }
 
   ////////////////////////
@@ -375,8 +375,6 @@ export class UserService {
     const user = await this.usersRepository.findOne({
       where: { email: email, status: 'active' },
     });
-
-    console.log('Email by user: ', user);
 
     if (user) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -424,12 +422,12 @@ export class UserService {
       };
     } else {
       throw new NotFoundException(
-        'User is not verifief with the provided cid_no and student_code',
+        'User is not verified with the provided email',
       );
     }
   }
 
-  async resetPasswordByEmail(id: string, otp: string, password: string) {
+  async resetPasswordByEmail(id: string, password: string) {
     const user = await this.usersRepository.findOne({
       where: { id: id },
     });
@@ -438,29 +436,16 @@ export class UserService {
       throw new NotFoundException('User ID not found');
     }
 
-    const otpEntry = await this.otpRepository.findOne({
-      where: {
-        user: { id: id },
-      },
-    });
-
-    console.log('OTP Entity: ', otpEntry);
-
-    if (!otpEntry) {
-      throw new BadRequestException('Invalid OTP');
-    }
-
-    if (otpEntry.otpExpiresAt < new Date()) {
-      throw new BadRequestException('OTP has expired');
-    }
-
+    console.log('Password: ', password);
     const hashedPassword = await bcrypt.hash(password, this.saltRounds);
     user.password = hashedPassword;
+
+    console.log('Hashed: ', hashedPassword);
 
     await this.usersRepository.save(user);
 
     return {
-      msg: 'Password is update for this user',
+      msg: 'Password is updated for this user',
       user,
     };
   }

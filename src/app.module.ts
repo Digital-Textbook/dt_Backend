@@ -12,11 +12,15 @@ import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigService } from '@nestjs/config';
 import config from './modules/user/config';
+import { AdminModule } from './modules/admin/admin.module';
+import { StudentModule } from './modules/student/student.module';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    AdminModule,
+    StudentModule,
     PassportModule,
     ConfigModule.forRoot({
       isGlobal: true,
