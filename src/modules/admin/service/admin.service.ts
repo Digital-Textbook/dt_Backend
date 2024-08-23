@@ -8,8 +8,8 @@ import { Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 import { Admin } from '../entities/admin.entity';
-import { CreateAdminDto } from '../dto/createAdmin.dto';
-import { UpdateAdminDto } from '../dto/updateAdmin.dto';
+import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
+import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { RoleType } from 'src/constants/role-type';
 
 @Injectable()
