@@ -14,8 +14,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Users } from '../entities/users.entity';
+import { CreateForgotPasswordDto } from '../dto/forgotPassword.dto';
 
-@ApiTags('User')
+@ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -40,18 +41,25 @@ export class UserController {
   }
 
   @Post('/forgot-password')
-  async forgotPasswordByEmail(@Body() data: { email: string }) {
+  async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
     return await this.userService.forgotPasswordByEmail(data.email);
   }
 
-  @Post('/reset-password')
-  async resetPasswordByEmail(
-    @Body() data: { id: string; otp: string; password: string },
+  @Post(':id/reset-password/:otp')
+  async resetPasswordVerifyByEmail(
+    @Param('id') id: string,
+    @Param('otp') otp: string,
   ) {
-    return await this.userService.resetPasswordByEmail(
-      data.id,
-      data.otp,
-      data.password,
-    );
+    return await this.userService.verifyByEmail(id, otp);
+  }
+
+  @Post(':id/reset-password-byEmail/:password')
+  async resetPasswordByEmail(
+    @Param('id') id: string,
+    @Param('password') password: string,
+  ) {
+    console.log('ID:', id);
+    console.log('OTP:', password);
+    return await this.userService.resetPasswordByEmail(id, password);
   }
 }
