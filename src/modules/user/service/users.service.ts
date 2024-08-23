@@ -6,16 +6,20 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { Users } from '../entities/users.entity';
-import { CreateUserDto } from '../dto/createUser.dto';
 import { Students } from '../entities/students.entity';
 import { UserProfile } from '../entities/UserProfile.entity';
+import { OtpEntity } from '../entities/otp.entity';
+
+import { CreateUserDto } from '../dto/createUser.dto';
+
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Twilio } from 'twilio';
-import { OtpEntity } from '../entities/otp.entity';
-
 import { MailerService } from '@nestjs-modules/mailer';
+import axios from 'axios';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class UserService {
@@ -33,6 +37,7 @@ export class UserService {
     private userProfileRepository: Repository<UserProfile>,
     @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
     private readonly configService: ConfigService,
+    private httpService: HttpService,
     private readonly mailerService: MailerService,
   ) {
     const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
@@ -91,21 +96,66 @@ export class UserService {
 
     if (existingUser) {
       if (user.otpOption === 'phone') {
-        let prefix = '+975';
-        let phone = prefix.concat(user.mobile_no);
-
-        const otpResponse = await this.sendOtp(phone);
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-        const newOtpEntity = this.otpRepository.create({
-          otp,
-          otpExpiresAt,
-          user: existingUser,
-        });
-        await this.otpRepository.save(newOtpEntity);
+        if (existingUser) {
+          existingUser.name = user.name;
+          existingUser.mobile_no = user.mobile_no;
+          existingUser.email = user.email;
+          existingUser.user_type = user.user_type;
+          existingUser.password = await bcrypt.hash(
+            user.password,
+            this.saltRounds,
+          );
+          existingUser.updated_at = new Date(Date.now());
 
-        console.log(`OTP sent to phone: ${otpResponse.msg}`);
+          await this.usersRepository.save(existingUser);
+
+          const profile = await this.userProfileRepository.findOne({
+            where: {
+              student_code: user.student_code,
+            },
+          });
+
+          profile.name = user.name;
+          profile.mobile_no = user.mobile_no;
+          profile.email = user.email;
+          profile.updated_at = new Date(Date.now());
+
+          await this.userProfileRepository.save(profile);
+
+          let otpEntity = await this.otpRepository.findOne({
+            where: {
+              user: { id: existingUser.id },
+            },
+          });
+
+          if (otpEntity) {
+            otpEntity.otp = otp;
+            otpEntity.otpExpiresAt = otpExpiresAt;
+            otpEntity.updatedAt = new Date(Date.now());
+          } else {
+            otpEntity = this.otpRepository.create({
+              otp,
+              otpExpiresAt,
+              user: existingUser,
+            });
+          }
+
+          await this.otpRepository.save(otpEntity);
+
+          let prefix = '+975';
+          let phone = prefix.concat(user.mobile_no);
+
+          await this.sendOtp(phone, otp);
+
+          console.log(`OTP sent to phone: ${otp}`);
+        } else {
+          throw new NotFoundException(
+            'No inactive user found with the provided cid_no and student_code',
+          );
+        }
       } else if (user.otpOption === 'email') {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
@@ -214,7 +264,6 @@ export class UserService {
         let prefix = '+975';
         let phone = prefix.concat(user.mobile_no);
 
-        const otpResponse = await this.sendOtp(phone);
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
@@ -225,7 +274,9 @@ export class UserService {
         });
         await this.otpRepository.save(newOtpEntity);
 
-        console.log(`OTP sent to phone: ${otpResponse.msg}`);
+        await this.sendOtp(phone, otp);
+
+        console.log(`OTP sent to phone: ${otp}`);
       } else if (user.otpOption === 'email') {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
@@ -258,20 +309,32 @@ export class UserService {
     }
   }
 
-  async sendOtp(phoneNumber: string) {
-    const serviceSid = this.configService.get(
-      'TWILIO_VERIFICATION_SERVICE_SID',
+  async sendOtp(phoneNumber: string, otp: string) {
+    const url = this.configService.get<string>('PLAYSMS_URL');
+    const username = this.configService.get<string>('PLAYSMS_USERNAME');
+    const token = this.configService.get<string>('PLAYSMS_TOKEN');
+    const operationType = this.configService.get<string>(
+      'PLAYSMS_OPERATION_TYPE',
     );
-    let msg = '';
+    const senderName = 'Digital Textbook';
 
-    await this.twilioClient.verify.v2
-      .services(serviceSid)
-      .verifications.create({ to: phoneNumber, channel: 'sms' })
-      .then((verification) => {
-        msg = verification.status;
-      });
+    const params = new URLSearchParams({
+      u: username,
+      h: token,
+      op: operationType,
+      to: phoneNumber,
+      from: senderName,
+      msg: `Your OTP code is ${otp}`,
+    }).toString();
 
-    return { msg: msg };
+    console.log(params);
+    try {
+      const response = await this.httpService.axiosRef.get(`${url}?${params}`);
+      return { msg: response.data };
+    } catch (error) {
+      console.error('Error sending OTP:', error.message || error);
+      throw new BadRequestException('Failed to send OTP');
+    }
   }
 
   async verifyByEmail(id: string, otp: string): Promise<string> {
@@ -305,5 +368,100 @@ export class UserService {
     await this.otpRepository.delete(otpEntry.id);
 
     return `User is verified and status updated to active.`;
+  }
+
+  ////////////////////////
+  async forgotPasswordByEmail(email: string) {
+    const user = await this.usersRepository.findOne({
+      where: { email: email, status: 'active' },
+    });
+
+    console.log('Email by user: ', user);
+
+    if (user) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+      const existingUser = await this.usersRepository.findOne({
+        where: {
+          email: user.email,
+          status: 'active',
+        },
+      });
+      let otpEntity = await this.otpRepository.findOne({
+        where: {
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (otpEntity) {
+        otpEntity.otp = otp;
+        otpEntity.otpExpiresAt = otpExpiresAt;
+        otpEntity.updatedAt = new Date(Date.now());
+      } else {
+        otpEntity = this.otpRepository.create({
+          otp,
+          otpExpiresAt,
+          user: existingUser,
+        });
+      }
+
+      await this.otpRepository.save(otpEntity);
+
+      await this.mailerService.sendMail({
+        to: existingUser.email,
+        subject: 'Your OTP Code',
+        template: './otp',
+        context: {
+          otp,
+          name: existingUser.name,
+        },
+      });
+
+      return {
+        msg: 'OTP successfully send',
+        user,
+      };
+    } else {
+      throw new NotFoundException(
+        'User is not verifief with the provided cid_no and student_code',
+      );
+    }
+  }
+
+  async resetPasswordByEmail(id: string, otp: string, password: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User ID not found');
+    }
+
+    const otpEntry = await this.otpRepository.findOne({
+      where: {
+        user: { id: id },
+      },
+    });
+
+    console.log('OTP Entity: ', otpEntry);
+
+    if (!otpEntry) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (otpEntry.otpExpiresAt < new Date()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+    user.password = hashedPassword;
+
+    await this.usersRepository.save(user);
+
+    return {
+      msg: 'Password is update for this user',
+      user,
+    };
   }
 }
