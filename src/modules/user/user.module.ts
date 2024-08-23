@@ -13,9 +13,11 @@ import { AdminService } from './service/admin.service';
 import { StudentProfileService } from './service/UserProfile.service';
 import { StudentService } from './service/students.service';
 import { OtpEntity } from './entities/otp.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     TypeOrmModule.forFeature([Admin, Users, Students, UserProfile, OtpEntity]),
   ],
   controllers: [
