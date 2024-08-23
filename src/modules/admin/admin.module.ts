@@ -5,9 +5,21 @@ import { Admin } from './entities/admin.entity';
 import { HttpModule } from '@nestjs/axios';
 import { AdminController } from './controller/admin.controller';
 import { AdminService } from './service/admin.service';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Admin])],
+  imports: [
+    HttpModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: 'topSecret51',
+      signOptions: {
+        expiresIn: 3600,
+      },
+    }),
+    TypeOrmModule.forFeature([Admin]),
+  ],
   controllers: [AdminController],
   providers: [AdminService],
 })

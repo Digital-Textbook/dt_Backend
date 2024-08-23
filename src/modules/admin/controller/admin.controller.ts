@@ -19,6 +19,7 @@ import { Admin } from '../entities/admin.entity';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -26,6 +27,7 @@ import {
 @ApiTags('Admin')
 @Controller('admin')
 @UseGuards(AuthGuard())
+@ApiBearerAuth()
 export class AdminController {
   constructor(private adminService: AdminService) {}
 

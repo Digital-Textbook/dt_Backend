@@ -16,7 +16,8 @@ import { RoleType } from 'src/constants/role-type';
 export class AdminService {
   private saltRounds = 10;
   constructor(
-    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
+    @InjectRepository(Admin)
+    private adminRepository: Repository<Admin>,
   ) {}
 
   async getAllAdmin(): Promise<Admin[]> {
