@@ -1,38 +1,43 @@
 import {
   Body,
   Controller,
+  Param,
   Post,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from '../service/users.service';
 import { CreateUserDto } from '../dto/createUser.dto';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Users } from '../entities/users.entity';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Post('/register')
+  @ApiCreatedResponse({
+    description: 'User registered successfully',
+    type: Users,
+  })
+  @ApiBadRequestResponse({ description: 'User cannot be registered' })
   @UsePipes(ValidationPipe)
   async createStudent(@Body() studentData: CreateUserDto) {
     return await this.userService.createNewUser(studentData);
   }
 
-  //   @Post('/VerifyOtpEmail')
-  //   async verifyByEmail(
-  //     @Body() data: { id: string; otp: string },
-  //   ): Promise<void> {
-  //     await this.userService.verifyByEmail(data.id, data.otp);
-  //   }
-
-  @Post('/VerifyOtpEmail')
+  @Post(':id/VerifyOtpEmail/:otp')
   async verifyByEmail(
-    @Body() data: { id: string; otp: string },
+    @Param('id') id: string,
+    @Param('otp') otp: string,
   ): Promise<string> {
-    return await this.userService.verifyByEmail(data.id, data.otp);
+    return await this.userService.verifyByEmail(id, otp);
   }
-
-  ////////////////////////////////////////////////////////////////////
 
   @Post('/forgot-password')
   async forgotPasswordByEmail(@Body() data: { email: string }) {

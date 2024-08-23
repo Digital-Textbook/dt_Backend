@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Users } from '../entities/users.entity';
-import { Students } from '../entities/students.entity';
+import { Students } from '../../student/entities/students.entity';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { OtpEntity } from '../entities/otp.entity';
 
