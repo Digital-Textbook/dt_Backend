@@ -32,6 +32,6 @@ export class OtpEntity extends BaseEntity {
   updatedAt: Date;
 
   @OneToOne(() => Users, (user) => user.otp)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn()
   user: Users;
 }
