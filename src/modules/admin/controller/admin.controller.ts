@@ -13,11 +13,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminService } from '../service/admin.service';
-import { CreateAdminDto } from '../dto/createAdmin.dto';
-import { UpdateAdminDto } from '../dto/updateAdmin.dto';
+import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
+import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { Admin } from '../entities/admin.entity';
 import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Admin')
 @Controller('admin')
 @UseGuards(AuthGuard())
 export class AdminController {
@@ -29,6 +35,11 @@ export class AdminController {
   }
 
   @Post('/register')
+  @ApiCreatedResponse({
+    description: 'User registered successfully',
+    type: Admin,
+  })
+  @ApiBadRequestResponse({ description: 'User cannot be registered' })
   @UsePipes(ValidationPipe)
   async createAdmin(@Body() adminData: CreateAdminDto) {
     return await this.adminService.createNewAdmin(adminData);

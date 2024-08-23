@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Admin } from '../user/entities/admin.entity';
-import { Students } from '../user/entities/students.entity';
+import { Admin } from '../admin/entities/admin.entity';
+import { Students } from '../student/entities/students.entity';
 import { Users } from '../user/entities/users.entity';
 import { UserProfile } from '../user/entities/UserProfile.entity';
-import { StudentService } from '../user/service/students.service';
-import { StudentController } from '../user/controller/students.controller';
+import { StudentService } from '../student/service/students.service';
+import { StudentController } from '../student/controller/students.controller';
 import { UserController } from '../user/controller/users.controller';
 import { UserService } from '../user/service/users.service';
 import { StudentProfileService } from '../user/service/UserProfile.service';
-import { AdminService } from '../user/service/admin.service';
-import { AdminController } from '../user/controller/admin.controller';
+import { AdminService } from '../admin/service/admin.service';
+import { AdminController } from '../admin/controller/admin.controller';
 import { UserProfileController } from '../user/controller/UserProfile.controller';
 import { AuthService } from './service/auth.service';
 import { PassportModule } from '@nestjs/passport';
