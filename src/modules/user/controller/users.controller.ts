@@ -33,4 +33,20 @@ export class UserController {
   }
 
   ////////////////////////////////////////////////////////////////////
+
+  @Post('/forgot-password')
+  async forgotPasswordByEmail(@Body() data: { email: string }) {
+    return await this.userService.forgotPasswordByEmail(data.email);
+  }
+
+  @Post('/reset-password')
+  async resetPasswordByEmail(
+    @Body() data: { id: string; otp: string; password: string },
+  ) {
+    return await this.userService.resetPasswordByEmail(
+      data.id,
+      data.otp,
+      data.password,
+    );
+  }
 }

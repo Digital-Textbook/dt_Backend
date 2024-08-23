@@ -10,7 +10,8 @@ import { PassportModule } from '@nestjs/passport';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { ConfigService, ConditionalModule } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
+import config from './modules/user/config';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigService, ConditionalModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [config],
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
     MailerModule.forRootAsync({

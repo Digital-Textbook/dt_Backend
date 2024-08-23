@@ -19,8 +19,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './controller/auth.controller';
 import { OtpEntity } from '../user/entities/otp.entity';
+import { HttpModule } from '@nestjs/axios';
+
 @Module({
   imports: [
+    HttpModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'topSecret51',
