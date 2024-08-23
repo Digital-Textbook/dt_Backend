@@ -11,10 +11,19 @@ import { StudentProfileService } from './service/UserProfile.service';
 import { StudentService } from '../student/service/students.service';
 import { OtpEntity } from './entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     HttpModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: 'topSecret51',
+      signOptions: {
+        expiresIn: 3600,
+      },
+    }),
     TypeOrmModule.forFeature([Users, Students, UserProfile, OtpEntity]),
   ],
   controllers: [UserController, UserProfileController, StudentController],

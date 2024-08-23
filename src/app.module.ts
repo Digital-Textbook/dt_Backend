@@ -11,7 +11,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigService } from '@nestjs/config';
-import config from './modules/user/config';
 import { AdminModule } from './modules/admin/admin.module';
 import { StudentModule } from './modules/student/student.module';
 
@@ -25,7 +24,6 @@ import { StudentModule } from './modules/student/student.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [config],
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
     MailerModule.forRootAsync({

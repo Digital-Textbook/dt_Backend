@@ -15,11 +15,12 @@ import { StudentProfileService } from '../service/UserProfile.service';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('user')
 @Controller('user')
 @UseGuards(AuthGuard())
+@ApiBearerAuth()
 export class UserProfileController {
   constructor(private studentProfileService: StudentProfileService) {}
 
