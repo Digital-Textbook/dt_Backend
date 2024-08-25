@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   UsePipes,
   ValidationPipe,
@@ -17,16 +16,19 @@ import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { Admin } from '../entities/admin.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateForgotPasswordDto } from 'src/common/dto/forgotPassword.dto';
+
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(AuthGuard())
+// @UseGuards(AuthGuard())
 @ApiBearerAuth()
 export class AdminController {
   constructor(private adminService: AdminService) {}
@@ -38,21 +40,25 @@ export class AdminController {
 
   @Post('/register')
   @ApiCreatedResponse({
-    description: 'User registered successfully',
+    description: 'Admin registered successfully',
     type: Admin,
   })
-  @ApiBadRequestResponse({ description: 'User cannot be registered' })
+  @ApiBadRequestResponse({ description: 'Admin cannot be registered' })
   @UsePipes(ValidationPipe)
   async createAdmin(@Body() adminData: CreateAdminDto) {
     return await this.adminService.createNewAdmin(adminData);
   }
 
   @Get('/:id')
+  @ApiOkResponse({ description: 'Admin successfully found.' })
+  @ApiBadRequestResponse({ description: 'Admin does not exist' })
   async getAdminById(@Param('id', ParseUUIDPipe) id: string): Promise<Admin> {
     return await this.adminService.getAdminById(id);
   }
 
   @Patch('/:id')
+  @ApiOkResponse({ description: 'Admin updated successfully.' })
+  @ApiBadRequestResponse({ description: 'Admin cannot be updated' })
   @UsePipes(ValidationPipe)
   async updateAdmin(
     @Param('id', ParseUUIDPipe) id: string,
@@ -62,8 +68,18 @@ export class AdminController {
   }
 
   @Delete('/:id')
+  @ApiOkResponse({ description: 'Admin delete successfully.' })
+  @ApiBadRequestResponse({ description: 'Admin cannot be deleted' })
   @UsePipes(ValidationPipe)
   async deleteAdmin(@Param('id', ParseUUIDPipe) id: string): Promise<string> {
     return await this.adminService.deleteAdminById(id);
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //   @Post('/forgot-password')
+  //   @ApiOkResponse({ description: 'OTP is successfully send.' })
+  //   @ApiBadRequestResponse({ description: 'OTP cannot be send.' })
+  //   async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
+  //     return await this.adminService.forgotPasswordByEmail(data.email);
+  //   }
 }

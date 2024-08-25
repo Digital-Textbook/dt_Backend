@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Users } from '../entities/users.entity';
-import { CreateForgotPasswordDto } from '../dto/forgotPassword.dto';
+import { CreateForgotPasswordDto } from '../../../common/dto/forgotPassword.dto';
 
 @ApiTags('user')
 @Controller('user')

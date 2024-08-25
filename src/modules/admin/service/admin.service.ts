@@ -11,6 +11,11 @@ import { Admin } from '../entities/admin.entity';
 import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { RoleType } from 'src/constants/role-type';
+import { OtpEntity } from 'src/modules/user/entities/otp.entity';
+
+import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AdminService {
@@ -18,6 +23,10 @@ export class AdminService {
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
+    @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
+    private readonly configService: ConfigService,
+    private httpService: HttpService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async getAllAdmin(): Promise<Admin[]> {
@@ -49,6 +58,7 @@ export class AdminService {
       let newUser = this.adminRepository.create({
         ...admin,
         password: hashedPassword,
+        status: 'active',
       });
 
       const savedUser = await this.adminRepository.save(newUser);
@@ -108,4 +118,61 @@ export class AdminService {
 
     return `Admin with id: ${id} successfully deleted`;
   }
+
+  ///////////////////////////////////////////////////////////////////
+  //   async forgotPasswordByEmail(email: string) {
+  //     const admin = await this.adminRepository.findOne({
+  //       where: { email: email, status: 'active' },
+  //     });
+
+  //     if (admin) {
+  //       const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //       const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+  //       const existingUser = await this.adminRepository.findOne({
+  //         where: {
+  //           email: admin.email,
+  //           status: 'active',
+  //         },
+  //       });
+  //       let otpEntity = await this.adminRepository.findOne({
+  //         where: {
+  //           admin: { id: existingUser.id },
+  //         },
+  //       });
+
+  //       if (otpEntity) {
+  //         = otp;
+  //         otpEntity.otpExpiresAt = otpExpiresAt;
+  //         otpEntity.updatedAt = new Date(Date.now());
+  //       } else {
+  //         otpEntity = this.otpRepository.create({
+  //           otp,
+  //           otpExpiresAt,
+  //           user: existingUser,
+  //         });
+  //       }
+
+  //       await this.otpRepository.save(otpEntity);
+
+  //       await this.mailerService.sendMail({
+  //         to: existingUser.email,
+  //         subject: 'Your OTP Code',
+  //         template: './otp',
+  //         context: {
+  //           otp,
+  //           name: existingUser.name,
+  //         },
+  //       });
+
+  //       return {
+  //         msg: 'OTP successfully send',
+  //         user,
+  //       };
+  //     } else {
+  //       throw new NotFoundException(
+  //         'Admin is not verified with the provided email',
+  //       );
+  //     }
+  //   }
 }
