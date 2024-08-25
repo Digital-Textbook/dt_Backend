@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Users } from './users.entity';
+import { Admin } from 'src/modules/admin/entities/admin.entity';
 
 @Entity('otp')
 export class OtpEntity extends BaseEntity {
@@ -34,4 +35,8 @@ export class OtpEntity extends BaseEntity {
   @OneToOne(() => Users, (user) => user.otp)
   @JoinColumn()
   user: Users;
+
+  @OneToOne(() => Admin, (admin) => admin.otp)
+  @JoinColumn()
+  admin: Admin;
 }

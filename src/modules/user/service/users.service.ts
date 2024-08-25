@@ -16,19 +16,16 @@ import { CreateUserDto } from '../dto/createUser.dto';
 
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { Twilio } from 'twilio';
 import { MailerService } from '@nestjs-modules/mailer';
-import axios from 'axios';
 import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class UserService {
   private saltRounds = 10;
-  private twilioClient: Twilio;
-  private readonly otpCache = new Map<
-    string,
-    { otp: string; expiresAt: Date }
-  >();
+  //   private readonly otpCache = new Map<
+  //     string,
+  //     { otp: string; expiresAt: Date }
+  //   >();
 
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
@@ -40,9 +37,9 @@ export class UserService {
     private httpService: HttpService,
     private readonly mailerService: MailerService,
   ) {
-    const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
-    const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
-    this.twilioClient = new Twilio(accountSid, authToken);
+    // const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
+    // const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
+    // this.twilioClient = new Twilio(accountSid, authToken);
   }
 
   async getStudentByCid(cid_no: string): Promise<Students> {

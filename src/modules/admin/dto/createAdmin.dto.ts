@@ -6,13 +6,19 @@ import {
   IsString,
   IsArray,
   ArrayNotEmpty,
-  Matches,
-  MinLength,
-  MaxLength,
 } from 'class-validator';
 import { RoleType } from 'src/constants/role-type';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsPhoneNumber,
+  IsStrongPassword,
+} from 'src/decorators/field.decorators';
 
 export class CreateAdminDto {
+  @ApiProperty({
+    description: 'Name must be string',
+    example: 'John Doe',
+  })
   @IsNotEmpty({
     message: 'Name is required',
   })
@@ -21,28 +27,26 @@ export class CreateAdminDto {
   })
   name: string;
 
-  @IsNotEmpty({
-    message: 'Email is required',
+  @ApiProperty({
+    description: 'Email is required',
+    example: 'example@gmail.com',
   })
-  @IsEmail(
-    {},
-    {
-      message: 'Email must be a valid email address',
-    },
-  )
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsString({ message: 'Email must be a string' })
+  @IsEmail({}, { message: 'Email must be a valid email address' })
   email: string;
 
-  @IsNotEmpty({
-    message: 'Mobile number is required',
+  @ApiProperty({
+    description: 'Phone number is required',
+    example: '17543213',
   })
-  @IsString({
-    message: 'Mobile number must be a string',
-  })
-  @Matches(/^\d+$/, {
-    message: 'Mobile number must contain only digits',
-  })
+  @IsPhoneNumber()
   mobile_no: string;
 
+  @ApiProperty({
+    description: 'User type must be admin or super admin',
+    example: 'ADMIN',
+  })
   @IsNotEmpty({
     message: 'Role is required',
   })
@@ -51,6 +55,10 @@ export class CreateAdminDto {
   })
   roles: RoleType;
 
+  @ApiProperty({
+    description: 'User type must be admin or super admin',
+    example: '["create", "delete"]',
+  })
   @IsOptional()
   @IsArray({
     message: 'Permissions must be an array',
@@ -60,15 +68,10 @@ export class CreateAdminDto {
   })
   permission?: string[];
 
-  @IsNotEmpty({ message: 'Password is required' })
-  @IsString({ message: 'Password must be a string' })
-  @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  @MaxLength(32, { message: 'Password must be no longer than 32 characters' })
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: `Passwords must contain at least:
-  1 upper case letter
-  1 lower case letter
-  1 number or special character`,
+  @ApiProperty({
+    description: 'Password is required',
+    example: 'Password#76',
   })
+  @IsStrongPassword()
   password: string;
 }

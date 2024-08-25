@@ -8,6 +8,8 @@ import { AdminService } from './service/admin.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 
+import { OtpEntity } from '../user/entities/otp.entity';
+
 @Module({
   imports: [
     HttpModule,
@@ -18,7 +20,7 @@ import { JwtModule } from '@nestjs/jwt';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin]),
+    TypeOrmModule.forFeature([Admin, OtpEntity]),
   ],
   controllers: [AdminController],
   providers: [AdminService],

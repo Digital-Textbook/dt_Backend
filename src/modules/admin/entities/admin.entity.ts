@@ -1,5 +1,14 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { RoleType } from 'src/constants/role-type';
+import { ApiProperty } from '@nestjs/swagger';
+import { OtpEntity } from 'src/modules/user/entities/otp.entity';
+
 @Entity('admin')
 export class Admin extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', {
@@ -33,6 +42,13 @@ export class Admin extends BaseEntity {
   })
   roles: RoleType;
 
+  @ApiProperty({
+    description: 'Status must be inactive',
+    example: 'inactive',
+  })
+  @Column({ type: 'varchar' })
+  status: 'active' | 'inactive';
+
   @Column({
     type: 'json',
   })
@@ -55,4 +71,7 @@ export class Admin extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
+
+  @OneToOne(() => OtpEntity, (otp) => otp.user)
+  otp: OtpEntity;
 }
