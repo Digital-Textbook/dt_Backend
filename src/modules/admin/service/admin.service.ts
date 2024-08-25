@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { Admin } from '../entities/admin.entity';
 import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
@@ -54,12 +55,27 @@ export class AdminService {
     }
 
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash(admin.password, this.saltRounds);
+      const generatedPassword = crypto.randomBytes(5).toString('hex');
+
+      const hashedPassword = await bcrypt.hash(
+        generatedPassword,
+        this.saltRounds,
+      );
 
       let newUser = this.adminRepository.create({
         ...admin,
         password: hashedPassword,
         status: 'active',
+      });
+
+      await this.mailerService.sendMail({
+        to: newUser.email,
+        subject: 'Your Password',
+        template: './admin',
+        context: {
+          generatedPassword,
+          name: newUser.name,
+        },
       });
 
       const savedUser = await this.adminRepository.save(newUser);

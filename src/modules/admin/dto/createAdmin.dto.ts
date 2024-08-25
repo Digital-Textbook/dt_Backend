@@ -68,10 +68,10 @@ export class CreateAdminDto {
   })
   permission?: string[];
 
-  @ApiProperty({
-    description: 'Password is required',
-    example: 'Password#76',
-  })
-  @IsStrongPassword()
-  password: string;
+  //   @ApiProperty({
+  //     description: 'Password is required',
+  //     example: 'Password#76',
+  //   })
+  //   @IsStrongPassword()
+  //   password: string;
 }
