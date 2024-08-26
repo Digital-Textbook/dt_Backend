@@ -5,6 +5,8 @@ import {
   Post,
   UsePipes,
   ValidationPipe,
+  Get,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from '../service/users.service';
 import { CreateUserDto } from '../dto/createUser.dto';

@@ -6,6 +6,13 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
+interface IFieldOptions {
+  each?: boolean;
+  swagger?: boolean;
+  nullable?: boolean;
+  groups?: string[];
+}
+
 @ValidatorConstraint({ async: false })
 export class IsStudentCodeConstraint implements ValidatorConstraintInterface {
   validate(student_code: any, args: ValidationArguments) {

@@ -22,7 +22,7 @@ export class AuthService {
 
   async SignIn(user: LoginUserDto): Promise<{ accessToken: string }> {
     const existingUser = await this.usersRepository.findOne({
-      where: { student_code: user.student_code },
+      where: { cid_no: user.cidNo },
     });
 
     if (existingUser.status == 'inactive') {
@@ -59,4 +59,76 @@ export class AuthService {
       throw new UnauthorizedException('Please check your login credentials');
     }
   }
+
+  ///////////////////////////////////////////////////////////////////////////
+  //   async fetchCitizenDetailsFromDataHub(cid: string) {
+
+  //     const citizenEntity = await this.citizenRepository.findOne({
+  //       where: {
+  //         cidNo: cid,
+  //       }
+  //     });
+
+  //     if (citizenEntity) {
+  //       return citizenEntity;
+  //     }
+
+  //     const censusData = await this.dataHubApiService.getCensusDataByCid(cid);
+
+  //     if (!censusData) {
+  //       throw new CitizenNotFoundException();
+  //     }
+
+  //     const photo = await this.dataHubApiService.getPhotoByCid(cid);
+  //     // console.log(photo.image);
+  //     const buffer = Buffer.from(photo.image, 'base64');
+  //     const fileType = parse(buffer);
+
+  //     let photoUrl = '';
+
+  //     if (buffer && fileType) {
+  //       const file = {
+  //         encoding: '7bit',
+  //         buffer,
+  //         fieldname: 'image',
+  //         mimetype: fileType.mime,
+  //         originalname: ⁠ ${cid}.${fileType.ext} ⁠,
+  //         size: buffer.length,
+  //       };
+
+  //       photoUrl = await this.awsS3Service.uploadFile('/bhutanese-half-photo', file);
+
+  //     }
+
+  //     //JOIN NAMES (FIRST, MIDDLE AND LAST)
+  //     let name = ⁠ ${censusData.firstName} ⁠;
+
+  //     if (censusData.middleName !== null) {
+  //       name = ⁠ ${name} ${censusData.middleName} ⁠;
+  //     }
+
+  //     if (censusData.lastName !== null) {
+  //       name = ⁠ ${name} ${censusData.lastName} ⁠;
+  //     }
+
+  //     const dateOfBirth = censusData.dob.split('/').reverse().join('-');
+
+  //     const gender = censusData.gender === 'M' ? Gender.MALE : Gender.FEMALE;
+
+  //     const contactNo = censusData.mobileNumber;
+
+  //     const citizenDto = {
+  //       cidNo: cid,
+  //       name,
+  //       gender,
+  //       dateOfBirth,
+  //       contactNo,
+  //       photoUrl
+  //     };
+
+  //     const createCitizen = this.citizenRepository.create(citizenDto);
+
+  //     return this.citizenRepository.save(createCitizen);
+
+  //   }
 }

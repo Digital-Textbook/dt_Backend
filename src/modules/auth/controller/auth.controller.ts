@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
+  HttpCode,
+  Param,
   Post,
   UsePipes,
   ValidationPipe,
@@ -9,7 +12,7 @@ import {
 import { AuthService } from '../service/auth.service';
 import { LoginUserDto } from '../dto/loginUser.dto';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -31,4 +34,15 @@ export class AuthController {
   ): Promise<{ adminAccessToken }> {
     return await this.authService.adminSignIn(adminSignInData);
   }
+
+  ////////////////////////////////////////////////
+  //   @Get('fetch-citizen-details-from-data-hub/:cid')
+  //   //@Auth()
+  //   @HttpCode(200)
+  //   @ApiOkResponse({
+  //     description: 'Get Citizen details from census',
+  //   })
+  //   fetchCitizenDetailsFromDataHub(@Param('cid') cid: string) {
+  //     return this.authService.fetchCitizenDetailsFromDataHub(cid);
+  //   }
 }
