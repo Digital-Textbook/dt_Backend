@@ -1,26 +1,14 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Post,
-  Patch,
-  UsePipes,
-  ValidationPipe,
-  Get,
-  HttpCode,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Param, Post, Patch } from '@nestjs/common';
 import { UserService } from '../service/users.service';
-import { CreateUserDto } from '../dto/createUser.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Users } from '../entities/users.entity';
 import { CreateForgotPasswordDto } from '../../../common/dto/forgotPassword.dto';
 import { updateRegister } from '../dto/updateRegistration.dto';
+import { permitOrNon } from '../dto/createPermit.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -30,10 +18,7 @@ export class UserController {
   @Post(':id/VerifyOtpEmail/:otp')
   @ApiOkResponse({ description: 'Password reset successfully' })
   @ApiBadRequestResponse({ description: 'User cannot be verified' })
-  async verifyByEmail(
-    @Param('id') id: string,
-    @Param('otp') otp: string,
-  ): Promise<string> {
+  async verifyByEmail(@Param('id') id: string, @Param('otp') otp: string) {
     return await this.userService.verifyByEmail(id, otp);
   }
 
@@ -79,25 +64,28 @@ export class UserController {
     return await this.userService.updatePassword(id, password);
   }
 
-  //   @Get('fetch-citizen-details-from-data-hub/:cid')
-  //   @HttpCode(200)
-  //   @ApiOkResponse({
-  //     description: 'Get Citizen details from census',
-  //   })
-  //   fetchCitizenDetailsFromDataHub(@Param('cid') cid: string) {
-  //     return this.userService.fetchCitizenDetailsFromDataHub(cid);
-  //   }
-
   @Post('/getCidDetail/:cidNo')
+  @ApiCreatedResponse({ description: 'Details successfully fetched' })
+  @ApiBadRequestResponse({ description: 'Details cannot be fetched.' })
   async getCidDetail(@Param('cidNo') cidNo: string) {
     return await this.userService.registerByCid(cidNo);
   }
 
   @Patch('/registerByCid/:id')
+  @ApiCreatedResponse({ description: 'User updated successfully!' })
+  @ApiBadRequestResponse({ description: 'User cannot be updated.' })
   async updateRegister(
     @Param('id') id: string,
     @Body() updateRegister: updateRegister,
   ) {
     return await this.userService.updateRegister(id, updateRegister);
+  }
+
+  //////// PERMIT OR NON-NHUTANESE USER ////////
+  @Post('/registerByPermit')
+  @ApiCreatedResponse({ description: 'Registration successfully!' })
+  @ApiBadRequestResponse({ description: 'Registration cannot be done.' })
+  async registerByPermit(@Body() userData: permitOrNon) {
+    return await this.userService.registerByPermit(userData);
   }
 }

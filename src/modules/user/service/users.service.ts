@@ -21,6 +21,7 @@ import { DataHubApiService } from './datahub.service';
 import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
 import { updateRegister } from '../dto/updateRegistration.dto';
+import { permitOrNon } from '../dto/createPermit.dto';
 
 @Injectable()
 export class UserService {
@@ -65,7 +66,7 @@ export class UserService {
     }
   }
 
-  async verifyByEmail(id: string, otp: string): Promise<string> {
+  async verifyByEmail(id: string, otp: string) {
     const user = await this.usersRepository.findOne({
       where: { id: id },
     });
@@ -95,7 +96,7 @@ export class UserService {
 
     await this.otpRepository.delete(otpEntry.id);
 
-    return `OTP is verified.`;
+    return { user, msg: `OTP is verified.` };
   }
 
   //   ////////////////////////
@@ -301,27 +302,14 @@ export class UserService {
 
     if (updateRegister.otpOption === 'email') {
       try {
-        await this.mailerService.sendMail({
-          to: user.email,
-          subject: 'Your OTP Code',
-          template: './otp',
-          context: {
-            otp: newOtp.otp,
-            name: user.name,
-          },
-        });
+        await this.sendMailOtp(user, newOtp.otp);
       } catch (e) {
         console.error(e);
         throw new ConflictException("OTP couldn't be sent. Please try again");
       }
     } else {
       try {
-        let prefix = '+975';
-        let phone = prefix.concat(user.mobileNo);
-
-        await this.sendOtp(phone, newOtp.otp);
-
-        console.log(`OTP sent to phone: ${newOtp.otp}`);
+        await this.phoneOtp(user.mobileNo, newOtp.otp);
       } catch (e) {
         console.error(e);
         throw new ConflictException("OTP couldn't be sent. Please try again");
@@ -331,10 +319,96 @@ export class UserService {
     return { user, message: 'OTP sent successfully!' };
   }
 
+  async sendMailOtp(user: Users, otp: string) {
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Your OTP Code',
+      template: './otp',
+      context: {
+        otp: otp,
+        name: user.name,
+      },
+    });
+  }
+
+  async phoneOtp(mobileNo: string, otp: string) {
+    let prefix = '+975';
+    let phone = prefix.concat(mobileNo);
+
+    await this.sendOtp(phone, otp);
+  }
+
   async generateOtp() {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     return { otp: otp, expiresAt: otpExpiresAt };
+  }
+
+  async registerByPermit(userData: permitOrNon) {
+    const existingUser = await this.usersRepository.findOne({
+      where: {
+        cidNo: userData.permitNo,
+      },
+    });
+
+    if (existingUser) {
+      throw new ConflictException(
+        `User with Permit or Document ID ${userData.permitNo} already exist`,
+      );
+    }
+    const permitDto = {
+      name: userData.name,
+      cidNo: userData.permitNo,
+      gender: userData.gender,
+      email: userData.email,
+      mobileNo: userData.mobileNo,
+      status: Status.INACTIVE,
+      userType:
+        userData.userType === 'Bhutanese_with_permit'
+          ? userType.Bhutanese_with_permit
+          : userType.Non_Bhutanese,
+    };
+    const user = await this.usersRepository.save(permitDto);
+
+    const newOtp = await this.generateOtp();
+
+    let otpEntity = await this.otpRepository.findOne({
+      where: {
+        user: { id: user.id },
+      },
+    });
+
+    if (otpEntity) {
+      otpEntity.otp = newOtp.otp;
+      otpEntity.otpExpiresAt = newOtp.expiresAt;
+      otpEntity.updatedAt = new Date(Date.now());
+    } else {
+      otpEntity = this.otpRepository.create({
+        otp: newOtp.otp,
+        otpExpiresAt: newOtp.expiresAt,
+        user: user,
+      });
+    }
+
+    await this.otpRepository.save(otpEntity);
+
+    if (userData.otpOption === 'email') {
+      try {
+        await this.sendMailOtp(user, newOtp.otp);
+      } catch (e) {
+        console.error(e);
+        throw new ConflictException("OTP couldn't be sent. Please try again");
+      }
+    } else {
+      try {
+        await this.phoneOtp(user.mobileNo, newOtp.otp);
+      } catch (e) {
+        console.error(e);
+        throw new ConflictException("OTP couldn't be sent. Please try again");
+      }
+    }
+
+    return { user, message: 'OTP sent successfully!' };
   }
 }
