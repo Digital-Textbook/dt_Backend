@@ -13,6 +13,7 @@ import { OtpEntity } from './entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { DataHubApiService } from './service/datahub.service';
 
 @Module({
   imports: [
@@ -27,6 +28,11 @@ import { JwtModule } from '@nestjs/jwt';
     TypeOrmModule.forFeature([Users, Students, UserProfile, OtpEntity]),
   ],
   controllers: [UserController, UserProfileController, StudentController],
-  providers: [UserService, StudentProfileService, StudentService],
+  providers: [
+    UserService,
+    DataHubApiService,
+    StudentProfileService,
+    StudentService,
+  ],
 })
 export class UserModule {}

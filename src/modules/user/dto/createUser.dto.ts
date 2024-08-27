@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString, IsIn, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsString, IsIn, IsEmail, IsEnum } from 'class-validator';
 import {
   IsValidName,
   IsPhoneNumber,
   IsStrongPassword,
-  IsStudentCode,
 } from 'src/decorators/field.decorators';
 import { ApiProperty } from '@nestjs/swagger';
+import { userType } from 'src/constants/user-type';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -24,14 +24,7 @@ export class CreateUserDto {
   })
   @IsNotEmpty({ message: 'CID number is required' })
   @IsString({ message: 'CID number must be an string' })
-  cid_no: string;
-
-  @ApiProperty({
-    description: 'Student code must follow this format: 201.00345.33.0006',
-    example: '201.00345.33.0006',
-  })
-  @IsStudentCode()
-  student_code: string;
+  cidNo: string;
 
   @ApiProperty({
     description: 'Email is required',
@@ -47,17 +40,18 @@ export class CreateUserDto {
     example: '17543213',
   })
   @IsPhoneNumber()
-  mobile_no: string;
+  mobileNo: string;
 
   @ApiProperty({
     description: 'User type must be bhutanese or non-bhutanese',
     example: 'bhutanese',
   })
   @IsNotEmpty({ message: 'User type is required' })
-  @IsIn(['bhutanese', 'non-bhutanese'], {
-    message: 'User type must be either "bhutanese" or "non-bhutanese"',
+  @IsEnum(userType, {
+    message:
+      'User type must be either "bhutanese with cid", "bhutanese without cid" or "non-bhutanese"',
   })
-  user_type: 'bhutanese' | 'non-bhutanese';
+  userType: userType;
 
   @ApiProperty({
     description: 'Password is required',

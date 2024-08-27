@@ -24,14 +24,14 @@ export class UserProfile extends BaseEntity {
     unique: true,
     length: 255,
   })
-  student_code: string;
+  studentCode: string;
 
   @Column({
     type: 'varchar',
     unique: true,
     length: 255,
   })
-  mobile_no: string;
+  mobileNo: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
@@ -62,7 +62,4 @@ export class UserProfile extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
-
-  @OneToOne(() => Users, (user) => user.profile)
-  user: Users;
 }
