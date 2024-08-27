@@ -26,8 +26,6 @@ export class AuthService {
       where: { cidNo: user.cidNo },
     });
 
-    console.log('User: ', existingUser);
-
     if (!existingUser) {
       throw new UnauthorizedException(
         `User with CID ${user.cidNo} does not exist`,
