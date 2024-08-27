@@ -118,9 +118,4 @@ export class Users extends BaseEntity {
 
   @OneToOne(() => OtpEntity, (otp) => otp.user)
   otp: OtpEntity;
-
-  //   @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
-  //   @JoinColumn({ name: 'profileId' })
-  //   @Exclude({ toPlainOnly: true })
-  //   profile: UserProfile;
 }

@@ -13,11 +13,11 @@ import { StudentProfileService } from '../user/service/UserProfile.service';
 import { AdminService } from '../admin/service/admin.service';
 import { AdminController } from '../admin/controller/admin.controller';
 import { UserProfileController } from '../user/controller/UserProfile.controller';
-// import { AuthService } from './service/auth.service';
+import { AuthService } from './service/auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-// import { JwtStrategy } from './jwt.strategy';
-// import { AuthController } from './controller/auth.controller';
+import { JwtStrategy } from './jwt.strategy';
+import { AuthController } from './controller/auth.controller';
 import { OtpEntity } from '../user/entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
 import { DataHubApiService } from '../user/service/datahub.service';
@@ -39,21 +39,18 @@ import { DataHubApiService } from '../user/service/datahub.service';
     UserController,
     AdminController,
     UserProfileController,
-    // AuthController,
+    AuthController,
   ],
   providers: [
     StudentService,
     UserService,
     StudentProfileService,
     AdminService,
-    // AuthService,
-    // JwtStrategy,
+    AuthService,
+    JwtStrategy,
     DataHubApiService,
   ],
 
-  exports: [
-    // JwtStrategy,
-    PassportModule,
-  ],
+  exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}

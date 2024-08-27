@@ -27,55 +27,44 @@ import { updateRegister } from '../dto/updateRegistration.dto';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  //   @Post('/register')
-  //   @ApiCreatedResponse({
-  //     description: 'User registered successfully',
-  //     type: Users,
-  //   })
-  //   @ApiBadRequestResponse({ description: 'User cannot be registered' })
-  //   @UsePipes(ValidationPipe)
-  //   async createStudent(@Body() studentData: CreateUserDto) {
-  //     return await this.userService.createNewUser(studentData);
-  //   }
+  @Post(':id/VerifyOtpEmail/:otp')
+  @ApiOkResponse({ description: 'Password reset successfully' })
+  @ApiBadRequestResponse({ description: 'User cannot be verified' })
+  async verifyByEmail(
+    @Param('id') id: string,
+    @Param('otp') otp: string,
+  ): Promise<string> {
+    return await this.userService.verifyByEmail(id, otp);
+  }
 
-  //   @Post(':id/VerifyOtpEmail/:otp')
-  //   @ApiOkResponse({ description: 'Password reset successfully' })
-  //   @ApiBadRequestResponse({ description: 'User cannot be verified' })
-  //   async verifyByEmail(
-  //     @Param('id') id: string,
-  //     @Param('otp') otp: string,
-  //   ): Promise<string> {
-  //     return await this.userService.verifyByEmail(id, otp);
-  //   }
+  @Post('/forgot-password')
+  @ApiOkResponse({ description: 'OTP is successfully send.' })
+  @ApiBadRequestResponse({ description: 'OTP cannot be send.' })
+  async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
+    return await this.userService.forgotPasswordByEmail(data.email);
+  }
 
-  //   @Post('/forgot-password')
-  //   @ApiOkResponse({ description: 'OTP is successfully send.' })
-  //   @ApiBadRequestResponse({ description: 'OTP cannot be send.' })
-  //   async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
-  //     return await this.userService.forgotPasswordByEmail(data.email);
-  //   }
+  @Post(':id/reset-password/:otp')
+  @ApiOkResponse({ description: 'OTP is successfully verified.' })
+  @ApiBadRequestResponse({ description: 'OTP cannot be verified.' })
+  async resetPasswordVerifyByEmail(
+    @Param('id') id: string,
+    @Param('otp') otp: string,
+  ) {
+    return await this.userService.verifyByEmail(id, otp);
+  }
 
-  //   @Post(':id/reset-password/:otp')
-  //   @ApiOkResponse({ description: 'OTP is successfully verified.' })
-  //   @ApiBadRequestResponse({ description: 'OTP cannot be verified.' })
-  //   async resetPasswordVerifyByEmail(
-  //     @Param('id') id: string,
-  //     @Param('otp') otp: string,
-  //   ) {
-  //     return await this.userService.verifyByEmail(id, otp);
-  //   }
-
-  //   @Post(':id/reset-password-byEmail/:password')
-  //   @ApiOkResponse({ description: 'Reset password is successfully done.' })
-  //   @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
-  //   async resetPasswordByEmail(
-  //     @Param('id') id: string,
-  //     @Param('password') password: string,
-  //   ) {
-  //     console.log('ID:', id);
-  //     console.log('OTP:', password);
-  //     return await this.userService.resetPasswordByEmail(id, password);
-  //   }
+  @Post(':id/reset-password-byEmail/:password')
+  @ApiOkResponse({ description: 'Reset password is successfully done.' })
+  @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
+  async resetPasswordByEmail(
+    @Param('id') id: string,
+    @Param('password') password: string,
+  ) {
+    console.log('ID:', id);
+    console.log('OTP:', password);
+    return await this.userService.resetPasswordByEmail(id, password);
+  }
 
   //////////////////////////////////////////////////////////////////////////
   @Post(':id/update-password/:password')
@@ -90,21 +79,21 @@ export class UserController {
     return await this.userService.updatePassword(id, password);
   }
 
-  @Get('fetch-citizen-details-from-data-hub/:cid')
-  @HttpCode(200)
-  @ApiOkResponse({
-    description: 'Get Citizen details from census',
-  })
-  fetchCitizenDetailsFromDataHub(@Param('cid') cid: string) {
-    return this.userService.fetchCitizenDetailsFromDataHub(cid);
-  }
+  //   @Get('fetch-citizen-details-from-data-hub/:cid')
+  //   @HttpCode(200)
+  //   @ApiOkResponse({
+  //     description: 'Get Citizen details from census',
+  //   })
+  //   fetchCitizenDetailsFromDataHub(@Param('cid') cid: string) {
+  //     return this.userService.fetchCitizenDetailsFromDataHub(cid);
+  //   }
 
   @Post('/getCidDetail/:cidNo')
   async getCidDetail(@Param('cidNo') cidNo: string) {
     return await this.userService.registerByCid(cidNo);
   }
 
-  @Patch('/updateByCid/:id')
+  @Patch('/registerByCid/:id')
   async updateRegister(
     @Param('id') id: string,
     @Body() updateRegister: updateRegister,
