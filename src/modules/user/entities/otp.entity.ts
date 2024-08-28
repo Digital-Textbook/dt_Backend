@@ -7,7 +7,6 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Users } from './users.entity';
-import { Admin } from 'src/modules/admin/entities/admin.entity';
 
 @Entity('otp')
 export class OtpEntity extends BaseEntity {

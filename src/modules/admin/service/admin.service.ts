@@ -13,7 +13,6 @@ import { Admin } from '../entities/admin.entity';
 import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { RoleType } from 'src/constants/role-type';
-import { OtpEntity } from 'src/modules/user/entities/otp.entity';
 
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -25,7 +24,6 @@ export class AdminService {
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
-    @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
     private readonly configService: ConfigService,
     private httpService: HttpService,
     private readonly mailerService: MailerService,

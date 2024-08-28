@@ -3,15 +3,12 @@ import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
-  JoinColumn,
   OneToOne,
 } from 'typeorm';
 import { UserProfile } from './UserProfile.entity';
-import { Exclude } from 'class-transformer';
 import { OtpEntity } from './otp.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { userType } from 'src/constants/user-type';
-import { Gender } from 'src/constants/gender';
 import { Status } from 'src/constants/status';
 
 @Entity('users')
@@ -45,6 +42,10 @@ export class Users extends BaseEntity {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   mobileNo: string;
 
+  @ApiProperty({
+    description: 'Email is required',
+    example: 'example@gmail.com',
+  })
   @ApiProperty({
     description: 'Email is required',
     example: 'example@gmail.com',
@@ -87,8 +88,6 @@ export class Users extends BaseEntity {
 
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
   @ApiProperty({ description: 'Created date' })
   @Column({
     type: 'timestamp',
