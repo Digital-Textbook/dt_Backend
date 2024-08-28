@@ -8,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Users } from '../entities/users.entity';
-import { Students } from '../../student/entities/students.entity';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { OtpEntity } from '../entities/otp.entity';
 
@@ -20,7 +19,7 @@ import { Gender } from 'src/constants/gender';
 import { DataHubApiService } from './datahub.service';
 import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
-import { CreateRegisterDto } from '../dto/createPermit.dto';
+import { CreateRegisterDto } from '../dto/createRegister.dto';
 
 @Injectable()
 export class UserService {
@@ -28,7 +27,6 @@ export class UserService {
 
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
-    @InjectRepository(Students) private studentRepository: Repository<Students>,
     @InjectRepository(UserProfile)
     private userProfileRepository: Repository<UserProfile>,
     @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
@@ -93,8 +91,6 @@ export class UserService {
     user.status = Status.ACTIVE;
     await this.usersRepository.save(user);
 
-    await this.otpRepository.delete(otpEntry.id);
-
     return { user, msg: `OTP is verified.` };
   }
 
@@ -153,29 +149,6 @@ export class UserService {
         'User is not verified with the provided email',
       );
     }
-  }
-
-  async resetPasswordByEmail(id: string, password: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id: id },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User ID not found');
-    }
-
-    console.log('Password: ', password);
-    const hashedPassword = await bcrypt.hash(password, this.saltRounds);
-    user.password = hashedPassword;
-
-    console.log('Hashed: ', hashedPassword);
-
-    await this.usersRepository.save(user);
-
-    return {
-      msg: 'Password is updated for this user',
-      user,
-    };
   }
 
   ///////////////////////////////////////////////////////////////////////////
