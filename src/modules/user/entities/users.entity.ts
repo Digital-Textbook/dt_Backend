@@ -27,7 +27,7 @@ export class Users extends BaseEntity {
   })
   @Column({
     type: 'varchar',
-    length: 255,
+    length: 50,
   })
   name: string;
 
@@ -49,7 +49,7 @@ export class Users extends BaseEntity {
     description: 'Email is required',
     example: 'example@gmail.com',
   })
-  @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
+  @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
   email: string;
 
   @ApiProperty({
@@ -63,25 +63,6 @@ export class Users extends BaseEntity {
     comment: 'User type',
   })
   userType: userType;
-
-  @ApiProperty({
-    description: 'Gender must be MALE or FEMALE',
-    example: 'MALE',
-  })
-  @Column({
-    type: 'enum',
-    enum: Gender,
-    comment: 'Gender must be MALE or FEMALE',
-  })
-  gender: Gender;
-
-  @ApiProperty({
-    description: 'Date of Birth, can be null',
-    example: '1990-01-01',
-    nullable: true,
-  })
-  @Column({ type: 'date', nullable: true })
-  dateOfBirth: Date | null;
 
   @ApiProperty({
     description: 'Status must be inactive',
@@ -106,7 +87,7 @@ export class Users extends BaseEntity {
 
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  createdAt: Date;
 
   @ApiProperty({ description: 'Created date' })
   @Column({
@@ -114,7 +95,7 @@ export class Users extends BaseEntity {
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => OtpEntity, (otp) => otp.user)
   otp: OtpEntity;

@@ -72,6 +72,6 @@ export class Admin extends BaseEntity {
   })
   updated_at: Date;
 
-  @OneToOne(() => OtpEntity, (otp) => otp.user)
-  otp: OtpEntity;
+  //   @OneToOne(() => OtpEntity, (otp) => otp.user)
+  //   otp: OtpEntity;
 }

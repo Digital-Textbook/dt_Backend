@@ -7,8 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateForgotPasswordDto } from '../../../common/dto/forgotPassword.dto';
-import { updateRegister } from '../dto/updateRegistration.dto';
-import { permitOrNon } from '../dto/createPermit.dto';
+import { CreateRegisterDto } from '../dto/createPermit.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -39,18 +38,6 @@ export class UserController {
     return await this.userService.verifyByEmail(id, otp);
   }
 
-  @Post(':id/reset-password-byEmail/:password')
-  @ApiOkResponse({ description: 'Reset password is successfully done.' })
-  @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
-  async resetPasswordByEmail(
-    @Param('id') id: string,
-    @Param('password') password: string,
-  ) {
-    console.log('ID:', id);
-    console.log('OTP:', password);
-    return await this.userService.resetPasswordByEmail(id, password);
-  }
-
   //////////////////////////////////////////////////////////////////////////
   @Post(':id/update-password/:password')
   @ApiOkResponse({ description: 'Password update is successfully done.' })
@@ -59,9 +46,7 @@ export class UserController {
     @Param('id') id: string,
     @Param('password') password: string,
   ) {
-    console.log('ID:', id);
-    console.log('Password:', password);
-    return await this.userService.updatePassword(id, password);
+    return await this.userService.resetPassword(id, password);
   }
 
   @Post('/getCidDetail/:cidNo')
@@ -71,21 +56,10 @@ export class UserController {
     return await this.userService.registerByCid(cidNo);
   }
 
-  @Patch('/registerByCid/:id')
-  @ApiCreatedResponse({ description: 'User updated successfully!' })
-  @ApiBadRequestResponse({ description: 'User cannot be updated.' })
-  async updateRegister(
-    @Param('id') id: string,
-    @Body() updateRegister: updateRegister,
-  ) {
-    return await this.userService.updateRegister(id, updateRegister);
-  }
-
-  //////// PERMIT OR NON-NHUTANESE USER ////////
-  @Post('/registerByPermit')
+  @Post('/register')
   @ApiCreatedResponse({ description: 'Registration successfully!' })
   @ApiBadRequestResponse({ description: 'Registration cannot be done.' })
-  async registerByPermit(@Body() userData: permitOrNon) {
-    return await this.userService.registerByPermit(userData);
+  async registerByPermit(@Body() userData: CreateRegisterDto) {
+    return await this.userService.register(userData);
   }
 }

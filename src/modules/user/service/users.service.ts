@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Transaction } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { Users } from '../entities/users.entity';
 import { Students } from '../../student/entities/students.entity';
@@ -20,8 +20,7 @@ import { Gender } from 'src/constants/gender';
 import { DataHubApiService } from './datahub.service';
 import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
-import { updateRegister } from '../dto/updateRegistration.dto';
-import { permitOrNon } from '../dto/createPermit.dto';
+import { CreateRegisterDto } from '../dto/createPermit.dto';
 
 @Injectable()
 export class UserService {
@@ -180,7 +179,7 @@ export class UserService {
   }
 
   ///////////////////////////////////////////////////////////////////////////
-  async updatePassword(id: string, password: string) {
+  async resetPassword(id: string, password: string) {
     const user = await this.usersRepository.findOne({
       where: { id: id },
     });
@@ -234,89 +233,14 @@ export class UserService {
     return citizenDto;
   }
 
+  /////////////// CID Details //////////////////
   async registerByCid(cidNo: string) {
-    const user = await this.usersRepository.findOne({
-      where: {
-        cidNo: cidNo,
-      },
-    });
-
-    if (user) {
-      return user;
-    } else {
-      const cidDetails = await this.fetchCitizenDetailsFromDataHub(cidNo);
-
-      const createDto = {
-        cidNo: cidDetails.cidNo,
-        name: cidDetails.name,
-        gender: cidDetails.gender,
-        dateOfBirth: cidDetails.dateOfBirth,
-        mobileNo: cidDetails.contactNo,
-        status: Status.INACTIVE,
-        userType: userType.Bhutanese_with_cid,
-      };
-
-      const newUser = this.usersRepository.create(createDto);
-      await this.usersRepository.save(newUser);
-
-      return newUser;
-    }
-  }
-
-  async updateRegister(id: string, updateRegister: updateRegister) {
-    const user = await this.usersRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
+    const user = await this.fetchCitizenDetailsFromDataHub(cidNo);
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Details with CID ${cidNo} not found!`);
     }
-    user.email = updateRegister.email;
-    user.mobileNo = updateRegister.mobileNo;
-
-    await this.usersRepository.save(user);
-
-    let otpEntity = await this.otpRepository.findOne({
-      where: {
-        user: { id: user.id },
-      },
-    });
-
-    const newOtp = await this.generateOtp();
-
-    if (otpEntity) {
-      otpEntity.otp = newOtp.otp;
-      otpEntity.otpExpiresAt = newOtp.expiresAt;
-      otpEntity.updatedAt = new Date(Date.now());
-    } else {
-      otpEntity = this.otpRepository.create({
-        otp: newOtp.otp,
-        otpExpiresAt: newOtp.expiresAt,
-        user: user,
-      });
-    }
-
-    await this.otpRepository.save(otpEntity);
-
-    if (updateRegister.otpOption === 'email') {
-      try {
-        await this.sendMailOtp(user, newOtp.otp);
-      } catch (e) {
-        console.error(e);
-        throw new ConflictException("OTP couldn't be sent. Please try again");
-      }
-    } else {
-      try {
-        await this.phoneOtp(user.mobileNo, newOtp.otp);
-      } catch (e) {
-        console.error(e);
-        throw new ConflictException("OTP couldn't be sent. Please try again");
-      }
-    }
-
-    return { user, message: 'OTP sent successfully!' };
+    return user;
   }
 
   async sendMailOtp(user: Users, otp: string) {
@@ -345,29 +269,26 @@ export class UserService {
     return { otp: otp, expiresAt: otpExpiresAt };
   }
 
-  async registerByPermit(userData: permitOrNon) {
+  async register(userData: CreateRegisterDto) {
     const existingUser = await this.usersRepository.findOne({
       where: {
-        cidNo: userData.permitNo,
+        cidNo: userData.cidNo,
       },
     });
 
     if (existingUser) {
       throw new ConflictException(
-        `User with Permit or Document ID ${userData.permitNo} already exist`,
+        `User with Cid or Permit or Document ID ${userData.cidNo} already exist`,
       );
     }
+
     const permitDto = {
       name: userData.name,
-      cidNo: userData.permitNo,
-      gender: userData.gender,
+      cidNo: userData.cidNo,
       email: userData.email,
       mobileNo: userData.mobileNo,
       status: Status.INACTIVE,
-      userType:
-        userData.userType === 'Bhutanese_with_permit'
-          ? userType.Bhutanese_with_permit
-          : userType.Non_Bhutanese,
+      userType: userData.userType as userType,
     };
     const user = await this.usersRepository.save(permitDto);
 

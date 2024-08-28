@@ -137,114 +137,114 @@ export class AdminService {
   }
 
   ///////////////////////////////////////////////////////////////////
-  async forgotPasswordByEmail(email: string) {
-    const admin = await this.adminRepository.findOne({
-      where: { email: email, status: 'active' },
-    });
+  //   async forgotPasswordByEmail(email: string) {
+  //     const admin = await this.adminRepository.findOne({
+  //       where: { email: email, status: 'active' },
+  //     });
 
-    if (admin) {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  //     if (admin) {
+  //       const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //       const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-      const existingUser = await this.adminRepository.findOne({
-        where: {
-          email: admin.email,
-          status: 'active',
-        },
-      });
-      let otpEntity = await this.otpRepository.findOne({
-        where: {
-          admin: { id: existingUser.id },
-        },
-      });
+  //       const existingUser = await this.adminRepository.findOne({
+  //         where: {
+  //           email: admin.email,
+  //           status: 'active',
+  //         },
+  //       });
+  //       let otpEntity = await this.otpRepository.findOne({
+  //         where: {
+  //           admin: { id: existingUser.id },
+  //         },
+  //       });
 
-      if (otpEntity) {
-        otpEntity.otp = otp;
-        otpEntity.otpExpiresAt = otpExpiresAt;
-        otpEntity.updatedAt = new Date(Date.now());
-      } else {
-        otpEntity = this.otpRepository.create({
-          otp,
-          otpExpiresAt,
-          admin: existingUser,
-        });
-      }
+  //       if (otpEntity) {
+  //         otpEntity.otp = otp;
+  //         otpEntity.otpExpiresAt = otpExpiresAt;
+  //         otpEntity.updatedAt = new Date(Date.now());
+  //       } else {
+  //         otpEntity = this.otpRepository.create({
+  //           otp,
+  //           otpExpiresAt,
+  //           admin: existingUser,
+  //         });
+  //       }
 
-      await this.otpRepository.save(otpEntity);
+  //       await this.otpRepository.save(otpEntity);
 
-      await this.mailerService.sendMail({
-        to: existingUser.email,
-        subject: 'Your OTP Code',
-        template: './otp',
-        context: {
-          otp,
-          name: existingUser.name,
-        },
-      });
+  //       await this.mailerService.sendMail({
+  //         to: existingUser.email,
+  //         subject: 'Your OTP Code',
+  //         template: './otp',
+  //         context: {
+  //           otp,
+  //           name: existingUser.name,
+  //         },
+  //       });
 
-      return {
-        msg: 'OTP successfully send',
-        admin,
-      };
-    } else {
-      throw new NotFoundException(
-        'Admin is not verified with the provided email',
-      );
-    }
-  }
+  //       return {
+  //         msg: 'OTP successfully send',
+  //         admin,
+  //       };
+  //     } else {
+  //       throw new NotFoundException(
+  //         'Admin is not verified with the provided email',
+  //       );
+  //     }
+  //   }
 
-  async resetPasswordByEmail(id: string, password: string) {
-    const admin = await this.adminRepository.findOne({
-      where: { id: id },
-    });
+  //   async resetPasswordByEmail(id: string, password: string) {
+  //     const admin = await this.adminRepository.findOne({
+  //       where: { id: id },
+  //     });
 
-    if (!admin) {
-      throw new NotFoundException('User ID not found');
-    }
+  //     if (!admin) {
+  //       throw new NotFoundException('User ID not found');
+  //     }
 
-    console.log('Password: ', password);
-    const hashedPassword = await bcrypt.hash(password, this.saltRounds);
-    admin.password = hashedPassword;
+  //     console.log('Password: ', password);
+  //     const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+  //     admin.password = hashedPassword;
 
-    console.log('Hashed: ', hashedPassword);
+  //     console.log('Hashed: ', hashedPassword);
 
-    await this.adminRepository.save(admin);
+  //     await this.adminRepository.save(admin);
 
-    return {
-      msg: 'Password is updated for this user',
-      admin,
-    };
-  }
+  //     return {
+  //       msg: 'Password is updated for this user',
+  //       admin,
+  //     };
+  //   }
 
-  /////////////////////////////////////////////////////////////
-  async verifyByEmail(id: string, otp: string): Promise<string> {
-    const admin = await this.adminRepository.findOne({
-      where: { id: id },
-    });
+  //   /////////////////////////////////////////////////////////////
+  //   async verifyByEmail(id: string, otp: string): Promise<string> {
+  //     const admin = await this.adminRepository.findOne({
+  //       where: { id: id },
+  //     });
 
-    if (!admin) {
-      throw new NotFoundException('Admin ID not found');
-    }
+  //     if (!admin) {
+  //       throw new NotFoundException('Admin ID not found');
+  //     }
 
-    const otpEntry = await this.otpRepository.findOne({
-      where: {
-        admin: { id: id },
-      },
-    });
+  //     const otpEntry = await this.otpRepository.findOne({
+  //       where: {
+  //         admin: { id: id },
+  //       },
+  //     });
 
-    if (!otpEntry) {
-      throw new BadRequestException('Invalid OTP');
-    }
+  //     if (!otpEntry) {
+  //       throw new BadRequestException('Invalid OTP');
+  //     }
 
-    if (otpEntry.otpExpiresAt < new Date()) {
-      throw new BadRequestException('OTP has expired');
-    }
+  //     if (otpEntry.otpExpiresAt < new Date()) {
+  //       throw new BadRequestException('OTP has expired');
+  //     }
 
-    admin.status = 'active';
-    await this.adminRepository.save(admin);
+  //     admin.status = 'active';
+  //     await this.adminRepository.save(admin);
 
-    await this.otpRepository.delete(otpEntry.id);
+  //     await this.otpRepository.delete(otpEntry.id);
 
-    return `OTP is verified.`;
-  }
+  //     return `OTP is verified.`;
+  //   }
 }

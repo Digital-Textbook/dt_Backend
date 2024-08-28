@@ -6,6 +6,9 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Users } from './users.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from 'src/constants/gender';
+import { ClassEnum } from 'src/constants/class-enum';
 
 @Entity('user_profile')
 export class UserProfile extends BaseEntity {
@@ -16,50 +19,70 @@ export class UserProfile extends BaseEntity {
 
   @Column({
     type: 'varchar',
+    length: 50,
   })
   name: string;
 
   @Column({
     type: 'varchar',
     unique: true,
-    length: 255,
+    length: 20,
   })
   studentCode: string;
 
   @Column({
     type: 'varchar',
     unique: true,
-    length: 255,
+    length: 20,
   })
   mobileNo: string;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'varchar', length: 100, unique: true })
   email: string;
 
-  @Column({
-    type: 'varchar',
+  @ApiProperty({
+    description: 'Class is required',
+    example: '12',
   })
-  class: string;
+  @Column({
+    type: 'enum',
+    enum: ClassEnum,
+    comment: 'Class is required',
+  })
+  class: ClassEnum;
 
   @Column({
     type: 'varchar',
     length: 255,
   })
-  school: string;
-
-  @Column({
-    type: 'varchar',
-    length: 255,
-  })
-  dzongkhag: string;
+  schoolId: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updated_at: Date;
+  updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Gender must be MALE or FEMALE',
+    example: 'MALE',
+  })
+  @Column({
+    type: 'enum',
+    enum: Gender,
+    comment: 'Gender must be MALE or FEMALE',
+  })
+  gender: Gender;
+
+  @ApiProperty({
+    description: 'Date of Birth, can be null',
+    example: '1990-01-01',
+    nullable: true,
+  })
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth: Date | null;
 }

@@ -76,30 +76,30 @@ export class AdminController {
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  @Post('/forgot-password')
-  @ApiOkResponse({ description: 'OTP is successfully send.' })
-  @ApiBadRequestResponse({ description: 'OTP cannot be send.' })
-  async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
-    return await this.adminService.forgotPasswordByEmail(data.email);
-  }
+  //   @Post('/forgot-password')
+  //   @ApiOkResponse({ description: 'OTP is successfully send.' })
+  //   @ApiBadRequestResponse({ description: 'OTP cannot be send.' })
+  //   async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
+  //     return await this.adminService.forgotPasswordByEmail(data.email);
+  //   }
 
-  @Post(':id/reset-password/:otp')
-  @ApiOkResponse({ description: 'OTP is successfully verified.' })
-  @ApiBadRequestResponse({ description: 'OTP cannot be verified.' })
-  async resetPasswordVerifyByEmail(
-    @Param('id') id: string,
-    @Param('otp') otp: string,
-  ) {
-    return await this.adminService.verifyByEmail(id, otp);
-  }
+  //   @Post(':id/reset-password/:otp')
+  //   @ApiOkResponse({ description: 'OTP is successfully verified.' })
+  //   @ApiBadRequestResponse({ description: 'OTP cannot be verified.' })
+  //   async resetPasswordVerifyByEmail(
+  //     @Param('id') id: string,
+  //     @Param('otp') otp: string,
+  //   ) {
+  //     return await this.adminService.verifyByEmail(id, otp);
+  //   }
 
-  @Post(':id/reset-password-byEmail/:password')
-  @ApiOkResponse({ description: 'Reset password is successfully done.' })
-  @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
-  async resetPasswordByEmail(
-    @Param('id') id: string,
-    @Param('password') password: string,
-  ) {
-    return await this.adminService.resetPasswordByEmail(id, password);
-  }
+  //   @Post(':id/reset-password-byEmail/:password')
+  //   @ApiOkResponse({ description: 'Reset password is successfully done.' })
+  //   @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
+  //   async resetPasswordByEmail(
+  //     @Param('id') id: string,
+  //     @Param('password') password: string,
+  //   ) {
+  //     return await this.adminService.resetPasswordByEmail(id, password);
+  //   }
 }

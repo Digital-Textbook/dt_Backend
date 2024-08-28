@@ -1,5 +1,5 @@
 export enum userType {
-  Bhutanese_with_cid = 'Bhutanese_with_cid ',
-  Bhutanese_with_permit = 'Bhutanese_with_permit',
+  BhutaneseCid = 'BhutaneseCid',
+  BhutanesePermit = 'BhutanesePermit',
   Non_Bhutanese = 'Non-Bhutanese',
 }

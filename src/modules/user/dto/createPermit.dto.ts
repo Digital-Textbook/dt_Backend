@@ -1,10 +1,9 @@
 import { IsNotEmpty, IsString, IsEnum, IsEmail, IsIn } from 'class-validator';
 import { IsPhoneNumber, IsValidName } from 'src/decorators/field.decorators';
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender } from 'src/constants/gender';
 import { userType } from 'src/constants/user-type';
 
-export class permitOrNon {
+export class CreateRegisterDto {
   @ApiProperty({
     description: 'Name must be string',
     example: 'Tenzin Norbu',
@@ -21,17 +20,7 @@ export class permitOrNon {
   })
   @IsNotEmpty({ message: 'CID number is required' })
   @IsString({ message: 'CID number must be an string' })
-  permitNo: string;
-
-  @ApiProperty({
-    description: 'Gender must be MALE or FEMALE',
-    example: 'MALE',
-  })
-  @IsNotEmpty({ message: 'Gender is required' })
-  @IsEnum(Gender, {
-    message: 'Gender must be MALE or FEMALE',
-  })
-  gender: Gender;
+  cidNo: string;
 
   @ApiProperty({
     description: 'Email is required',
@@ -61,7 +50,7 @@ export class permitOrNon {
 
   @ApiProperty({
     description: 'User type must be bhutanese or non-bhutanese',
-    example: 'Bhutanese_with_permit',
+    example: 'BhutaneseCid',
   })
   @IsNotEmpty({ message: 'User type is required' })
   @IsEnum(userType, {

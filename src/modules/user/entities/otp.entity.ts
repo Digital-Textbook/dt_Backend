@@ -35,8 +35,4 @@ export class OtpEntity extends BaseEntity {
   @OneToOne(() => Users, (user) => user.otp)
   @JoinColumn()
   user: Users;
-
-  @OneToOne(() => Admin, (admin) => admin.otp)
-  @JoinColumn()
-  admin: Admin;
 }
