@@ -12,6 +12,7 @@ import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigService } from '@nestjs/config';
 import { AdminModule } from './modules/admin/admin.module';
+import { SubjectModule } from './modules/subject/subject.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AdminModule } from './modules/admin/admin.module';
     UserModule,
     AdminModule,
     PassportModule,
+    SubjectModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

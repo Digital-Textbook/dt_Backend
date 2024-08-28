@@ -4,41 +4,36 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   ManyToOne,
-  OneToOne,
-  JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Class } from '../../class/entities/class.entity';
 import { PastQuestionPaper } from '../../pastQuestion/entities/pastquestionpaper.entity';
 
 @Entity('subject')
 export class Subject extends BaseEntity {
-  @PrimaryGeneratedColumn({
+  @PrimaryGeneratedColumn('uuid', {
     comment: 'This is the unique ID',
   })
-  id: number;
+  id: string;
 
   @Column({
     comment: 'Subject name of each class',
   })
-  subject: string;
+  subjectName: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => Class, (classEntity) => classEntity.subjects)
   class: Class;
 
-  @OneToOne(
-    () => PastQuestionPaper,
-    (pastQuestionPaper) => pastQuestionPaper.subject,
-  )
-  @JoinColumn()
-  pastQuestionPaper: PastQuestionPaper;
+  @OneToMany(() => PastQuestionPaper, (question) => question.subject)
+  question: PastQuestionPaper;
 }

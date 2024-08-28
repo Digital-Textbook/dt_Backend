@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Subject } from '../../subject/entities/subject.entity';
 import { ClassEnum } from '../dto/ClassEnum';
@@ -28,18 +29,15 @@ export class PastQuestionPaper {
   class: ClassEnum;
 
   @Column({ type: 'varchar' })
-  subjectName: string;
-
-  @Column({ type: 'varchar' })
-  pastQuestion_url: string;
+  pastQuestionUrl: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updated_at: Date;
+  updatedAt: Date;
 
-  @OneToOne(() => Subject, (subject) => subject.pastQuestionPaper)
+  @ManyToOne(() => Subject, (subject) => subject.question)
   @JoinColumn()
   subject: Subject;
 }

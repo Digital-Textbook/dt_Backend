@@ -16,7 +16,7 @@ export class CreatePastQuestionPaperDto {
 
   @IsNotEmpty({ message: 'Subject ID is required' })
   @IsInt({ message: 'Subject ID must be a number' })
-  subject_Id: number;
+  subjectId: number;
 
   @IsNotEmpty({ message: 'Subject is required' })
   @IsString({ message: 'Subject must be a string' })
@@ -24,5 +24,5 @@ export class CreatePastQuestionPaperDto {
 
   @IsNotEmpty({ message: 'Past Question URL is required' })
   @IsUrl({}, { message: 'Past Question URL must be a valid URL' })
-  pastQuestion_url: string;
+  pastQuestionUrl: string;
 }

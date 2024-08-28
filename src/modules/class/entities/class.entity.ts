@@ -10,10 +10,10 @@ import { ClassEnum } from '../dto/ClassEnum';
 
 @Entity('class')
 export class Class extends BaseEntity {
-  @PrimaryGeneratedColumn({
+  @PrimaryGeneratedColumn('uuid', {
     comment: 'This is the unique ID',
   })
-  id: number;
+  id: string;
 
   @Column({
     type: 'enum',
