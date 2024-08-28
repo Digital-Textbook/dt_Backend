@@ -99,4 +99,7 @@ export class Users extends BaseEntity {
 
   @OneToOne(() => OtpEntity, (otp) => otp.user)
   otp: OtpEntity;
+
+  @OneToOne(() => UserProfile, (profile) => profile.user)
+  profile: UserProfile;
 }

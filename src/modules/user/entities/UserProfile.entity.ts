@@ -4,6 +4,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Users } from './users.entity';
 import { ApiProperty } from '@nestjs/swagger';
@@ -85,4 +86,8 @@ export class UserProfile extends BaseEntity {
   })
   @Column({ type: 'date', nullable: true })
   dateOfBirth: Date | null;
+
+  @OneToOne(() => Users, (user) => user.profile)
+  @JoinColumn()
+  user: Users;
 }
