@@ -2,17 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Admin } from '../admin/entities/admin.entity';
-import { Students } from '../student/entities/students.entity';
 import { Users } from '../user/entities/users.entity';
 import { UserProfile } from '../user/entities/UserProfile.entity';
-import { StudentService } from '../student/service/students.service';
-import { StudentController } from '../student/controller/students.controller';
 import { UserController } from '../user/controller/users.controller';
 import { UserService } from '../user/service/users.service';
-import { StudentProfileService } from '../user/service/UserProfile.service';
 import { AdminService } from '../admin/service/admin.service';
 import { AdminController } from '../admin/controller/admin.controller';
-import { UserProfileController } from '../user/controller/UserProfile.controller';
 import { AuthService } from './service/auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -32,19 +27,11 @@ import { DataHubApiService } from '../user/service/datahub.service';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, Users, Students, UserProfile, OtpEntity]),
+    TypeOrmModule.forFeature([Admin, Users, UserProfile, OtpEntity]),
   ],
-  controllers: [
-    StudentController,
-    UserController,
-    AdminController,
-    UserProfileController,
-    AuthController,
-  ],
+  controllers: [UserController, AdminController, AuthController],
   providers: [
-    StudentService,
     UserService,
-    StudentProfileService,
     AdminService,
     AuthService,
     JwtStrategy,
