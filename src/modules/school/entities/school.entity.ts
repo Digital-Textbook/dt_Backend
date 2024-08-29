@@ -2,10 +2,10 @@ import {
   BaseEntity,
   Column,
   Entity,
-  ManyToOne,
   PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 import { Dzongkhag } from './dzongkhag.entity';
 
 @Entity('school')
@@ -15,21 +15,14 @@ export class School extends BaseEntity {
   })
   id: string;
 
-  @ApiProperty({
-    description: 'Name of dzongkhag is required!',
-    example: 'Thimphu',
-  })
   @Column({
-    type: 'varchar',
-    length: 50,
+    comment: 'Subject name of each class',
   })
-  name: string;
+  schoolName: string;
 
-  @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ApiProperty({ description: 'Created date' })
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
@@ -38,5 +31,6 @@ export class School extends BaseEntity {
   updatedAt: Date;
 
   @ManyToOne(() => Dzongkhag, (dzongkhag) => dzongkhag.school)
+  @JoinColumn({ name: 'dzongkhagId' })
   dzongkhag: Dzongkhag;
 }
