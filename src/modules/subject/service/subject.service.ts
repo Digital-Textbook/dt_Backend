@@ -29,4 +29,50 @@ export class SubjectService {
 
     return await this.subjectRepository.save(subject);
   }
+
+  async deleteSubject(id: string) {
+    const subject = await this.subjectRepository.findOne({
+      where: { id },
+    });
+
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+
+    await this.subjectRepository.delete(id);
+
+    return { msg: 'Subject successfully deleted!' };
+  }
+
+  async updateSubject(id: string, name: string) {
+    const subject = await this.subjectRepository.findOne({
+      where: { id },
+      relations: ['class'],
+    });
+
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found!`);
+    }
+
+    subject.subjectName = name;
+
+    await this.subjectRepository.save(subject);
+
+    return { msg: 'Subject successfully updated!', subject };
+  }
+
+  async getSubjectByClass(id: string) {
+    const subject = await this.subjectRepository.find({
+      where: { class: { id: id } },
+      //   relations: ['class'],
+    });
+
+    if (!subject) {
+      throw new NotFoundException(
+        `Class with ID ${id} and related subject not found!`,
+      );
+    }
+
+    return { msg: 'Subject with class Id successfully found!', subject };
+  }
 }
