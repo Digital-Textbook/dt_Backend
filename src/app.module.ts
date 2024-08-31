@@ -14,6 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import { AdminModule } from './modules/admin/admin.module';
 import { SubjectModule } from './modules/subject/subject.module';
 import { SchoolModule } from './modules/school/school.module';
+import { MinioClientModule } from './minio-client/minio-client.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { SchoolModule } from './modules/school/school.module';
     PassportModule,
     SubjectModule,
     SchoolModule,
+    MinioClientModule,
+    FileUploadModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

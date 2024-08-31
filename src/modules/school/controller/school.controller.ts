@@ -45,12 +45,21 @@ export class SchoolController {
     return await this.schoolService.updateSchool(id, data);
   }
 
-  @Get(':id')
+  @Get('/dzongkhag/:id')
   @ApiOkResponse({ description: 'School successfully found.' })
   @ApiBadRequestResponse({
     description: 'School not found. Please try again',
   })
-  async getSubject(@Param('id') id: string) {
+  async getSchoolByDzongkhag(@Param('id') id: string) {
     return await this.schoolService.getSchoolByDzongkhag(id);
+  }
+
+  @Get('/id')
+  @ApiOkResponse({ description: 'School successfully found.' })
+  @ApiBadRequestResponse({
+    description: 'School not found. Please try again',
+  })
+  async getSchoolById(@Param('id') id: string) {
+    return await this.schoolService.getSchoolById(id);
   }
 }

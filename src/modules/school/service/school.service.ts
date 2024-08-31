@@ -79,4 +79,16 @@ export class SchoolService {
 
     return schools;
   }
+
+  async getSchoolById(id: string) {
+    const school = await this.schoolRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!school) {
+      throw new NotFoundException(`School with ID ${id} not found`);
+    }
+
+    return school;
+  }
 }
