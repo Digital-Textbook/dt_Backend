@@ -12,8 +12,14 @@ export class FileUploadService {
     file: BufferedFile,
     uploadSingleFileDto: UploadSingleFileDto,
   ) {
-    // Handle file upload and any additional metadata here
-    return await this.minioClientService.upload(file);
+    // // Handle file upload and any additional metadata here
+    // return await this.minioClientService.upload(file);
+    let uploaded_image = await this.minioClientService.upload(file);
+
+    return {
+      image_url: uploaded_image.url,
+      message: 'Successfully uploaded to MinIO S3',
+    };
   }
 
   async uploadMany(

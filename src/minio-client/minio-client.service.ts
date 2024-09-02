@@ -39,13 +39,7 @@ export class MinioClientService {
     const fileBuffer = file.buffer;
 
     try {
-      // Adjust the putObject call to match the expected parameters
-      await this.client.putObject(
-        baseBucket,
-        fileName,
-        fileBuffer,
-        // If metadata is not supported, remove this parameter
-      );
+      await this.client.putObject(baseBucket, fileName, fileBuffer);
 
       return {
         url: `${config.MINIO_ENDPOINT}:${config.MINIO_PORT}/${config.MINIO_BUCKET}/${filename}`,

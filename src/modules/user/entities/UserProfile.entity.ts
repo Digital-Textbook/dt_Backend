@@ -38,8 +38,8 @@ export class UserProfile extends BaseEntity {
   })
   mobileNo: string;
 
-  @Column({ type: 'varchar', length: 100, unique: true })
-  email: string;
+  //   @Column({ type: 'varchar', length: 100, unique: true })
+  //   email: string;
 
   @ApiProperty({
     description: 'Class is required',

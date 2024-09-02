@@ -1,7 +1,7 @@
 export const config = {
   MINIO_ENDPOINT: 'localhost',
   MINIO_PORT: 9000,
-  MINIO_ACCESSKEY: '0qkIV26kPREzWXm4w9Ec',
-  MINIO_SECRETKEY: '3XNOzSbETXw1r48FwOjjGcyDB62c2lHguGYfooZW',
-  MINIO_BUCKET: 'minio',
+  MINIO_ACCESSKEY: 'yuadhistra',
+  MINIO_SECRETKEY: 'Dt_backend#2024',
+  MINIO_BUCKET: 'profile',
 };
