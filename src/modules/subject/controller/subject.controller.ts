@@ -55,4 +55,9 @@ export class SubjectController {
   async getSubject(@Param('id') id: string) {
     return await this.subjectService.getSubjectByClass(id);
   }
+
+  @Get('/allSubject')
+  async getAllSubject() {
+    return await this.subjectService.getAllSubject();
+  }
 }

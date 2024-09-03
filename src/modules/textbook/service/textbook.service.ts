@@ -58,15 +58,30 @@ export class TextbookService {
     }
   }
 
-  async getTextbook(id: string) {
-    const textbook = await this.textbookRepository.findOne({
-      where: { id: id },
-    });
+  ///////////////////// GET PNG OR PDF ///////////////////
+  //   async getFile(bucket: string, filename: string, res: Response): Promise<void> {
+  //     try {
+  //       const fileStream = await this.minioClientService.getObject(bucket, filename);
+  //       const fileExtension = filename.split('.').pop();
 
-    if (!textbook) {
-      throw new NotFoundException(`Textbook with ID ${id} not found!`);
-    }
+  //       let contentType = 'application/octet-stream'; // Default content type
 
-    return textbook;
-  }
+  //       if (fileExtension === 'png') {
+  //         contentType = 'image/png';
+  //       } else if (fileExtension === 'pdf') {
+  //         contentType = 'application/pdf';
+  //       }
+
+  //       res.set({
+  //         'Content-Type': contentType,
+  //         'Content-Disposition': `inline; filename="${filename}"`,
+  //       });
+
+  //       fileStream.pipe(res);
+  //     } catch (error) {
+  //       throw new Error(`Error retrieving file: ${error.message}`);
+  //     }
+  //   }
+
+  //////////////////// DELETE PNG OR PDF ///////////////
 }

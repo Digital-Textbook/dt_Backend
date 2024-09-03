@@ -8,6 +8,7 @@ import {
   Get,
   UploadedFiles,
   UseInterceptors,
+  Res,
 } from '@nestjs/common';
 
 import {
@@ -24,6 +25,7 @@ import {
   FileFieldsInterceptor,
   FilesInterceptor,
 } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @Controller('textbook')
 @ApiTags('textbook')
@@ -59,10 +61,9 @@ export class TextbookController {
     );
   }
 
-  @Get('/:id')
-  @ApiOkResponse({ description: 'Textbook successfully uploaded!' })
-  @ApiBadRequestResponse({ description: 'Textbook cannot be uploaded!' })
-  async getTextbook(@Param('id') id: string) {
-    return await this.textbookService.getTextbook(id);
-  }
+  //   @Get(':filename')
+  //   async getFile(@Param('filename') filename: string, @Res() res: Response) {
+  //     const bucket = 'textbook';
+  //     await this.textbookService.getFile(bucket, filename, res);
+  //   }
 }
