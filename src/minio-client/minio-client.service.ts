@@ -93,6 +93,10 @@ export class MinioClientService {
     }
   }
 
+  async getObject(bucket: string, filename: string) {
+    return await this.client.getObject(bucket, filename);
+  }
+
   async delete(objectName: string, baseBucket: string = this.baseBucket) {
     try {
       await this.client.removeObject(baseBucket, objectName);

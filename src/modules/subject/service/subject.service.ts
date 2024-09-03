@@ -75,4 +75,16 @@ export class SubjectService {
 
     return { msg: 'Subject with class Id successfully found!', subject };
   }
+
+  async getAllSubject() {
+    const subjects = await this.subjectRepository.find({
+      relations: ['class'],
+    });
+
+    if (!subjects || subjects.length === 0) {
+      throw new NotFoundException('There are no subjects in the database!');
+    }
+
+    return subjects;
+  }
 }

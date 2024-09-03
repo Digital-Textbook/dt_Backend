@@ -4,12 +4,14 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { UserProfile } from './UserProfile.entity';
 import { OtpEntity } from './otp.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
+import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -99,4 +101,7 @@ export class Users extends BaseEntity {
 
   @OneToOne(() => UserProfile, (profile) => profile.user)
   profile: UserProfile;
+
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  bookmark: Bookmark;
 }

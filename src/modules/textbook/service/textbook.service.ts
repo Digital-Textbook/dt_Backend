@@ -11,12 +11,14 @@ import { Textbook } from '../entities/textbook.entity';
 import { CreateTextbookDto } from '../dto/textbook.dto';
 import { BufferedFile } from 'src/minio-client/file.model';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
+import { Subject } from 'src/modules/subject/entities/subject.entity';
 
 @Injectable()
 export class TextbookService {
   constructor(
     @InjectRepository(Textbook)
     private textbookRepository: Repository<Textbook>,
+    @InjectRepository(Subject) private subjectRepository: Repository<Subject>,
     private minioClientService: MinioClientService,
   ) {}
   async createTextbook(
@@ -31,6 +33,17 @@ export class TextbookService {
       const uploadFileResult =
         await this.minioClientService.uploadTextbook(textbookFile);
 
+      const subject = await this.subjectRepository.findOne({
+        where: { id: data.subjectID },
+      });
+
+      if (!subject) {
+        throw new HttpException(
+          'Invalid subject ID provided',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const newTextbook = {
         author: data.author,
         chapter: data.chapter,
@@ -39,7 +52,7 @@ export class TextbookService {
         edition: data.edition,
         coverUrl: uploadImageResult.url,
         textbookUrl: uploadFileResult.url,
-        subjectId: data.subjectID,
+        subject,
       };
 
       const textbook = await this.textbookRepository.save(newTextbook);
@@ -58,15 +71,30 @@ export class TextbookService {
     }
   }
 
-  async getTextbook(id: string) {
-    const textbook = await this.textbookRepository.findOne({
-      where: { id: id },
-    });
+  ///////////////////// GET PNG OR PDF ///////////////////
+  //   async getFile(bucket: string, filename: string, res: Response): Promise<void> {
+  //     try {
+  //       const fileStream = await this.minioClientService.getObject(bucket, filename);
+  //       const fileExtension = filename.split('.').pop();
 
-    if (!textbook) {
-      throw new NotFoundException(`Textbook with ID ${id} not found!`);
-    }
+  //       let contentType = 'application/octet-stream'; // Default content type
 
-    return textbook;
-  }
+  //       if (fileExtension === 'png') {
+  //         contentType = 'image/png';
+  //       } else if (fileExtension === 'pdf') {
+  //         contentType = 'application/pdf';
+  //       }
+
+  //       res.set({
+  //         'Content-Type': contentType,
+  //         'Content-Disposition': `inline; filename="${filename}"`,
+  //       });
+
+  //       fileStream.pipe(res);
+  //     } catch (error) {
+  //       throw new Error(`Error retrieving file: ${error.message}`);
+  //     }
+  //   }
+
+  //////////////////// DELETE PNG OR PDF ///////////////
 }

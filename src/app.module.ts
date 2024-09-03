@@ -17,6 +17,7 @@ import { SchoolModule } from './modules/school/school.module';
 import { MinioClientModule } from './minio-client/minio-client.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { TextbookModule } from './modules/textbook/textbook.module';
+import { BookmarkModule } from './modules/bookmark/bookmark.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { TextbookModule } from './modules/textbook/textbook.module';
       }),
     }),
     TextbookModule,
+    BookmarkModule,
   ],
   controllers: [AppController],
   providers: [AppService],
