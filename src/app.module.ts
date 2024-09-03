@@ -16,6 +16,7 @@ import { SubjectModule } from './modules/subject/subject.module';
 import { SchoolModule } from './modules/school/school.module';
 import { MinioClientModule } from './minio-client/minio-client.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
+import { TextbookModule } from './modules/textbook/textbook.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
         },
       }),
     }),
+    TextbookModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -12,8 +12,6 @@ export class FileUploadService {
     file: BufferedFile,
     uploadSingleFileDto: UploadSingleFileDto,
   ) {
-    // // Handle file upload and any additional metadata here
-    // return await this.minioClientService.upload(file);
     let uploaded_image = await this.minioClientService.upload(file);
 
     return {
@@ -22,11 +20,20 @@ export class FileUploadService {
     };
   }
 
+  async uploadTextbook(textbook: BufferedFile) {
+    let upload_textbook =
+      await this.minioClientService.uploadTextbook(textbook);
+
+    return {
+      textbook_url: upload_textbook.url,
+      message: 'Textbook successfully uploaded to MinIO S3',
+    };
+  }
+
   async uploadMany(
     files: { image1?: BufferedFile[]; image2?: BufferedFile[] },
     uploadMultipleFilesDto: UploadMultipleFilesDto,
   ) {
-    // Handle multiple file uploads and additional metadata here
     const responses = [];
     if (files.image1) {
       responses.push(await this.minioClientService.upload(files.image1[0]));

@@ -88,12 +88,10 @@ export class Users extends BaseEntity {
 
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
   @ApiProperty({ description: 'Created date' })
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
   @OneToOne(() => OtpEntity, (otp) => otp.user)
