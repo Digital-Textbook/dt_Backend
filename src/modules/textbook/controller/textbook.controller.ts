@@ -21,11 +21,7 @@ import {
 import { TextbookService } from '../service/textbook.service';
 import { CreateTextbookDto } from '../dto/textbook.dto';
 import { BufferedFile } from 'src/minio-client/file.model';
-import {
-  FileFieldsInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
-import { Response } from 'express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('textbook')
 @ApiTags('textbook')

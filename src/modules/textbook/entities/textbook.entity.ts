@@ -5,9 +5,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
+import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
 
 @Entity('textbook')
 export class Textbook extends BaseEntity {
@@ -90,4 +92,7 @@ export class Textbook extends BaseEntity {
   @ManyToOne(() => Subject, (subjects) => subjects.textbooks)
   @JoinColumn()
   subject: Subject;
+
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.textbook)
+  bookmark: Bookmark;
 }

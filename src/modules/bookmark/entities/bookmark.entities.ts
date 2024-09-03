@@ -7,7 +7,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Subject } from 'src/modules/subject/entities/subject.entity';
+import { Users } from 'src/modules/user/entities/users.entity';
+import { Textbook } from 'src/modules/textbook/entities/textbook.entity';
 
 @Entity('bookmark')
 export class Bookmark extends BaseEntity {
@@ -50,10 +51,10 @@ export class Bookmark extends BaseEntity {
 
   @ApiProperty({ description: 'Time spent accessing the book in seconds' })
   @Column({
-    type: 'bigint',
+    type: 'int',
     comment: 'Total time used to access the book in seconds',
   })
-  totalTime: bigint;
+  totalTime: number;
 
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -62,4 +63,12 @@ export class Bookmark extends BaseEntity {
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
+
+  @ManyToOne(() => Users, (user) => user.bookmark)
+  @JoinColumn()
+  user: Users;
+
+  @ManyToOne(() => Textbook, (textbook) => textbook.bookmark)
+  @JoinColumn()
+  textbook: Textbook;
 }
