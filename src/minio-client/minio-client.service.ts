@@ -8,6 +8,7 @@ import { config } from './config';
 export class MinioClientService {
   private readonly logger: Logger;
   private readonly baseBucket = config.MINIO_BUCKET;
+  private readonly imageBucket = config.MINIO_BUCKET_TEXTBOOKDETAILS;
 
   public get client() {
     return this.minio.client;
@@ -17,29 +18,69 @@ export class MinioClientService {
     this.logger = new Logger('MinioClientService');
   }
 
-  public async upload(
-    file: BufferedFile,
-    baseBucket: string = this.baseBucket,
-  ) {
-    if (!(file.mimetype.includes('jpeg') || file.mimetype.includes('png'))) {
-      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
-    }
-
-    let temp_filename = Date.now().toString();
+  private generateFileName(originalName: string): string {
+    let tempFilename = Date.now().toString();
     let hashedFileName = crypto
       .createHash('md5')
-      .update(temp_filename)
+      .update(tempFilename)
       .digest('hex');
-    let ext = file.originalname.substring(
-      file.originalname.lastIndexOf('.'),
-      file.originalname.length,
-    );
-    let filename = hashedFileName + ext;
-    const fileName: string = `${filename}`;
+    let ext = originalName.substring(originalName.lastIndexOf('.'));
+    return hashedFileName + ext;
+  }
+
+  private validateFile(file: BufferedFile, allowedMimeTypes: string[]): void {
+    if (!file || !file.originalname || !file.mimetype || !file.buffer) {
+      console.log('File object:', file);
+      throw new HttpException('Invalid file', HttpStatus.BAD_REQUEST);
+    }
+
+    const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
+    const mimeType = file.mimetype.split('/').pop()?.toLowerCase();
+
+    if (
+      !allowedMimeTypes.includes(fileExtension) ||
+      !allowedMimeTypes.includes(mimeType)
+    ) {
+      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  public async upload(
+    file: BufferedFile,
+    baseBucket: string = this.imageBucket,
+  ) {
+    const allowedMimeTypes = ['jpeg', 'png', 'jpg'];
+
+    this.validateFile(file, allowedMimeTypes);
+
+    const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;
 
     try {
-      await this.client.putObject(baseBucket, fileName, fileBuffer);
+      await this.client.putObject(baseBucket, filename, fileBuffer);
+
+      return {
+        url: `${config.MINIO_ENDPOINT}:${config.MINIO_PORT}/${config.MINIO_BUCKET}/${filename}`,
+      };
+    } catch (error) {
+      this.logger.error('Upload failed', error.stack);
+      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  public async uploadTextbook(
+    file: BufferedFile,
+    baseBucket: string = this.baseBucket,
+  ) {
+    const allowedMimeTypes = ['jpeg', 'png', 'pdf', 'epub'];
+
+    this.validateFile(file, allowedMimeTypes);
+
+    const filename = this.generateFileName(file.originalname);
+    const fileBuffer = file.buffer;
+
+    try {
+      await this.client.putObject(baseBucket, filename, fileBuffer);
 
       return {
         url: `${config.MINIO_ENDPOINT}:${config.MINIO_PORT}/${config.MINIO_BUCKET}/${filename}`,

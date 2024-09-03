@@ -16,19 +16,23 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
+  ApiOkResponse,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { FileUploadService } from './file-upload.service';
 import { BufferedFile } from 'src/minio-client/file.model';
 import { UploadSingleFileDto } from './dto/single-file.dto';
 import { UploadMultipleFilesDto } from './dto/multiple-file.dto';
+import { TextbookDto } from './dto/textbook-file.dto';
 
 @ApiTags('file-upload')
 @Controller('file-upload')
 export class FileUploadController {
   constructor(private fileUploadService: FileUploadService) {}
 
-  @Post('single')
-  @ApiOperation({ summary: 'Upload a single image' })
+  @Post('singleImage')
+  @ApiOkResponse({ description: 'Image successfully uploaded!' })
+  @ApiBadRequestResponse({ description: 'Image cannot be uploaded!' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Single image file',
@@ -45,8 +49,20 @@ export class FileUploadController {
     );
   }
 
+  @Post('textbook-upload')
+  @ApiOkResponse({ description: 'Textbook successfully uploaded!' })
+  @ApiBadRequestResponse({ description: 'Textbook cannot be uploaded!' })
+  @ApiBody({
+    description: 'Textbook file',
+    type: TextbookDto,
+  })
+  @UseInterceptors(FileInterceptor('textbook'))
+  @ApiConsumes('multipart/form-data')
+  async uploadFile(@UploadedFile() textbook: BufferedFile) {
+    return await this.fileUploadService.uploadTextbook(textbook);
+  }
+
   @Post('many')
-  @ApiOperation({ summary: 'Upload multiple images' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Multiple image files',

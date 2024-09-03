@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Class } from '../../class/entities/class.entity';
 import { PastQuestionPaper } from '../../pastQuestion/entities/pastquestionpaper.entity';
+import { Textbook } from 'src/modules/textbook/entities/textbook.entity';
 
 @Entity('subject')
 export class Subject extends BaseEntity {
@@ -36,4 +37,7 @@ export class Subject extends BaseEntity {
 
   @OneToMany(() => PastQuestionPaper, (question) => question.subject)
   question: PastQuestionPaper;
+
+  @OneToMany(() => Textbook, (textbooks) => textbooks.subject)
+  textbooks: Textbook;
 }
