@@ -56,11 +56,13 @@ export class MinioClientService {
     const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;
 
+    console.log('Filename: ', filename);
+
     try {
       await this.client.putObject(baseBucket, filename, fileBuffer);
 
       return {
-        url: `${config.MINIO_ENDPOINT}:${config.MINIO_PORT}/${config.MINIO_BUCKET}/${filename}`,
+        url: `${config.MINIO_ENDPOINT}:${config.MINIO_PORT}/${config.MINIO_BUCKET_TEXTBOOKDETAILS}/${filename}`,
       };
     } catch (error) {
       this.logger.error('Upload failed', error.stack);

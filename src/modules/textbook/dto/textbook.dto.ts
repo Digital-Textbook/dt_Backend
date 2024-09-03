@@ -28,7 +28,7 @@ export class CreateTextbookDto {
 
   @ApiProperty({
     description: 'Summary of textbook.',
-    example: '12',
+    example: 'Introduction of History',
   })
   @IsNotEmpty({ message: 'Summary of textbook is required!' })
   @IsString({ message: 'Summary must be string' })
@@ -41,4 +41,25 @@ export class CreateTextbookDto {
   @IsNotEmpty({ message: 'Edition is required!' })
   @IsString({ message: 'Edition must be string' })
   edition: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Image of textbook',
+  })
+  textbookImage: any;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'Content of textbook',
+  })
+  textbookFile: any;
+
+  @ApiProperty({
+    description: 'Subject ID',
+  })
+  @IsNotEmpty({ message: 'Subject ID is required!' })
+  @IsString({ message: 'Subject ID be string' })
+  subjectID: string;
 }
