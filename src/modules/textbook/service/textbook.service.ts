@@ -5,13 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 
 import { Textbook } from '../entities/textbook.entity';
 import { CreateTextbookDto } from '../dto/textbook.dto';
 import { BufferedFile } from 'src/minio-client/file.model';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
+import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
 
 @Injectable()
 export class TextbookService {
@@ -118,5 +119,55 @@ export class TextbookService {
       throw new Error(`Error retrieving image: ${error.message}`);
     }
   }
+
+  async getAllTextbook() {
+    const textbook = await this.textbookRepository.find({
+      relations: ['subject'],
+    });
+
+    if (!textbook || textbook.length === 0) {
+      throw new NotFoundException('Textbook not found in database!');
+    }
+
+    return textbook;
+  }
+
+  //////////////////// UPDATE TEXTBOOK ///////////////
+  async updateTextbook(
+    id: string,
+    data: UpdateTextbookDto,
+    textbookImage: BufferedFile | null,
+    textbookFile: BufferedFile | null,
+  ) {
+    const textbook = await this.textbookRepository.findOne({
+      where: { id: id },
+    });
+    if (!textbook) {
+      throw new NotFoundException(`Textbook with ID ${id} not found!`);
+    }
+
+    if (textbookFile) {
+      const uploadedFile =
+        await this.minioClientService.uploadTextbook(textbookFile);
+      textbook.textbookUrl = uploadedFile.url;
+    }
+
+    if (textbookImage) {
+      const uploadedImage = await this.minioClientService.upload(textbookImage);
+      textbook.coverUrl = uploadedImage.url;
+    }
+
+    Object.assign(textbook, data);
+    await this.textbookRepository.save(textbook);
+    return { msg: 'Textbook updated successfully!', textbook };
+  }
   //////////////////// DELETE PNG OR PDF ///////////////
+
+  async deleteTextbook(id: string): Promise<void> {
+    const result = await this.textbookRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Textbook with ID ${id} not found!`);
+    }
+  }
 }
