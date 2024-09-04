@@ -9,6 +9,8 @@ import {
   UploadedFiles,
   UseInterceptors,
   Res,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 
 import {
@@ -57,9 +59,28 @@ export class TextbookController {
     );
   }
 
-  //   @Get(':filename')
-  //   async getFile(@Param('filename') filename: string, @Res() res: Response) {
-  //     const bucket = 'textbook';
-  //     await this.textbookService.getFile(bucket, filename, res);
-  //   }
+  // @Get('/:filename')
+  // async getFile(@Param('filename') filename: string, @Res() res: Response) {
+  //   const bucket = 'textbook';
+  //   await this.textbookService.getImage(bucket, filename, res);
+  // }
+
+  @Get('textbook-cover/:id')
+  async getBookCover(@Param('id') id: string) {
+    try {
+      const result = await this.textbookService.getImage(id);
+
+      // Check if coverUrl is present in the result
+      if (result.coverUrl) {
+        return result; // Return the result with the coverUrl
+      } else {
+        throw new HttpException(result.msg, HttpStatus.NOT_FOUND); // Handle the case where coverUrl is not found
+      }
+    } catch (error) {
+      throw new HttpException(
+        `Error retrieving image: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

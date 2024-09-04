@@ -96,5 +96,27 @@ export class TextbookService {
   //     }
   //   }
 
+  async getImage(id: string): Promise<{ msg: string; coverUrl?: string }> {
+    try {
+      const textbook = await this.textbookRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!textbook) {
+        throw new NotFoundException(`Textbook Cover with ID ${id} not found!`);
+      }
+
+      if (textbook.coverUrl) {
+        return {
+          msg: 'Textbook cover URL found!',
+          coverUrl: textbook.coverUrl,
+        };
+      } else {
+        return { msg: 'Textbook cover URL not found!' };
+      }
+    } catch (error) {
+      throw new Error(`Error retrieving image: ${error.message}`);
+    }
+  }
   //////////////////// DELETE PNG OR PDF ///////////////
 }
