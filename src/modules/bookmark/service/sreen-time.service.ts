@@ -18,7 +18,6 @@ export class ScreenTimeService {
 
   async createScreenTime(data: CreateScreenTimeDto) {
     try {
-      console.log('Data: ', data);
       const { accessTime, endTime, userId, textbookId } = data;
 
       const start = new Date(accessTime);
@@ -34,9 +33,6 @@ export class ScreenTimeService {
       const textbook = await this.textbookRepository.findOne({
         where: { id: textbookId },
       });
-
-      console.log('User: ', user);
-      console.log('Textbook: ', textbook);
 
       if (!user || !textbook) {
         throw new Error('Invalid user or textbook ID provided');
