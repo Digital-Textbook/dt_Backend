@@ -9,14 +9,14 @@ import { Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { Admin } from '../entities/admin.entity';
+
 import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { RoleType } from 'src/constants/role-type';
 
-import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-import { HttpService } from '@nestjs/axios';
+import { Admin } from '../entities/admin.entity';
+import { AdminOtp } from '../entities/admin-otp.entity';
 
 @Injectable()
 export class AdminService {
@@ -24,9 +24,8 @@ export class AdminService {
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
-    private readonly configService: ConfigService,
-    private httpService: HttpService,
     private readonly mailerService: MailerService,
+    @InjectRepository(AdminOtp) private otpRepository: Repository<AdminOtp>,
   ) {}
 
   async getAllAdmin(): Promise<Admin[]> {
@@ -135,114 +134,116 @@ export class AdminService {
   }
 
   ///////////////////////////////////////////////////////////////////
-  //   async forgotPasswordByEmail(email: string) {
-  //     const admin = await this.adminRepository.findOne({
-  //       where: { email: email, status: 'active' },
-  //     });
+  async forgotPasswordByEmail(email: string) {
+    const admin = await this.adminRepository.findOne({
+      where: { email: email, status: 'active' },
+    });
 
-  //     if (admin) {
-  //       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  //       const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    if (admin) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-  //       const existingUser = await this.adminRepository.findOne({
-  //         where: {
-  //           email: admin.email,
-  //           status: 'active',
-  //         },
-  //       });
-  //       let otpEntity = await this.otpRepository.findOne({
-  //         where: {
-  //           admin: { id: existingUser.id },
-  //         },
-  //       });
+      const hashedOtp = await bcrypt.hash(otp, 10);
 
-  //       if (otpEntity) {
-  //         otpEntity.otp = otp;
-  //         otpEntity.otpExpiresAt = otpExpiresAt;
-  //         otpEntity.updatedAt = new Date(Date.now());
-  //       } else {
-  //         otpEntity = this.otpRepository.create({
-  //           otp,
-  //           otpExpiresAt,
-  //           admin: existingUser,
-  //         });
-  //       }
+      const existingUser = await this.adminRepository.findOne({
+        where: {
+          email: admin.email,
+          status: 'active',
+        },
+      });
+      let otpEntity = await this.otpRepository.findOne({
+        where: {
+          admin: { id: existingUser.id },
+        },
+      });
 
-  //       await this.otpRepository.save(otpEntity);
+      if (otpEntity) {
+        otpEntity.otp = hashedOtp;
+        otpEntity.otpExpiresAt = otpExpiresAt;
+        otpEntity.updatedAt = new Date(Date.now());
+      } else {
+        otpEntity = this.otpRepository.create({
+          otp: hashedOtp,
+          otpExpiresAt,
+          admin: existingUser,
+        });
+      }
 
-  //       await this.mailerService.sendMail({
-  //         to: existingUser.email,
-  //         subject: 'Your OTP Code',
-  //         template: './otp',
-  //         context: {
-  //           otp,
-  //           name: existingUser.name,
-  //         },
-  //       });
+      await this.otpRepository.save(otpEntity);
 
-  //       return {
-  //         msg: 'OTP successfully send',
-  //         admin,
-  //       };
-  //     } else {
-  //       throw new NotFoundException(
-  //         'Admin is not verified with the provided email',
-  //       );
-  //     }
-  //   }
+      await this.mailerService.sendMail({
+        to: existingUser.email,
+        subject: 'Your OTP Code',
+        template: './admin-otp',
+        context: {
+          otp,
+          name: existingUser.name,
+        },
+      });
 
-  //   async resetPasswordByEmail(id: string, password: string) {
-  //     const admin = await this.adminRepository.findOne({
-  //       where: { id: id },
-  //     });
+      return {
+        msg: 'OTP successfully send',
+        admin,
+      };
+    } else {
+      throw new NotFoundException(
+        'Admin is not verified with the provided email',
+      );
+    }
+  }
 
-  //     if (!admin) {
-  //       throw new NotFoundException('User ID not found');
-  //     }
+  async resetPasswordByEmail(id: string, password: string) {
+    const admin = await this.adminRepository.findOne({
+      where: { id: id },
+    });
 
-  //     console.log('Password: ', password);
-  //     const hashedPassword = await bcrypt.hash(password, this.saltRounds);
-  //     admin.password = hashedPassword;
+    if (!admin) {
+      throw new NotFoundException('User ID not found');
+    }
 
-  //     console.log('Hashed: ', hashedPassword);
+    const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+    admin.password = hashedPassword;
 
-  //     await this.adminRepository.save(admin);
+    await this.adminRepository.save(admin);
 
-  //     return {
-  //       msg: 'Password is updated for this user',
-  //       admin,
-  //     };
-  //   }
+    return {
+      msg: 'Password is updated for this user',
+      admin,
+    };
+  }
 
-  //   /////////////////////////////////////////////////////////////
-  //   async verifyByEmail(id: string, otp: string): Promise<string> {
-  //     const admin = await this.adminRepository.findOne({
-  //       where: { id: id },
-  //     });
+  /////////////////////////////////////////////////////////////
+  async verifyByEmail(id: string, otp: string) {
+    const admin = await this.adminRepository.findOne({
+      where: { id: id },
+    });
 
-  //     if (!admin) {
-  //       throw new NotFoundException('Admin ID not found');
-  //     }
+    if (!admin) {
+      throw new NotFoundException(`Admin ID ${id} not found`);
+    }
 
-  //     const otpEntry = await this.otpRepository.findOne({
-  //       where: {
-  //         admin: { id: id },
-  //       },
-  //     });
+    const otpEntry = await this.otpRepository.findOne({
+      where: {
+        admin: { id: id },
+      },
+    });
 
-  //     if (!otpEntry) {
-  //       throw new BadRequestException('Invalid OTP');
-  //     }
+    if (!otpEntry) {
+      throw new BadRequestException('Invalid OTP');
+    }
 
-  //     if (otpEntry.otpExpiresAt < new Date()) {
-  //       throw new BadRequestException('OTP has expired');
-  //     }
+    if (otpEntry.otpExpiresAt < new Date()) {
+      throw new BadRequestException('OTP has expired');
+    }
 
-  //     admin.status = 'active';
-  //     await this.adminRepository.save(admin);
+    const isOtpValid = await bcrypt.compare(otp, otpEntry.otp);
+    if (!isOtpValid) {
+      throw new BadRequestException('Invalid OTP');
+    }
 
-  //     await this.otpRepository.delete(otpEntry.id);
+    admin.status = 'active';
+    await this.adminRepository.save(admin);
 
-  //     return `OTP is verified.`;
-  //   }
+    return { msg: `OTP is verified.`, admin };
+  }
 }
