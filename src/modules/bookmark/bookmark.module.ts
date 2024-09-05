@@ -5,9 +5,10 @@ import { Bookmark } from './entities/bookmark.entities';
 import { BookmarkController } from './controller/bookmark.controller';
 import { Textbook } from '../textbook/entities/textbook.entity';
 import { Users } from '../user/entities/users.entity';
+import { ScreenTime } from './entities/screen-time.entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Bookmark, Textbook, Users])],
+  imports: [TypeOrmModule.forFeature([Bookmark, Textbook, Users, ScreenTime])],
   providers: [BookmarkService],
   controllers: [BookmarkController],
 })

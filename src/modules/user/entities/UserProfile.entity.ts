@@ -11,7 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from 'src/constants/gender';
 import { ClassEnum } from 'src/constants/class-enum';
 
-@Entity('user_profile')
+@Entity('userProfile')
 export class UserProfile extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', {
     comment: 'This is the unique ID',

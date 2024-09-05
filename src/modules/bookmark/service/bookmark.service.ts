@@ -18,17 +18,16 @@ export class BookmarkService {
 
   async createBookmark(createBookmarkDto: CreateBookmarkDto) {
     try {
-      const { notes, pages, startTime, endTime, userId, textbookId } =
-        createBookmarkDto;
+      const { pageNumber, userId, textbookId } = createBookmarkDto;
 
-      const start = new Date(startTime);
-      const end = new Date(endTime);
+      //   const start = new Date(startTime);
+      //   const end = new Date(endTime);
 
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        throw new Error('Invalid start or end time provided');
-      }
+      //   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      //     throw new Error('Invalid start or end time provided');
+      //   }
 
-      const totalTime = Math.floor((end.getTime() - start.getTime()) / 1000);
+      //   const totalTime = Math.floor((end.getTime() - start.getTime()) / 1000);
 
       const user = await this.userRepository.findOne({ where: { id: userId } });
       const textbook = await this.textbookRepository.findOne({
@@ -39,12 +38,18 @@ export class BookmarkService {
         throw new Error('Invalid user or textbook ID provided');
       }
 
+      //   const newBookmark = this.bookmarkRepository.create({
+      //     notes,
+      //     pages,
+      //     startTime: start,
+      //     endTime: end,
+      //     totalTime,
+      //     user,
+      //     textbook,
+      //   });
+
       const newBookmark = this.bookmarkRepository.create({
-        notes,
-        pages,
-        startTime: start,
-        endTime: end,
-        totalTime,
+        pageNumber,
         user,
         textbook,
       });

@@ -163,11 +163,25 @@ export class TextbookService {
   }
   //////////////////// DELETE PNG OR PDF ///////////////
 
-  async deleteTextbook(id: string): Promise<void> {
+  async deleteTextbook(id: string) {
     const result = await this.textbookRepository.delete(id);
 
     if (result.affected === 0) {
       throw new NotFoundException(`Textbook with ID ${id} not found!`);
     }
+
+    return { msg: 'Textbook deleted successfully!' };
+  }
+
+  //////////////////// GET TEXTBOOK BY ID ///////////////
+  async getTextbookById(id: string) {
+    const textbook = await this.textbookRepository.findOne({
+      where: { id: id },
+    });
+    if (!textbook) {
+      throw new NotFoundException(`Textbook with ID ${id} not found!`);
+    }
+
+    return textbook;
   }
 }

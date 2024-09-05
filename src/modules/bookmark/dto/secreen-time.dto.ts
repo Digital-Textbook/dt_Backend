@@ -1,14 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsDate, IsUUID } from 'class-validator';
 
-export class CreateBookmarkDto {
+export class CreateScreenTimeDto {
   @ApiProperty({
-    description: 'Last page accessed',
-    example: '80',
+    description: 'Start time of the session',
+    example: '2023-09-01T10:00:00Z',
   })
-  @IsNotEmpty({ message: 'Page number is required' })
-  @IsString({ message: 'Page number must be a string' })
-  pageNumber: string;
+  @IsNotEmpty({ message: 'Start time is required' })
+  @IsDate({ message: 'Start time must be a valid date' })
+  accessTime: Date;
+
+  @ApiProperty({
+    description: 'End time of the session',
+    example: '2023-09-01T11:00:00Z',
+  })
+  @IsNotEmpty({ message: 'End time is required' })
+  @IsDate({ message: 'End time must be a valid date' })
+  endTime: Date;
 
   @ApiProperty({
     description: 'User ID',

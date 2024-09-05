@@ -12,6 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
 import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
+import { ScreenTime } from 'src/modules/bookmark/entities/screen-time.entities';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -104,4 +105,7 @@ export class Users extends BaseEntity {
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmark: Bookmark;
+
+  @OneToMany(() => ScreenTime, (screenTime) => screenTime.user)
+  screenTime: ScreenTime;
 }
