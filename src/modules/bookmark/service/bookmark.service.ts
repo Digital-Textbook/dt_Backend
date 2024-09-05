@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bookmark } from '../entities/bookmark.entities';
@@ -29,13 +34,25 @@ export class BookmarkService {
         throw new Error('Invalid user or textbook ID provided');
       }
 
-      const newBookmark = this.bookmarkRepository.create({
-        pageNumber,
-        user,
-        textbook,
+      const existingBookmark = await this.bookmarkRepository.findOne({
+        where: {
+          user: { id: userId },
+          textbook: { id: textbookId },
+        },
       });
 
-      return await this.bookmarkRepository.save(newBookmark);
+      if (existingBookmark) {
+        existingBookmark.pageNumber = pageNumber;
+        return await this.bookmarkRepository.save(existingBookmark);
+      } else {
+        const newBookmark = this.bookmarkRepository.create({
+          pageNumber,
+          user,
+          textbook,
+        });
+
+        return await this.bookmarkRepository.save(newBookmark);
+      }
     } catch (error) {
       console.error('Error creating bookmark: ', error);
       throw new HttpException(
@@ -43,5 +60,46 @@ export class BookmarkService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async updateBookmark(id: string, pageNumber: string) {
+    const existingBookmark = await this.bookmarkRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!existingBookmark) {
+      throw new HttpException(
+        'Failed to upadte bookmark',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    existingBookmark.pageNumber = pageNumber;
+    await this.bookmarkRepository.save(existingBookmark);
+
+    return { msg: 'Bookmark updated successfully!', existingBookmark };
+  }
+
+  async deleteBookmark(id: string) {
+    const result = await this.bookmarkRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Bookmark with ID ${id} not found!`);
+    }
+
+    return { msg: 'Bookmark deleted successfully!' };
+  }
+
+  async getBookmarkByUserId(userId: string) {
+    const userBookmark = await this.bookmarkRepository.find({
+      where: {
+        user: { id: userId },
+      },
+    });
+
+    if (!userBookmark || userBookmark.length === 0) {
+      throw new NotFoundException(`User with ID ${userId} have no bookmark!`);
+    }
+    return userBookmark;
   }
 }
