@@ -95,7 +95,7 @@ export class Textbook extends BaseEntity {
   @JoinColumn()
   subject: Subject;
 
-  @OneToOne(() => Bookmark, (bookmark) => bookmark.textbook)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.textbook)
   bookmark: Bookmark;
 
   @OneToMany(() => ScreenTime, (screenTime) => screenTime.textbook)

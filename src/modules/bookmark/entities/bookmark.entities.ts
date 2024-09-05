@@ -39,7 +39,7 @@ export class Bookmark extends BaseEntity {
   @JoinColumn()
   user: Users;
 
-  @OneToOne(() => Textbook, (textbook) => textbook.bookmark)
+  @ManyToOne(() => Textbook, (textbook) => textbook.bookmark)
   @JoinColumn()
   textbook: Textbook;
 }

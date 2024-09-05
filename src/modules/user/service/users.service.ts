@@ -69,7 +69,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException('User ID not found');
+      throw new NotFoundException('User not found');
     }
 
     const otpEntry = await this.otpRepository.findOne({
@@ -78,9 +78,15 @@ export class UserService {
       },
     });
 
-    console.log('OTP Entity: ', otpEntry);
-
     if (!otpEntry) {
+      throw new BadRequestException('No OTP entry found');
+    }
+
+    console.log('Stored OTP (hashed):', otpEntry.otp);
+    console.log('Provided OTP:', otp);
+
+    const isValidOtp = await bcrypt.compare(otp, otpEntry.otp);
+    if (!isValidOtp) {
       throw new BadRequestException('Invalid OTP');
     }
 
@@ -104,6 +110,11 @@ export class UserService {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
+      const hashedOtp = await bcrypt.hash(otp, 10);
+
+      console.log('OTP: ', otp);
+      console.log('Hashed OTP: ', hashedOtp);
+
       const existingUser = await this.usersRepository.findOne({
         where: {
           email: user.email,
@@ -117,12 +128,12 @@ export class UserService {
       });
 
       if (otpEntity) {
-        otpEntity.otp = otp;
+        otpEntity.otp = hashedOtp;
         otpEntity.otpExpiresAt = otpExpiresAt;
         otpEntity.updatedAt = new Date(Date.now());
       } else {
         otpEntity = this.otpRepository.create({
-          otp,
+          otp: hashedOtp,
           otpExpiresAt,
           user: existingUser,
         });
@@ -161,11 +172,8 @@ export class UserService {
       throw new NotFoundException('User ID not found');
     }
 
-    console.log('Password: ', password);
     const hashedPassword = await bcrypt.hash(password, this.saltRounds);
     user.password = hashedPassword;
-
-    console.log('Hashed: ', hashedPassword);
 
     await this.usersRepository.save(user);
 
@@ -267,6 +275,8 @@ export class UserService {
 
     const newOtp = await this.generateOtp();
 
+    const hashedOtp = await bcrypt.hash(newOtp.otp, 10);
+
     let otpEntity = await this.otpRepository.findOne({
       where: {
         user: { id: user.id },
@@ -274,12 +284,12 @@ export class UserService {
     });
 
     if (otpEntity) {
-      otpEntity.otp = newOtp.otp;
+      otpEntity.otp = hashedOtp;
       otpEntity.otpExpiresAt = newOtp.expiresAt;
       otpEntity.updatedAt = new Date(Date.now());
     } else {
       otpEntity = this.otpRepository.create({
-        otp: newOtp.otp,
+        otp: hashedOtp,
         otpExpiresAt: newOtp.expiresAt,
         user: user,
       });

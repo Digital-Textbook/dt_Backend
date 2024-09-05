@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { RoleType } from 'src/constants/role-type';
 import { ApiProperty } from '@nestjs/swagger';
+import { AdminOtp } from './admin-otp.entity';
 
 @Entity('admin')
 export class Admin extends BaseEntity {
@@ -70,4 +71,7 @@ export class Admin extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
+
+  @OneToOne(() => AdminOtp, (adminOtp) => adminOtp.admin)
+  adminOtp: AdminOtp;
 }

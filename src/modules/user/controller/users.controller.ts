@@ -21,11 +21,11 @@ export class UserController {
     return await this.userService.verifyByEmail(id, otp);
   }
 
-  @Post('/forgot-password')
+  @Post('/forgot-password/:email')
   @ApiOkResponse({ description: 'OTP is successfully send.' })
   @ApiBadRequestResponse({ description: 'OTP cannot be send.' })
-  async forgotPasswordByEmail(@Body() data: CreateForgotPasswordDto) {
-    return await this.userService.forgotPasswordByEmail(data.email);
+  async forgotPasswordByEmail(@Param('email') email: string) {
+    return await this.userService.forgotPasswordByEmail(email);
   }
 
   @Post(':id/reset-password/:otp')

@@ -2,7 +2,6 @@ import { Controller, Post, Body } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
-  ApiConsumes,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';

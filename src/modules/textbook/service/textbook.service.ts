@@ -177,11 +177,33 @@ export class TextbookService {
   async getTextbookById(id: string) {
     const textbook = await this.textbookRepository.findOne({
       where: { id: id },
+      relations: ['subject', 'subject.class'],
     });
+
+    // const textbook = await this.textbookRepository
+    // .createQueryBuilder('textbook')
+    // .leftJoinAndSelect('textbook.subject', 'subject')   // Join the subject relation
+    // .leftJoinAndSelect('subject.class', 'class')        // Join the class relation through subject
+    // .where('textbook.id = :id', { id })
+    // .getOne();
+
     if (!textbook) {
       throw new NotFoundException(`Textbook with ID ${id} not found!`);
     }
+    const className = textbook.subject?.class?.class || 'N/A';
 
-    return textbook;
+    return {
+      id: textbook.id,
+      author: textbook.author,
+      chapter: textbook.chapter,
+      totalPages: textbook.totalPages,
+      summary: textbook.summary,
+      edition: textbook.edition,
+      coverUrl: textbook.coverUrl,
+      textbookUrl: textbook.textbookUrl,
+      createdAt: textbook.createdAt,
+      updatedAt: textbook.updatedAt,
+      class: className,
+    };
   }
 }

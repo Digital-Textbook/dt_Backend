@@ -16,6 +16,7 @@ import { AuthController } from './controller/auth.controller';
 import { OtpEntity } from '../user/entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
 import { DataHubApiService } from '../user/service/datahub.service';
+import { AdminOtp } from '../admin/entities/admin-otp.entity';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { DataHubApiService } from '../user/service/datahub.service';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, Users, UserProfile, OtpEntity]),
+    TypeOrmModule.forFeature([Admin, Users, UserProfile, OtpEntity, AdminOtp]),
   ],
   controllers: [UserController, AdminController, AuthController],
   providers: [
