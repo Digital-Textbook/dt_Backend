@@ -11,8 +11,7 @@ import {
   Res,
   HttpException,
   HttpStatus,
-  UsePipes,
-  ValidationPipe,
+  NotFoundException,
 } from '@nestjs/common';
 
 import {
@@ -27,12 +26,18 @@ import { CreateTextbookDto } from '../dto/textbook.dto';
 import { BufferedFile } from 'src/minio-client/file.model';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
+import { MinioClientService } from 'src/minio-client/minio-client.service';
+import { Response } from 'express';
 
 @Controller('textbook')
 @ApiTags('textbook')
 export class TextbookController {
-  constructor(private textbookService: TextbookService) {}
+  constructor(
+    private textbookService: TextbookService,
+    private minioClientService: MinioClientService,
+  ) {}
 
+  //////////////// Get All Textbook ///////////////////////
   @Get('/')
   @ApiOkResponse({ description: 'Textbook found!' })
   @ApiBadRequestResponse({ description: 'Textbook not found!' })
@@ -40,6 +45,7 @@ export class TextbookController {
     return await this.textbookService.getAllTextbook();
   }
 
+  //////////////// Create Textbook ///////////////////////
   @Post('/')
   @ApiOkResponse({ description: 'Textbook successfully uploaded!' })
   @ApiBadRequestResponse({ description: 'Textbook cannot be uploaded!' })
@@ -69,6 +75,7 @@ export class TextbookController {
     );
   }
 
+  //////////////// Updated Textbook By ID ///////////////////////
   @Patch('/:id')
   @ApiOkResponse({ description: 'Textbook successfully updated!' })
   @ApiBadRequestResponse({ description: 'Textbook cannot be updated!' })
@@ -100,11 +107,20 @@ export class TextbookController {
     );
   }
 
+  //////////////// Delete Textbook By ID ///////////////////////
   @Delete('/:id')
   @ApiOkResponse({ description: 'Textbook deleted successfully!' })
   @ApiBadRequestResponse({ description: 'Textbook cannot be deleted!' })
   async deleteTextbook(@Param('id') id: string): Promise<void> {
     await this.textbookService.deleteTextbook(id);
+  }
+
+  //////////////// Get textbook By ID///////////////////////
+  @Get(':id/textbook')
+  @ApiOkResponse({ description: 'Textbook successfully found!' })
+  @ApiBadRequestResponse({ description: 'Textbook not found!' })
+  async getTextbook(@Param('id') id: string) {
+    return await this.textbookService.getTextbookById(id);
   }
 
   @Get('textbook-cover/:id')
@@ -122,6 +138,50 @@ export class TextbookController {
         `Error retrieving image: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  //////////////// Download textbook By ID///////////////////////
+  @Get(':id/download')
+  async downloadTextbook(@Param('id') id: string, @Res() res: Response) {
+    const textbook = await this.textbookService.getTextbookById(id);
+
+    if (!textbook || !textbook.textbookUrl) {
+      throw new NotFoundException(
+        'Textbook not found or no associated file URL.',
+      );
+    }
+
+    const url = textbook.textbookUrl;
+
+    const match = url.match(/\/([^\/]+)\/(.+)$/);
+    if (!match) {
+      throw new NotFoundException('Invalid URL format.');
+    }
+    // (/ for // in url), \/([^\/]+) for bucketname, (.+)$/ for filename
+
+    const bucketName = match[1];
+    const fileName = match[2];
+
+    try {
+      const fileStream = await this.minioClientService.client.getObject(
+        bucketName,
+        fileName,
+      );
+
+      if (!fileStream) {
+        throw new NotFoundException('File not found in storage.');
+      }
+
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${fileName}"`,
+      );
+
+      fileStream.pipe(res);
+    } catch (error) {
+      throw new NotFoundException(`Error downloading file: ${error.message}`);
     }
   }
 }

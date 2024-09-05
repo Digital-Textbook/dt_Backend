@@ -6,10 +6,12 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
+import { ScreenTime } from 'src/modules/bookmark/entities/screen-time.entities';
 
 @Entity('textbook')
 export class Textbook extends BaseEntity {
@@ -93,6 +95,9 @@ export class Textbook extends BaseEntity {
   @JoinColumn()
   subject: Subject;
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.textbook)
+  @OneToOne(() => Bookmark, (bookmark) => bookmark.textbook)
   bookmark: Bookmark;
+
+  @OneToMany(() => ScreenTime, (screenTime) => screenTime.textbook)
+  screenTime: ScreenTime;
 }

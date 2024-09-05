@@ -4,6 +4,7 @@ import { BufferedFile } from './file.model';
 import * as crypto from 'crypto';
 import { config } from './config';
 import { Stream } from 'stream';
+import * as Minio from 'minio';
 
 @Injectable()
 export class MinioClientService {
@@ -17,7 +18,6 @@ export class MinioClientService {
 
   constructor(private readonly minio: MinioService) {
     this.logger = new Logger('MinioClientService');
-    // this.setBucketPolicies(); // Set bucket policies on initialization
   }
 
   private generateFileName(originalName: string): string {
@@ -137,58 +137,4 @@ export class MinioClientService {
       );
     }
   }
-
-  //   private async setBucketPolicies() {
-  //     const buckets = [this.baseBucket, this.imageBucket];
-
-  //     const policy = {
-  //       Version: '2012-10-17',
-  //       Statement: [
-  //         {
-  //           Effect: 'Allow',
-  //           Principal: {
-  //             AWS: ['*'],
-  //           },
-  //           Action: [
-  //             's3:ListBucketMultipartUploads',
-  //             's3:GetBucketLocation',
-  //             's3:ListBucket',
-  //           ],
-  //           Resource: [],
-  //         },
-  //         {
-  //           Effect: 'Allow',
-  //           Principal: {
-  //             AWS: ['*'],
-  //           },
-  //           Action: [
-  //             's3:PutObject',
-  //             's3:AbortMultipartUpload',
-  //             's3:DeleteObject',
-  //             's3:GetObject',
-  //             's3:ListMultipartUploadParts',
-  //           ],
-  //           Resource: [],
-  //         },
-  //       ],
-  //     };
-
-  //     for (const bucketName of buckets) {
-  //       try {
-  //         console.log('Bucket Name: ', bucketName);
-  //         policy.Statement[0].Resource = [`arn:aws:s3:::${bucketName}`];
-  //         policy.Statement[1].Resource = [`arn:aws:s3:::${bucketName}/*`];
-
-  //         await this.client.setBucketPolicy(bucketName, JSON.stringify(policy));
-
-  //         this.logger.log(`Bucket policy set for ${bucketName}`);
-  //       } catch (err) {
-  //         this.logger.error(`Failed to set policy for ${bucketName}`, err.stack);
-  //         throw new HttpException(
-  //           `Failed to set bucket policy for ${bucketName}`,
-  //           HttpStatus.INTERNAL_SERVER_ERROR,
-  //         );
-  //       }
-  //     }
-  //   }
 }
