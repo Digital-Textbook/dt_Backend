@@ -64,12 +64,8 @@ export class UserProfile extends BaseEntity {
     description: 'Gender must be MALE or FEMALE',
     example: 'MALE',
   })
-  @Column({
-    type: 'enum',
-    enum: Gender,
-    comment: 'Gender must be MALE or FEMALE',
-  })
-  gender: Gender;
+  @Column()
+  gender: string;
 
   @ApiProperty({
     description: 'Date of Birth, can be null',

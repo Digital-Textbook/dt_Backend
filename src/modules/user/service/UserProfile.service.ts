@@ -16,9 +16,12 @@ export class UserProfileService {
     @InjectRepository(School) private schoolRepository: Repository<School>,
   ) {}
 
-  async createUserProfile(userProfileData: CreateUserProfileDto) {
+  async createUserProfile(
+    userId: string,
+    userProfileData: CreateUserProfileDto,
+  ) {
     const existingUser = await this.userRepository.findOne({
-      where: { id: userProfileData.userId },
+      where: { id: userId },
     });
     const existingSchool = await this.schoolRepository.findOne({
       where: { id: userProfileData.schoolId },

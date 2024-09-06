@@ -48,23 +48,12 @@ export class CreateUserProfileDto {
   @IsString({ message: 'Class must be a string' })
   class: string;
 
-  @IsNotEmpty({ message: 'School is required' })
-  @IsString({ message: 'School must be a string' })
-  schoolId: string;
-
-  @IsNotEmpty({ message: 'Dzongkhag is required' })
-  @IsString({ message: 'Dzongkhag must be a string' })
-  dzongkhagId: string;
-
   @ApiProperty({
     description: 'User gender must be Male or Female',
     example: 'Male',
   })
   @IsNotEmpty({ message: 'Gender is required' })
-  @IsEnum(Gender, {
-    message: 'Gender must be Male or Female!',
-  })
-  gender: Gender;
+  gender: string;
 
   @ApiProperty({
     description:
@@ -81,7 +70,27 @@ export class CreateUserProfileDto {
   )
   dateOfBirth: string;
 
-  @IsNotEmpty({ message: 'User ID is required' })
-  @IsString({ message: 'User Id must be UUID' })
-  userId: string;
+  //   @ApiProperty({
+  //     description: 'User Id is required',
+  //     example: 'User Id',
+  //   })
+  //   @IsNotEmpty({ message: 'User ID is required' })
+  //   @IsString({ message: 'User Id must be UUID' })
+  //   userId: string;
+
+  @ApiProperty({
+    description: 'School Id is required!',
+    example: 'School Id',
+  })
+  @IsNotEmpty({ message: 'School is required!' })
+  @IsString({ message: 'School must be a string' })
+  schoolId: string;
+
+  @ApiProperty({
+    description: 'Dzongkhag Id is required!',
+    example: 'Dzongkhag Id',
+  })
+  @IsNotEmpty({ message: 'Dzongkhag is required' })
+  @IsString({ message: 'Dzongkhag must be a string' })
+  dzongkhagId: string;
 }

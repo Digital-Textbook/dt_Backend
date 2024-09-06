@@ -13,6 +13,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { DataHubApiService } from './service/datahub.service';
 import { School } from '../school/entities/school.entity';
 import { Dzongkhag } from '../school/entities/dzongkhag.entity';
+import { CommonController } from 'src/common/controller/common.controller';
+import { CommonService } from 'src/common/service/common.service';
 
 @Module({
   imports: [
@@ -32,7 +34,12 @@ import { Dzongkhag } from '../school/entities/dzongkhag.entity';
       Dzongkhag,
     ]),
   ],
-  controllers: [UserController, UserProfileController],
-  providers: [UserService, DataHubApiService, UserProfileService],
+  controllers: [UserController, UserProfileController, CommonController],
+  providers: [
+    UserService,
+    DataHubApiService,
+    UserProfileService,
+    CommonService,
+  ],
 })
 export class UserModule {}

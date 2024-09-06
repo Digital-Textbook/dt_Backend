@@ -29,12 +29,15 @@ import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
 export class UserProfileController {
   constructor(private userProfileService: UserProfileService) {}
 
-  @Post('/')
-  async createProfile(@Body() userProfileData: CreateUserProfileDto) {
-    return await this.userProfileService.createUserProfile(userProfileData);
+  @Post('/:id/user-profile')
+  async createProfile(
+    @Param('id') id: string,
+    @Body() userProfileData: CreateUserProfileDto,
+  ) {
+    return await this.userProfileService.createUserProfile(id, userProfileData);
   }
 
-  @Get('/:id/profile')
+  @Get('/:id/user-profile')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully fetched!' })
   @ApiBadRequestResponse({ description: 'User profile not found!' })
@@ -44,7 +47,7 @@ export class UserProfileController {
     return await this.userProfileService.getProfileById(id);
   }
 
-  @Patch('/:id/profile')
+  @Patch('/:id/user-profile')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully updated!' })
   @ApiBadRequestResponse({ description: 'User profile cannot updated!' })
