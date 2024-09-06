@@ -116,7 +116,7 @@ export class TextbookController {
   }
 
   //////////////// Get textbook By ID///////////////////////
-  @Get(':id/textbook')
+  @Get(':id/textbook-details')
   @ApiOkResponse({ description: 'Textbook successfully found!' })
   @ApiBadRequestResponse({ description: 'Textbook not found!' })
   async getTextbook(@Param('id') id: string) {
