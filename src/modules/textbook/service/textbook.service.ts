@@ -224,4 +224,28 @@ export class TextbookService {
       subjectName: subjectName,
     };
   }
+
+  ////////////////////// GET TEXTBOOK INFORMATION /////////////
+  async getTextbookInfo(id: string) {
+    try {
+      const textbookInfo = await this.textbookRepository.findOne({
+        where: { id: id },
+      });
+      if (!textbookInfo) {
+        throw new NotFoundException(`No Textbook found with ID ${id}!`);
+      }
+      if (textbookInfo.textbookUrl) {
+        return {
+          msg: 'Textbook information found!',
+          coverUrl: textbookInfo.textbookUrl,
+        };
+      } else {
+        return { msg: 'Textbook Information not found!' };
+      }
+    } catch (error) {
+      throw new Error(
+        `Error retrieving textbook information: ${error.message}`,
+      );
+    }
+  }
 }

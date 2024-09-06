@@ -5,11 +5,14 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Users } from './users.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from 'src/constants/gender';
 import { ClassEnum } from 'src/constants/class-enum';
+import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
+import { School } from 'src/modules/school/entities/school.entity';
 
 @Entity('userProfile')
 export class UserProfile extends BaseEntity {
@@ -18,12 +21,20 @@ export class UserProfile extends BaseEntity {
   })
   id: string;
 
+  @ApiProperty({
+    description: 'Name is required',
+    example: 'John Doe',
+  })
   @Column({
     type: 'varchar',
     length: 50,
   })
   name: string;
 
+  @ApiProperty({
+    description: 'Student code must match the pattern 201.00345.33.0042',
+    example: '201.00345.33.0042',
+  })
   @Column({
     type: 'varchar',
     unique: true,
@@ -31,6 +42,10 @@ export class UserProfile extends BaseEntity {
   })
   studentCode: string;
 
+  @ApiProperty({
+    description: 'Mobile number is required',
+    example: '17542312',
+  })
   @Column({
     type: 'varchar',
     unique: true,
@@ -38,35 +53,12 @@ export class UserProfile extends BaseEntity {
   })
   mobileNo: string;
 
-  //   @Column({ type: 'varchar', length: 100, unique: true })
-  //   email: string;
-
   @ApiProperty({
     description: 'Class is required',
     example: '12',
   })
-  @Column({
-    type: 'enum',
-    enum: ClassEnum,
-    comment: 'Class is required',
-  })
-  class: ClassEnum;
-
-  @Column({
-    type: 'varchar',
-    length: 255,
-  })
-  schoolId: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
-  updatedAt: Date;
+  @Column()
+  class: string;
 
   @ApiProperty({
     description: 'Gender must be MALE or FEMALE',
@@ -87,7 +79,25 @@ export class UserProfile extends BaseEntity {
   @Column({ type: 'date', nullable: true })
   dateOfBirth: Date | null;
 
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
+
   @OneToOne(() => Users, (user) => user.profile)
   @JoinColumn()
   user: Users;
+
+  @ManyToOne(() => Dzongkhag, (dzongkhag) => dzongkhag.userProfile)
+  @JoinColumn()
+  dzongkhag: Dzongkhag;
+
+  @ManyToOne(() => School, (school) => school.userProfile)
+  @JoinColumn()
+  school: School;
 }

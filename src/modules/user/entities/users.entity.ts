@@ -89,6 +89,10 @@ export class Users extends BaseEntity {
   })
   password: string;
 
+  @ApiProperty({ description: 'Is Logged In' })
+  @Column({ type: 'boolean', default: false })
+  isLoggedIn: boolean;
+
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

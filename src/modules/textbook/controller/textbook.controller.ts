@@ -123,7 +123,9 @@ export class TextbookController {
     return await this.textbookService.getTextbookById(id);
   }
 
-  @Get('textbook-cover/:id')
+  @Get('/:id/textbook-cover')
+  @ApiOkResponse({ description: 'Textbook cover Url successfully found!' })
+  @ApiBadRequestResponse({ description: 'Textbook cover Url not found!' })
   async getBookCover(@Param('id') id: string) {
     try {
       const result = await this.textbookService.getImage(id);
@@ -143,6 +145,8 @@ export class TextbookController {
 
   //////////////// Download textbook By ID///////////////////////
   @Get(':id/download')
+  @ApiOkResponse({ description: 'Textbook successfully downloaded!' })
+  @ApiBadRequestResponse({ description: 'Textbook cannot download!' })
   async downloadTextbook(@Param('id') id: string, @Res() res: Response) {
     const textbook = await this.textbookService.getTextbookById(id);
 
@@ -183,5 +187,12 @@ export class TextbookController {
     } catch (error) {
       throw new NotFoundException(`Error downloading file: ${error.message}`);
     }
+  }
+
+  @Get('/:id/textbook-info')
+  @ApiOkResponse({ description: 'Textbook Url successfully found!' })
+  @ApiBadRequestResponse({ description: 'Textbook Url not found!' })
+  async getTextbookInfo(@Param('id') id: string) {
+    return await this.textbookService.getTextbookInfo(id);
   }
 }

@@ -7,6 +7,8 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { School } from './school.entity';
+import { Users } from 'src/modules/user/entities/users.entity';
+import { UserProfile } from 'src/modules/user/entities/UserProfile.entity';
 
 @Entity('dzongkhag')
 export class Dzongkhag extends BaseEntity {
@@ -39,4 +41,7 @@ export class Dzongkhag extends BaseEntity {
 
   @OneToMany(() => School, (school) => school.dzongkhag)
   school: School[];
+
+  @OneToMany(() => UserProfile, (userProfile) => userProfile.dzongkhag)
+  userProfile: UserProfile[];
 }

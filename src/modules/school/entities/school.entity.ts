@@ -5,8 +5,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Dzongkhag } from './dzongkhag.entity';
+import { UserProfile } from 'src/modules/user/entities/UserProfile.entity';
 
 @Entity('school')
 export class School extends BaseEntity {
@@ -31,6 +33,9 @@ export class School extends BaseEntity {
   updatedAt: Date;
 
   @ManyToOne(() => Dzongkhag, (dzongkhag) => dzongkhag.school)
-  @JoinColumn({ name: 'dzongkhagId' })
+  @JoinColumn()
   dzongkhag: Dzongkhag;
+
+  @OneToMany(() => UserProfile, (userProfile) => userProfile.school)
+  userProfile: UserProfile;
 }
