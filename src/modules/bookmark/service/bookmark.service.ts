@@ -102,4 +102,33 @@ export class BookmarkService {
     }
     return userBookmark;
   }
+
+  async getAllBookmark() {
+    const bookmarks = await this.bookmarkRepository.find();
+
+    if (!bookmarks || bookmarks.length === 0) {
+      throw new NotFoundException('Bookmarks not found!');
+    }
+
+    return bookmarks;
+  }
+
+  async getBookmarkById(id: string) {
+    const bookmark = await this.bookmarkRepository.findOne({
+      where: { id: id },
+      relations: ['textbook', 'textbook.subject'],
+    });
+    if (!bookmark) {
+      throw new NotFoundException(`Bookmark with ID ${id} not found!`);
+    }
+    const subjectName = bookmark.textbook?.subject?.subjectName || 'N/A';
+    const coverUrl = bookmark.textbook?.coverUrl || 'N/A';
+
+    return {
+      id: bookmark.id,
+      subjectName: subjectName,
+      pageNumber: bookmark.pageNumber,
+      coverUrl: coverUrl,
+    };
+  }
 }

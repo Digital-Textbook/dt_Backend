@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Param,
   Post,
   UsePipes,
   ValidationPipe,
@@ -9,7 +10,7 @@ import {
 import { AuthService } from '../service/auth.service';
 import { LoginUserDto } from '../dto/loginUser.dto';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -18,6 +19,8 @@ export class AuthController {
 
   @Post('/login')
   @UsePipes(ValidationPipe)
+  @ApiOkResponse({ description: 'User successfully login!' })
+  @ApiBadRequestResponse({ description: 'User cannot login!' })
   async signin(
     @Body() signinData: LoginUserDto,
   ): Promise<{ accessToken: string }> {
@@ -26,9 +29,25 @@ export class AuthController {
 
   @Post('/admin/login')
   @UsePipes(ValidationPipe)
+  @ApiOkResponse({ description: 'Admin successfully login!' })
+  @ApiBadRequestResponse({ description: 'Admin cannot login!' })
   async adminSignIn(
     @Body() adminSignInData: LoginAdminDto,
   ): Promise<{ adminAccessToken }> {
     return await this.authService.adminSignIn(adminSignInData);
+  }
+
+  @Post('/:id/user-logout')
+  @ApiOkResponse({ description: 'User successfully logout!' })
+  @ApiBadRequestResponse({ description: 'User cannot logout!' })
+  async userLogout(@Param('id') id: string) {
+    return await this.authService.userLogOut(id);
+  }
+
+  @Post('/:id/admin-logout')
+  @ApiOkResponse({ description: 'User successfully logout!' })
+  @ApiBadRequestResponse({ description: 'User cannot logout!' })
+  async adminLogout(@Param('id') id: string) {
+    return await this.authService.adminLogOut(id);
   }
 }

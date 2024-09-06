@@ -5,12 +5,16 @@ import { UserProfile } from './entities/UserProfile.entity';
 import { UserController } from './controller/users.controller';
 import { UserProfileController } from './controller/UserProfile.controller';
 import { UserService } from './service/users.service';
-import { StudentProfileService } from './service/UserProfile.service';
+import { UserProfileService } from './service/UserProfile.service';
 import { OtpEntity } from './entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { DataHubApiService } from './service/datahub.service';
+import { School } from '../school/entities/school.entity';
+import { Dzongkhag } from '../school/entities/dzongkhag.entity';
+import { CommonController } from 'src/common/controller/common.controller';
+import { CommonService } from 'src/common/service/common.service';
 
 @Module({
   imports: [
@@ -22,9 +26,20 @@ import { DataHubApiService } from './service/datahub.service';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Users, UserProfile, OtpEntity]),
+    TypeOrmModule.forFeature([
+      Users,
+      UserProfile,
+      OtpEntity,
+      School,
+      Dzongkhag,
+    ]),
   ],
-  controllers: [UserController, UserProfileController],
-  providers: [UserService, DataHubApiService, StudentProfileService],
+  controllers: [UserController, UserProfileController, CommonController],
+  providers: [
+    UserService,
+    DataHubApiService,
+    UserProfileService,
+    CommonService,
+  ],
 })
 export class UserModule {}

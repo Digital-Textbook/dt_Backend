@@ -47,4 +47,14 @@ export class BookmarkController {
   async getBookmarkByUserId(@Param('userId') userId: string) {
     return await this.bookmarkService.getBookmarkByUserId(userId);
   }
+
+  @Get('/')
+  async getAllBookmark() {
+    return await this.bookmarkService.getAllBookmark();
+  }
+
+  @Get('/:id/bookmark-details')
+  async getBookmarkById(@Param('id') id: string) {
+    return await this.bookmarkService.getBookmarkById(id);
+  }
 }

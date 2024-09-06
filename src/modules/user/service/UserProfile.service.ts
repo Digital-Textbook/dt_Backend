@@ -3,13 +3,48 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
+import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
+import { Users } from '../entities/users.entity';
+import { School } from 'src/modules/school/entities/school.entity';
 
 @Injectable()
-export class StudentProfileService {
+export class UserProfileService {
   constructor(
     @InjectRepository(UserProfile)
     private profileRepository: Repository<UserProfile>,
+    @InjectRepository(Users) private userRepository: Repository<Users>,
+    @InjectRepository(School) private schoolRepository: Repository<School>,
   ) {}
+
+  async createUserProfile(
+    userId: string,
+    userProfileData: CreateUserProfileDto,
+  ) {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    const existingSchool = await this.schoolRepository.findOne({
+      where: { id: userProfileData.schoolId },
+    });
+
+    if (!existingUser || !existingSchool) {
+      throw new NotFoundException('Invalid user or School data');
+    }
+
+    const userProfile = {
+      name: userProfileData.name,
+      studentCode: userProfileData.studentCode,
+      mobileNo: userProfileData.mobileNo,
+      class: userProfileData.class,
+      schoolId: existingSchool,
+      gender: userProfileData.gender,
+      dateOfBirth: userProfileData.dateOfBirth,
+      userId: existingUser,
+      dzongkhagId: userProfileData.dzongkhagId,
+    };
+
+    return await this.profileRepository.save(userProfile);
+  }
 
   async getProfileById(id: string): Promise<UserProfile> {
     if (!id) {

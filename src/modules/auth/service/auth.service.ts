@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -36,12 +40,19 @@ export class AuthService {
       throw new UnauthorizedException('Please verify your account');
     }
 
+    if (existingUser.isLoggedIn === true) {
+      throw new ConflictException('User already logged in to the system!');
+    }
+
     if (
       existingUser &&
       (await bcrypt.compare(user.password, existingUser.password))
     ) {
       const payload: JwtPayload = { cidNo: existingUser.cidNo };
       const accessToken: string = await this.jwtService.sign(payload);
+      existingUser.isLoggedIn = true;
+
+      await this.usersRepository.save(existingUser);
       return { accessToken };
     } else {
       throw new UnauthorizedException('Please check your login credentials');
@@ -65,5 +76,36 @@ export class AuthService {
     } else {
       throw new UnauthorizedException('Please check your login credentials');
     }
+  }
+
+  /////////////////////// User And Admin Log Out ////////////////////////////////////
+  async userLogOut(id: string) {
+    const existingUser = await this.usersRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!existingUser) {
+      throw new UnauthorizedException(`User cannot log out`);
+    }
+
+    console.log('Signed User: ', existingUser);
+
+    existingUser.isLoggedIn = false;
+
+    return await this.usersRepository.save(existingUser);
+  }
+
+  async adminLogOut(id: string) {
+    const existingUser = await this.adminRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!existingUser) {
+      throw new UnauthorizedException(`User cannot log out`);
+    }
+
+    existingUser.isLoggedIn = false;
+
+    return await this.adminRepository.save(existingUser);
   }
 }

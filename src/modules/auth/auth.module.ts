@@ -1,6 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { Admin } from '../admin/entities/admin.entity';
 import { Users } from '../user/entities/users.entity';
 import { UserProfile } from '../user/entities/UserProfile.entity';
@@ -17,6 +16,7 @@ import { OtpEntity } from '../user/entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
 import { DataHubApiService } from '../user/service/datahub.service';
 import { AdminOtp } from '../admin/entities/admin-otp.entity';
+import * as session from 'express-session';
 
 @Module({
   imports: [
@@ -38,7 +38,21 @@ import { AdminOtp } from '../admin/entities/admin-otp.entity';
     JwtStrategy,
     DataHubApiService,
   ],
-
   exports: [JwtStrategy, PassportModule],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        session({
+          secret: 'topSecret51',
+          resave: false,
+          saveUninitialized: false,
+          cookie: {
+            maxAge: 3600000,
+          },
+        }),
+      )
+      .forRoutes('*');
+  }
+}

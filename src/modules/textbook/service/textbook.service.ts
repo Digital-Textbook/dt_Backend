@@ -13,6 +13,7 @@ import { BufferedFile } from 'src/minio-client/file.model';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
+import { text } from 'stream/consumers';
 
 @Injectable()
 export class TextbookService {
@@ -121,15 +122,32 @@ export class TextbookService {
   }
 
   async getAllTextbook() {
-    const textbook = await this.textbookRepository.find({
-      relations: ['subject'],
+    const textbooks = await this.textbookRepository.find({
+      relations: ['subject', 'subject.class'],
     });
 
-    if (!textbook || textbook.length === 0) {
-      throw new NotFoundException('Textbook not found in database!');
+    if (!textbooks || textbooks.length === 0) {
+      throw new NotFoundException('No textbooks found in the database!');
     }
 
-    return textbook;
+    return textbooks.map((textbook) => {
+      const className = textbook.subject?.class?.class || 'N/A';
+
+      const subjectName = textbook.subject?.subjectName || 'N/A';
+
+      return {
+        id: textbook.id,
+        author: textbook.author,
+        chapter: textbook.chapter,
+        totalPages: textbook.totalPages,
+        summary: textbook.summary,
+        edition: textbook.edition,
+        coverUrl: textbook.coverUrl,
+        textbookUrl: textbook.textbookUrl,
+        class: className,
+        subjectName: subjectName,
+      };
+    });
   }
 
   //////////////////// UPDATE TEXTBOOK ///////////////
@@ -191,6 +209,7 @@ export class TextbookService {
       throw new NotFoundException(`Textbook with ID ${id} not found!`);
     }
     const className = textbook.subject?.class?.class || 'N/A';
+    const subjectName = textbook.subject?.subjectName || 'N/A';
 
     return {
       id: textbook.id,
@@ -201,9 +220,32 @@ export class TextbookService {
       edition: textbook.edition,
       coverUrl: textbook.coverUrl,
       textbookUrl: textbook.textbookUrl,
-      createdAt: textbook.createdAt,
-      updatedAt: textbook.updatedAt,
       class: className,
+      subjectName: subjectName,
     };
+  }
+
+  ////////////////////// GET TEXTBOOK INFORMATION /////////////
+  async getTextbookInfo(id: string) {
+    try {
+      const textbookInfo = await this.textbookRepository.findOne({
+        where: { id: id },
+      });
+      if (!textbookInfo) {
+        throw new NotFoundException(`No Textbook found with ID ${id}!`);
+      }
+      if (textbookInfo.textbookUrl) {
+        return {
+          msg: 'Textbook information found!',
+          coverUrl: textbookInfo.textbookUrl,
+        };
+      } else {
+        return { msg: 'Textbook Information not found!' };
+      }
+    } catch (error) {
+      throw new Error(
+        `Error retrieving textbook information: ${error.message}`,
+      );
+    }
   }
 }
