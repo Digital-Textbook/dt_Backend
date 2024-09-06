@@ -29,4 +29,23 @@ export class CommonService {
 
     return dzongkhag;
   }
+
+  async getAllSchool(schoolName?: string) {
+    const query = this.schoolRepository
+      .createQueryBuilder('school')
+      .select(['school.id', 'school.schoolName']);
+
+    if (schoolName) {
+      query.where('school.schoolName ILIKE :schoolName', {
+        schoolName: `${schoolName}%`,
+      });
+    }
+
+    const school = await query.getMany();
+
+    if (!school || school.length === 0) {
+      throw new NotFoundException('No school found!');
+    }
+    return school;
+  }
 }
