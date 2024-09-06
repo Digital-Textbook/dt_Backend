@@ -18,7 +18,16 @@ export class CommonController {
   constructor(private commonService: CommonService) {}
 
   @Get('/dzongkhag/:dzongkhagName')
+  @ApiOkResponse({ description: 'Dzongkhag found!' })
+  @ApiBadRequestResponse({ description: 'Dzongkhag not found!' })
   async getAllDzongkhag(@Param('dzongkhagName') dzongkhagName: string) {
     return await this.commonService.getAllDzongkhag(dzongkhagName);
+  }
+
+  @Get('/school/:schoolName')
+  @ApiOkResponse({ description: 'School found!' })
+  @ApiBadRequestResponse({ description: 'School not found!' })
+  async getAllSchool(@Param('schoolName') schoolName: string) {
+    return await this.commonService.getAllSchool(schoolName);
   }
 }
