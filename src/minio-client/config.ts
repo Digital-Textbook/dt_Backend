@@ -5,4 +5,5 @@ export const config = {
   MINIO_SECRETKEY: 'Dt_backend#2024',
   MINIO_BUCKET: 'textbook',
   MINIO_BUCKET_TEXTBOOKDETAILS: 'textbook-details',
+  MINIO_BUCKET_USERPROFILES: 'user-profile',
 };

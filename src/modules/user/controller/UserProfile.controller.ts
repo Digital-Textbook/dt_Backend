@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   UseGuards,
   Post,
+  Delete,
 } from '@nestjs/common';
 import { UserProfileService } from '../service/UserProfile.service';
 import { UserProfile } from '../entities/UserProfile.entity';
@@ -22,8 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
 
-@ApiTags('user')
-@Controller('user')
+@ApiTags('user-profile')
+@Controller('user-profile')
 @UseGuards(AuthGuard())
 @ApiBearerAuth()
 export class UserProfileController {
@@ -41,9 +42,7 @@ export class UserProfileController {
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully fetched!' })
   @ApiBadRequestResponse({ description: 'User profile not found!' })
-  async getProfileById(
-    @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<UserProfile> {
+  async getProfileById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userProfileService.getProfileById(id);
   }
 
@@ -56,5 +55,12 @@ export class UserProfileController {
     @Body() studentData: UpdateProfileDto,
   ) {
     return await this.userProfileService.updateProfile(id, studentData);
+  }
+
+  @Delete('/:id/user-profile')
+  @ApiOkResponse({ description: 'User profile successfully updated!' })
+  @ApiBadRequestResponse({ description: 'User profile cannot updated!' })
+  async deleteUserProfile(@Param('id') id: string) {
+    return await this.userProfileService.deleteProfile(id);
   }
 }

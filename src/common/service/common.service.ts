@@ -33,7 +33,13 @@ export class CommonService {
   async getAllSchool(schoolName?: string) {
     const query = this.schoolRepository
       .createQueryBuilder('school')
-      .select(['school.id', 'school.schoolName']);
+      .leftJoinAndSelect('school.dzongkhag', 'dzongkhag')
+      .select([
+        'school.id',
+        'school.schoolName',
+        'dzongkhag.name',
+        'dzongkhag.id',
+      ]);
 
     if (schoolName) {
       query.where('school.schoolName ILIKE :schoolName', {
@@ -41,11 +47,16 @@ export class CommonService {
       });
     }
 
-    const school = await query.getMany();
+    const schools = await query.getMany();
 
-    if (!school || school.length === 0) {
+    if (!schools || schools.length === 0) {
       throw new NotFoundException('No school found!');
     }
-    return school;
+    return schools.map((school) => ({
+      school: school.schoolName,
+      dzongkhagName: school.dzongkhag.name,
+      schoolId: school.id,
+      dzongkhagId: school.dzongkhag.id,
+    }));
   }
 }

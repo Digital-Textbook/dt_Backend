@@ -11,6 +11,7 @@ export class MinioClientService {
   private readonly logger: Logger;
   private readonly baseBucket = config.MINIO_BUCKET;
   private readonly imageBucket = config.MINIO_BUCKET_TEXTBOOKDETAILS;
+  private readonly profileBucket = config.MINIO_BUCKET_USERPROFILES;
 
   public get client() {
     return this.minio.client;
@@ -135,6 +136,43 @@ export class MinioClientService {
         'Oops Something wrong happened',
         HttpStatus.BAD_REQUEST,
       );
+    }
+  }
+
+  //////////////// USER PROFILE //////////////////////////
+  public async uploadProfile(
+    file: BufferedFile,
+    baseBucket: string = this.profileBucket,
+  ) {
+    const allowedMimeTypes = ['jpeg', 'png', 'jpg'];
+
+    this.validateFile(file, allowedMimeTypes);
+
+    const filename = this.generateFileName(file.originalname);
+    const fileBuffer = file.buffer;
+
+    console.log('Filename: ', filename);
+
+    const metaData = {
+      'Content-Type': file.mimetype,
+      'Content-Disposition': 'inline',
+    };
+
+    try {
+      await this.client.putObject(
+        baseBucket,
+        filename,
+        fileBuffer,
+        fileBuffer.length,
+        metaData,
+      );
+
+      return {
+        url: `${config.MINIO_ENDPOINT}:${config.MINIO_PORT}/${baseBucket}/${filename}`,
+      };
+    } catch (error) {
+      this.logger.error('Upload failed', error.stack);
+      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
     }
   }
 }

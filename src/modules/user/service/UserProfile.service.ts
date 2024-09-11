@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserProfile } from '../entities/UserProfile.entity';
@@ -6,6 +10,7 @@ import { UpdateProfileDto } from '../dto/updateProfile.dto';
 import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
 import { Users } from '../entities/users.entity';
 import { School } from 'src/modules/school/entities/school.entity';
+import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
 
 @Injectable()
 export class UserProfileService {
@@ -14,6 +19,8 @@ export class UserProfileService {
     private profileRepository: Repository<UserProfile>,
     @InjectRepository(Users) private userRepository: Repository<Users>,
     @InjectRepository(School) private schoolRepository: Repository<School>,
+    @InjectRepository(Dzongkhag)
+    private dzongkhagRepository: Repository<Dzongkhag>,
   ) {}
 
   async createUserProfile(
@@ -27,38 +34,67 @@ export class UserProfileService {
       where: { id: userProfileData.schoolId },
     });
 
-    if (!existingUser || !existingSchool) {
-      throw new NotFoundException('Invalid user or School data');
+    const existingDzongkhag = await this.dzongkhagRepository.findOne({
+      where: { id: userProfileData.dzongkhagId },
+    });
+
+    if (!existingUser || !existingSchool || !existingDzongkhag) {
+      throw new NotFoundException('Invalid data provided by the user!');
     }
 
-    const userProfile = {
+    const userProfile = this.profileRepository.create({
       name: userProfileData.name,
       studentCode: userProfileData.studentCode,
       mobileNo: userProfileData.mobileNo,
       class: userProfileData.class,
-      schoolId: existingSchool,
       gender: userProfileData.gender,
       dateOfBirth: userProfileData.dateOfBirth,
-      userId: existingUser,
-      dzongkhagId: userProfileData.dzongkhagId,
-    };
+      user: existingUser,
+      school: existingSchool,
+      dzongkhag: existingDzongkhag,
+    });
 
-    return await this.profileRepository.save(userProfile);
+    await this.profileRepository.save(userProfile);
+
+    return {
+      id: userProfile.id,
+      name: userProfile.name,
+      studentCode: userProfile.studentCode,
+      mobileNo: userProfile.mobileNo,
+      class: userProfile.class,
+      gender: userProfile.gender,
+      dateOfBirth: userProfile.dateOfBirth,
+      userId: userProfile.user.id,
+      schoolName: userProfile.school.schoolName,
+      dzongkhagName: userProfile.dzongkhag.name,
+    };
   }
 
-  async getProfileById(id: string): Promise<UserProfile> {
+  async getProfileById(id: string) {
     if (!id) {
       throw new Error('ID is required');
     }
 
     const profile = await this.profileRepository.findOne({
       where: { id },
+      relations: ['school', 'dzongkhag'],
+      select: ['id', 'name', 'studentCode', 'class', 'gender', 'dateOfBirth'],
     });
 
     if (!profile) {
       throw new NotFoundException(`No matching profile found with ID: ${id}`);
     }
-    return profile;
+
+    return {
+      id: profile.id,
+      name: profile.name,
+      studentCode: profile.studentCode,
+      class: profile.class,
+      gender: profile.gender,
+      dateOfBirth: profile.dateOfBirth,
+      schoolName: profile.school?.schoolName,
+      dzongkhagName: profile.dzongkhag?.name,
+    };
   }
 
   async updateProfile(
@@ -74,5 +110,17 @@ export class UserProfileService {
     Object.assign(profile, userData);
 
     return await this.profileRepository.save(profile);
+  }
+
+  async deleteProfile(id: string) {
+    const result = await this.profileRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new ConflictException(
+        `Error deleting user profile with User ID ${id}!`,
+      );
+    }
+
+    return { msg: 'User profile successfully deleted!' };
   }
 }

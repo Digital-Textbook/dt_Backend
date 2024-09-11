@@ -3,11 +3,9 @@ import {
   IsNotEmpty,
   IsString,
   Length,
-  IsEnum,
   IsDateString,
   IsMobilePhone,
 } from 'class-validator';
-import { Gender } from 'src/constants/gender';
 import { IsStudentCode } from 'src/decorators/field.decorators';
 
 export class CreateUserProfileDto {
