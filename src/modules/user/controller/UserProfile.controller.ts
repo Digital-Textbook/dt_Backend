@@ -22,6 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
+import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
 
 @ApiTags('user-profile')
 @Controller('user-profile')
@@ -58,9 +59,19 @@ export class UserProfileController {
   }
 
   @Delete('/:id/user-profile')
-  @ApiOkResponse({ description: 'User profile successfully updated!' })
-  @ApiBadRequestResponse({ description: 'User profile cannot updated!' })
+  @ApiOkResponse({ description: 'User profile successfully deleted!' })
+  @ApiBadRequestResponse({ description: 'User profile cannot be deleted!' })
   async deleteUserProfile(@Param('id') id: string) {
     return await this.userProfileService.deleteProfile(id);
+  }
+
+  @Patch('/:id/user-profile/setting')
+  @ApiOkResponse({ description: 'User password upadted successfully!' })
+  @ApiBadRequestResponse({ description: 'User password cannot updated!' })
+  async changePassword(
+    @Param('id') id: string,
+    @Body() data: UpdateUserProfilePassword,
+  ) {
+    return await this.userProfileService.changePassword(id, data);
   }
 }

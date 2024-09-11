@@ -1,16 +1,19 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
 import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
 import { Users } from '../entities/users.entity';
 import { School } from 'src/modules/school/entities/school.entity';
 import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
+import * as bcrypt from 'bcrypt';
+import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
 
 @Injectable()
 export class UserProfileService {
@@ -122,5 +125,34 @@ export class UserProfileService {
     }
 
     return { msg: 'User profile successfully deleted!' };
+  }
+
+  async changePassword(id: string, data: UpdateUserProfilePassword) {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: id },
+    });
+    if (!existingUser) {
+      throw new NotFoundException('Invalid user!');
+    }
+    const isPasswordValid = await bcrypt.compare(
+      data.currentPassword,
+      existingUser.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Current password is incorrect!');
+    }
+
+    if (data.newPassword !== data.confirmPassword) {
+      throw new BadRequestException(
+        'New password and confirm password do not match!',
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+    existingUser.password = hashedPassword;
+    await this.userRepository.save(existingUser);
+
+    return { message: 'Password updated successfully!' };
   }
 }
