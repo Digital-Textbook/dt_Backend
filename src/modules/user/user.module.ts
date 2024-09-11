@@ -15,10 +15,12 @@ import { School } from '../school/entities/school.entity';
 import { Dzongkhag } from '../school/entities/dzongkhag.entity';
 import { CommonController } from 'src/common/controller/common.controller';
 import { CommonService } from 'src/common/service/common.service';
+import { MinioClientModule } from 'src/minio-client/minio-client.module';
 
 @Module({
   imports: [
     HttpModule,
+    MinioClientModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'topSecret51',

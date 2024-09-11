@@ -1,27 +1,79 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsEmail, IsArray, IsInt } from 'class-validator';
 
 export class UpdateProfileDto {
+  @ApiProperty({
+    description: 'Name is required!',
+    example: 'Tshering',
+  })
   @IsOptional()
-  @IsString()
-  name?: string;
+  @IsString({ message: 'Name must be a string' })
+  name: string;
 
-  //   @IsOptional()
-  //   @IsEmail()
-  //   email?: string;
-
+  @ApiProperty({
+    description: 'Student code is required!',
+    example: '201.00345.33.0042',
+  })
   @IsOptional()
-  @IsInt()
-  mobile_no?: string;
+  @IsString({
+    message: 'Student code must follow this format: 201.00345.33.0042',
+  })
+  studentCode: string;
 
+  @ApiProperty({
+    description: 'Mobile Number is required!',
+    example: '17654321',
+  })
   @IsOptional()
-  @IsString()
-  roles?: string;
+  @IsString({ message: 'Mobile number must be string' })
+  mobileNo: string;
 
+  @ApiProperty({
+    description: 'Class is required!',
+    example: '10',
+  })
   @IsOptional()
-  @IsArray()
-  permission?: string[];
+  @IsString({ message: 'Class must be a string' })
+  class: string;
 
+  @ApiProperty({
+    description: 'User gender must be Male or Female',
+    example: 'Male',
+  })
   @IsOptional()
-  @IsString()
-  password?: string;
+  gender: string;
+
+  @ApiProperty({
+    description:
+      'Date of birth is required and must be a valid date in the format YYYY-MM-DD.',
+    example: '2000-05-15',
+  })
+  @IsOptional()
+  @IsString({ message: 'Date of birth is required!' })
+  dateOfBirth: Date;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'User profile image',
+    required: false,
+  })
+  @IsOptional()
+  profileImageUrl: any;
+
+  @ApiProperty({
+    description: 'School Id is required!',
+    example: 'School Id',
+  })
+  @IsOptional()
+  @IsString({ message: 'School must be a string' })
+  schoolId: string;
+
+  @ApiProperty({
+    description: 'Dzongkhag Id is required!',
+    example: 'Dzongkhag Id',
+  })
+  @IsOptional()
+  @IsString({ message: 'Dzongkhag must be a string' })
+  dzongkhagId: string;
 }

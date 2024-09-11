@@ -2,12 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsString,
-  Length,
-  IsEnum,
   IsDateString,
   IsMobilePhone,
 } from 'class-validator';
-import { Gender } from 'src/constants/gender';
 import { IsStudentCode } from 'src/decorators/field.decorators';
 
 export class CreateUserProfileDto {
@@ -16,9 +13,6 @@ export class CreateUserProfileDto {
     example: 'Tshering',
   })
   @IsNotEmpty({ message: 'Name is required' })
-  @Length(2, 255, {
-    message: 'Name must be between 2 and 255 characters long',
-  })
   @IsString({ message: 'Name must be a string' })
   name: string;
 
@@ -70,13 +64,13 @@ export class CreateUserProfileDto {
   )
   dateOfBirth: string;
 
-  //   @ApiProperty({
-  //     description: 'User Id is required',
-  //     example: 'User Id',
-  //   })
-  //   @IsNotEmpty({ message: 'User ID is required' })
-  //   @IsString({ message: 'User Id must be UUID' })
-  //   userId: string;
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    description: 'User profile image',
+    required: false,
+  })
+  profileImage: any;
 
   @ApiProperty({
     description: 'School Id is required!',
