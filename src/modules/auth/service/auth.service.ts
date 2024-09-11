@@ -25,7 +25,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async SignIn(user: LoginUserDto): Promise<{ accessToken: string }> {
+  async SignIn(
+    user: LoginUserDto,
+  ): Promise<{ accessToken: string; user: Partial<Users> }> {
     const existingUser = await this.usersRepository.findOne({
       where: { cidNo: user.cidNo },
     });
@@ -44,16 +46,24 @@ export class AuthService {
       throw new ConflictException('User already logged in to the system!');
     }
 
-    if (
-      existingUser &&
-      (await bcrypt.compare(user.password, existingUser.password))
-    ) {
+    const passwordMatches = await bcrypt.compare(
+      user.password,
+      existingUser.password,
+    );
+
+    if (passwordMatches) {
       const payload: JwtPayload = { cidNo: existingUser.cidNo };
       const accessToken: string = await this.jwtService.sign(payload);
-      existingUser.isLoggedIn = true;
 
+      existingUser.isLoggedIn = true;
       await this.usersRepository.save(existingUser);
-      return { accessToken };
+
+      const { password, ...userData } = existingUser;
+
+      return {
+        accessToken,
+        user: userData,
+      };
     } else {
       throw new UnauthorizedException('Please check your login credentials');
     }

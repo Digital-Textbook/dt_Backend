@@ -28,7 +28,6 @@ import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
 import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BufferedFile } from 'src/minio-client/file.model';
-import * as jwt from 'jsonwebtoken';
 
 @ApiTags('user-profile')
 @Controller('user-profile')
