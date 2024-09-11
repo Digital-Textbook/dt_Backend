@@ -73,31 +73,6 @@ export class TextbookService {
     }
   }
 
-  ///////////////////// GET PNG OR PDF ///////////////////
-  //   async getFile(bucket: string, filename: string, res: Response): Promise<void> {
-  //     try {
-  //       const fileStream = await this.minioClientService.getObject(bucket, filename);
-  //       const fileExtension = filename.split('.').pop();
-
-  //       let contentType = 'application/octet-stream'; // Default content type
-
-  //       if (fileExtension === 'png') {
-  //         contentType = 'image/png';
-  //       } else if (fileExtension === 'pdf') {
-  //         contentType = 'application/pdf';
-  //       }
-
-  //       res.set({
-  //         'Content-Type': contentType,
-  //         'Content-Disposition': `inline; filename="${filename}"`,
-  //       });
-
-  //       fileStream.pipe(res);
-  //     } catch (error) {
-  //       throw new Error(`Error retrieving file: ${error.message}`);
-  //     }
-  //   }
-
   async getImage(id: string): Promise<{ msg: string; coverUrl?: string }> {
     try {
       const textbook = await this.textbookRepository.findOne({

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserProfile } from '../entities/UserProfile.entity';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
 import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
@@ -14,6 +14,8 @@ import { School } from 'src/modules/school/entities/school.entity';
 import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
+import { BufferedFile } from 'src/minio-client/file.model';
+import { MinioClientService } from 'src/minio-client/minio-client.service';
 
 @Injectable()
 export class UserProfileService {
@@ -24,15 +26,18 @@ export class UserProfileService {
     @InjectRepository(School) private schoolRepository: Repository<School>,
     @InjectRepository(Dzongkhag)
     private dzongkhagRepository: Repository<Dzongkhag>,
+    private minioClientService: MinioClientService,
   ) {}
 
   async createUserProfile(
     userId: string,
     userProfileData: CreateUserProfileDto,
+    profileImage: BufferedFile,
   ) {
     const existingUser = await this.userRepository.findOne({
       where: { id: userId },
     });
+
     const existingSchool = await this.schoolRepository.findOne({
       where: { id: userProfileData.schoolId },
     });
@@ -45,7 +50,10 @@ export class UserProfileService {
       throw new NotFoundException('Invalid data provided by the user!');
     }
 
-    const userProfile = this.profileRepository.create({
+    const uploadProfile =
+      await this.minioClientService.uploadProfile(profileImage);
+
+    const userProfile = {
       name: userProfileData.name,
       studentCode: userProfileData.studentCode,
       mobileNo: userProfileData.mobileNo,
@@ -53,24 +61,12 @@ export class UserProfileService {
       gender: userProfileData.gender,
       dateOfBirth: userProfileData.dateOfBirth,
       user: existingUser,
-      school: existingSchool,
       dzongkhag: existingDzongkhag,
-    });
-
-    await this.profileRepository.save(userProfile);
-
-    return {
-      id: userProfile.id,
-      name: userProfile.name,
-      studentCode: userProfile.studentCode,
-      mobileNo: userProfile.mobileNo,
-      class: userProfile.class,
-      gender: userProfile.gender,
-      dateOfBirth: userProfile.dateOfBirth,
-      userId: userProfile.user.id,
-      schoolName: userProfile.school.schoolName,
-      dzongkhagName: userProfile.dzongkhag.name,
+      school: existingSchool,
+      profileImageUrl: uploadProfile.url,
     };
+
+    return await this.profileRepository.save(userProfile);
   }
 
   async getProfileById(id: string) {

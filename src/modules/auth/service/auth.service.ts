@@ -88,8 +88,6 @@ export class AuthService {
       throw new UnauthorizedException(`User cannot log out`);
     }
 
-    console.log('Signed User: ', existingUser);
-
     existingUser.isLoggedIn = false;
 
     return await this.usersRepository.save(existingUser);

@@ -9,7 +9,7 @@ import * as Minio from 'minio';
 @Injectable()
 export class MinioClientService {
   private readonly logger: Logger;
-  private readonly baseBucket = config.MINIO_BUCKET;
+  private readonly baseBucket = config.MINIO_BUCKET_TEXTBOOK;
   private readonly imageBucket = config.MINIO_BUCKET_TEXTBOOKDETAILS;
   private readonly profileBucket = config.MINIO_BUCKET_USERPROFILES;
 
@@ -80,7 +80,10 @@ export class MinioClientService {
       };
     } catch (error) {
       this.logger.error('Upload failed', error.stack);
-      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Error uploading cover image',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -114,7 +117,10 @@ export class MinioClientService {
       };
     } catch (error) {
       this.logger.error('Upload failed', error.stack);
-      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Error uploading textbook file',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -151,8 +157,6 @@ export class MinioClientService {
     const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;
 
-    console.log('Filename: ', filename);
-
     const metaData = {
       'Content-Type': file.mimetype,
       'Content-Disposition': 'inline',
@@ -172,7 +176,10 @@ export class MinioClientService {
       };
     } catch (error) {
       this.logger.error('Upload failed', error.stack);
-      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Error uploading profile image',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

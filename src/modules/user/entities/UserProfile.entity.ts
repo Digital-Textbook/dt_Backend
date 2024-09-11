@@ -9,8 +9,6 @@ import {
 } from 'typeorm';
 import { Users } from './users.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender } from 'src/constants/gender';
-import { ClassEnum } from 'src/constants/class-enum';
 import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
 import { School } from 'src/modules/school/entities/school.entity';
 
@@ -74,6 +72,16 @@ export class UserProfile extends BaseEntity {
   })
   @Column({ type: 'date', nullable: true })
   dateOfBirth: Date | null;
+
+  @ApiProperty({
+    description: 'Profile Iamge Url',
+    example: 'localhost:9000/dt-backend/226d79a3340c4a1054c2f25823ceb5f3.png',
+  })
+  @Column({
+    comment: 'Address of profile image',
+    nullable: true,
+  })
+  profileImageUrl: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
