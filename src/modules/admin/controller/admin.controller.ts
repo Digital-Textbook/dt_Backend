@@ -28,7 +28,7 @@ import {
 
 @ApiTags('Admin')
 @Controller('admin')
-// @UseGuards(AuthGuard())
+@UseGuards(AuthGuard())
 @ApiBearerAuth()
 export class AdminController {
   constructor(private adminService: AdminService) {}
