@@ -16,6 +16,8 @@ import { Dzongkhag } from '../school/entities/dzongkhag.entity';
 import { CommonController } from 'src/common/controller/common.controller';
 import { CommonService } from 'src/common/service/common.service';
 import { MinioClientModule } from 'src/minio-client/minio-client.module';
+import { Class } from '../class/entities/class.entity';
+import { Subject } from '../subject/entities/subject.entity';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { MinioClientModule } from 'src/minio-client/minio-client.module';
       OtpEntity,
       School,
       Dzongkhag,
+      Class,
+      Subject,
     ]),
   ],
   controllers: [UserController, UserProfileController, CommonController],

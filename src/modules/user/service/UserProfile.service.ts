@@ -16,6 +16,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
 import { BufferedFile } from 'src/minio-client/file.model';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
+import { Console } from 'console';
 
 @Injectable()
 export class UserProfileService {
@@ -99,6 +100,7 @@ export class UserProfileService {
   async updateProfile(
     id: string,
     userData: UpdateProfileDto,
+    profileImage: BufferedFile,
   ): Promise<UserProfile> {
     const profile = await this.profileRepository.findOne({ where: { id } });
 
@@ -107,6 +109,23 @@ export class UserProfileService {
     }
 
     Object.assign(profile, userData);
+
+    if (profileImage) {
+      const oldProfileImage = profile.profileImageUrl;
+
+      if (!oldProfileImage) {
+        console.log('No previous profile image found.');
+      } else {
+        const oldFileName = oldProfileImage.split('/').pop();
+        await this.minioClientService.deleteProfileImage(oldFileName);
+      }
+
+      const newProfileImage =
+        await this.minioClientService.uploadProfile(profileImage);
+      profile.profileImageUrl = newProfileImage.url;
+
+      await this.profileRepository.save(profile);
+    }
 
     return await this.profileRepository.save(profile);
   }

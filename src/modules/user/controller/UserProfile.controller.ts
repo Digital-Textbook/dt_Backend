@@ -30,7 +30,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { BufferedFile } from 'src/minio-client/file.model';
 
 @ApiTags('user-profile')
-@Controller('user-profile')
+@Controller('Digital-text/user-profile')
 @UseGuards(AuthGuard())
 @ApiBearerAuth()
 export class UserProfileController {
@@ -69,11 +69,22 @@ export class UserProfileController {
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully updated!' })
   @ApiBadRequestResponse({ description: 'User profile cannot updated!' })
+  @UseInterceptors(FileInterceptor('profileImage'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload user profile image and user data',
+    type: UpdateProfileDto,
+  })
   async updateProfile(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() studentData: UpdateProfileDto,
+    @UploadedFile() profileImage: BufferedFile,
   ) {
-    return await this.userProfileService.updateProfile(id, studentData);
+    return await this.userProfileService.updateProfile(
+      id,
+      studentData,
+      profileImage,
+    );
   }
 
   @Delete('/:id')
