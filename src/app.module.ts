@@ -15,9 +15,9 @@ import { AdminModule } from './modules/admin/admin.module';
 import { SubjectModule } from './modules/subject/subject.module';
 import { SchoolModule } from './modules/school/school.module';
 import { MinioClientModule } from './minio-client/minio-client.module';
-import { FileUploadModule } from './file-upload/file-upload.module';
 import { TextbookModule } from './modules/textbook/textbook.module';
 import { BookmarkModule } from './modules/bookmark/bookmark.module';
+import { NoteModule } from './modules/notes/note.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { BookmarkModule } from './modules/bookmark/bookmark.module';
     SubjectModule,
     SchoolModule,
     MinioClientModule,
-    FileUploadModule,
+    NoteModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
