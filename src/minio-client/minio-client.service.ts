@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import { config } from './config';
 import { Stream } from 'stream';
 import * as Minio from 'minio';
+import { error } from 'console';
 
 @Injectable()
 export class MinioClientService {
@@ -138,6 +139,22 @@ export class MinioClientService {
       await this.client.removeObject(baseBucket, objectName);
     } catch (error) {
       this.logger.error('Delete failed', error.stack);
+      throw new HttpException(
+        'Oops Something wrong happened',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async deleteProfileImage(
+    profileImageName: string,
+    profileImageBucket: string = this.profileBucket,
+  ) {
+    try {
+      await this.client.removeObject(profileImageBucket, profileImageName);
+      console.log('OLD PROFILE DELETED!');
+    } catch (error) {
+      this.logger.error('Delete failed ', error.stack);
       throw new HttpException(
         'Oops Something wrong happened',
         HttpStatus.BAD_REQUEST,

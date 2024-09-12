@@ -59,7 +59,7 @@ export class UpdateProfileDto {
     required: false,
   })
   @IsOptional()
-  profileImageUrl: any;
+  profileImage: any;
 
   @ApiProperty({
     description: 'School Id is required!',
