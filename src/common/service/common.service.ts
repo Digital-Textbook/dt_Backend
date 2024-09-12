@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Class } from 'src/modules/class/entities/class.entity';
 import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
 import { School } from 'src/modules/school/entities/school.entity';
+import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -10,6 +12,8 @@ export class CommonService {
     @InjectRepository(Dzongkhag)
     private dzongkhagRepository: Repository<Dzongkhag>,
     @InjectRepository(School) private schoolRepository: Repository<School>,
+    @InjectRepository(Subject) private subjectRepository: Repository<Subject>,
+    @InjectRepository(Class) private classRepository: Repository<Class>,
   ) {}
 
   async getAllDzongkhag(dzongkhagName?: string) {
@@ -57,6 +61,25 @@ export class CommonService {
       dzongkhagName: school.dzongkhag.name,
       schoolId: school.id,
       dzongkhagId: school.dzongkhag.id,
+    }));
+  }
+
+  async getSubjectByClass(classId: string) {
+    const subjects = await this.subjectRepository.find({
+      where: { class: { id: classId } },
+      relations: ['class'],
+      select: ['id', 'subjectName'],
+    });
+
+    if (!subjects || subjects.length === 0) {
+      throw new NotFoundException('Class not found or no subjects available!');
+    }
+
+    return subjects.map((subject) => ({
+      className: subject.class.class,
+      classId: subject.class.id,
+      subjectName: subject.subjectName,
+      subjectId: subject.id,
     }));
   }
 }

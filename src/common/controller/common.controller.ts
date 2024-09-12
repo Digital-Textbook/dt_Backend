@@ -30,4 +30,11 @@ export class CommonController {
   async getAllSchool(@Param('schoolName') schoolName: string) {
     return await this.commonService.getAllSchool(schoolName);
   }
+
+  @Get('/:classId')
+  @ApiOkResponse({ description: 'Class found!' })
+  @ApiBadRequestResponse({ description: 'Class not found!' })
+  async getSubjectByClass(@Param('classId') classId: string) {
+    return await this.commonService.getSubjectByClass(classId);
+  }
 }
