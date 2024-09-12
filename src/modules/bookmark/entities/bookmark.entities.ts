@@ -27,6 +27,15 @@ export class Bookmark extends BaseEntity {
   })
   pageNumber: string;
 
+  @ApiProperty({
+    description: 'Thumb nail for bookmark',
+    example: true,
+  })
+  @Column({
+    default: false,
+  })
+  isBookmark: boolean;
+
   @ApiProperty({ description: 'Created date' })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

@@ -41,7 +41,7 @@ export class BookmarkService {
         },
       });
 
-      if (existingBookmark) {
+      if (existingBookmark && existingBookmark.isBookmark === true) {
         existingBookmark.pageNumber = pageNumber;
         return await this.bookmarkRepository.save(existingBookmark);
       } else {
@@ -49,6 +49,7 @@ export class BookmarkService {
           pageNumber,
           user,
           textbook,
+          isBookmark: true,
         });
 
         return await this.bookmarkRepository.save(newBookmark);
@@ -118,7 +119,7 @@ export class BookmarkService {
       where: { id: id },
       relations: ['textbook', 'textbook.subject'],
     });
-    if (!bookmark) {
+    if (!bookmark || bookmark.isBookmark === true) {
       throw new NotFoundException(`Bookmark with ID ${id} not found!`);
     }
     const subjectName = bookmark.textbook?.subject?.subjectName || 'N/A';
