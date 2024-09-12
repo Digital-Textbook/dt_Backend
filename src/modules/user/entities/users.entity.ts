@@ -13,6 +13,7 @@ import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
 import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
 import { ScreenTime } from 'src/modules/bookmark/entities/screen-time.entities';
+import { Notes } from 'src/modules/notes/entities/note.entities';
 
 @Entity('users')
 export class Users extends BaseEntity {
@@ -112,4 +113,7 @@ export class Users extends BaseEntity {
 
   @OneToMany(() => ScreenTime, (screenTime) => screenTime.user)
   screenTime: ScreenTime;
+
+  @OneToMany(() => Notes, (notes) => notes.user)
+  notes: Notes;
 }

@@ -12,6 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
 import { ScreenTime } from 'src/modules/bookmark/entities/screen-time.entities';
+import { Notes } from 'src/modules/notes/entities/note.entities';
 
 @Entity('textbook')
 export class Textbook extends BaseEntity {
@@ -100,4 +101,7 @@ export class Textbook extends BaseEntity {
 
   @OneToMany(() => ScreenTime, (screenTime) => screenTime.textbook)
   screenTime: ScreenTime;
+
+  @OneToMany(() => Notes, (notes) => notes.textbook)
+  notes: Notes;
 }
