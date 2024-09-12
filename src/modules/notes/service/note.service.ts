@@ -10,6 +10,7 @@ import { Notes } from '../entities/note.entities';
 import { CreateNoteDto } from '../dto/note.dto';
 import { Users } from 'src/modules/user/entities/users.entity';
 import { Textbook } from 'src/modules/textbook/entities/textbook.entity';
+import { UpdateNoteDto } from '../dto/update-note.dto';
 
 @Injectable()
 export class NoteService {
@@ -69,5 +70,32 @@ export class NoteService {
     }
 
     return notes;
+  }
+
+  async updateNotesById(noteId: string, updateNote: UpdateNoteDto) {
+    const notes = await this.noteRepository.findOne({
+      where: { id: noteId },
+    });
+
+    if (!notes) {
+      throw new NotFoundException(
+        `Their is no notes for this Notes ID! ${noteId}`,
+      );
+    }
+
+    notes.notes = updateNote.notes;
+
+    return await this.noteRepository.save(notes);
+  }
+
+  async deleteNoteById(noteId: string) {
+    const result = await this.noteRepository.delete(noteId);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Error while deleting note with ID ${noteId}`,
+      );
+    }
+    return { msg: 'Note deleted successfully!' };
   }
 }
