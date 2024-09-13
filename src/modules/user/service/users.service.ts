@@ -3,12 +3,12 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Users } from '../entities/users.entity';
-import { UserProfile } from '../entities/UserProfile.entity';
 import { OtpEntity } from '../entities/otp.entity';
 
 import * as bcrypt from 'bcrypt';
@@ -27,8 +27,6 @@ export class UserService {
 
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
-    @InjectRepository(UserProfile)
-    private userProfileRepository: Repository<UserProfile>,
     @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
     private readonly configService: ConfigService,
     private httpService: HttpService,
@@ -64,26 +62,18 @@ export class UserService {
   }
 
   async verifyByEmail(id: string, otp: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id: id },
-    });
+    const [user, otpEntry] = await Promise.all([
+      this.usersRepository.findOne({ where: { id } }),
+      this.otpRepository.findOne({ where: { user: { id } } }),
+    ]);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const otpEntry = await this.otpRepository.findOne({
-      where: {
-        user: { id: id },
-      },
-    });
-
     if (!otpEntry) {
       throw new BadRequestException('No OTP entry found');
     }
-
-    console.log('Stored OTP (hashed):', otpEntry.otp);
-    console.log('Provided OTP:', otp);
 
     const isValidOtp = await bcrypt.compare(otp, otpEntry.otp);
     if (!isValidOtp) {
@@ -95,12 +85,14 @@ export class UserService {
     }
 
     user.status = Status.ACTIVE;
-    await this.usersRepository.save(user);
-
+    const verifiedUser = await this.usersRepository.save(user);
+    if (!verifiedUser) {
+      throw new InternalServerErrorException('Error while verifying OTP!');
+    }
     return { user, msg: `OTP is verified.` };
   }
 
-  //   ////////////////////////
+  //////////////////////////////////////////////////////////////////////////
   async forgotPasswordByEmail(email: string) {
     const user = await this.usersRepository.findOne({
       where: { email: email, status: Status.ACTIVE },
@@ -111,9 +103,6 @@ export class UserService {
       const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
       const hashedOtp = await bcrypt.hash(otp, 10);
-
-      console.log('OTP: ', otp);
-      console.log('Hashed OTP: ', hashedOtp);
 
       const existingUser = await this.usersRepository.findOne({
         where: {
@@ -175,12 +164,16 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(password, this.saltRounds);
     user.password = hashedPassword;
 
-    await this.usersRepository.save(user);
+    const updated = await this.usersRepository.save(user);
 
-    return {
-      msg: 'Password is updated for this user',
-      user,
-    };
+    if (!updated) {
+      throw new InternalServerErrorException('Password update failed!');
+    } else {
+      return {
+        msg: 'Password is updated for this user',
+        user,
+      };
+    }
   }
   ///////////////////////
 
@@ -216,6 +209,12 @@ export class UserService {
 
   /////////////// CID Details //////////////////
   async registerByCid(cidNo: string) {
+    if (cidNo.length !== 11 || !/^\d+$/.test(cidNo)) {
+      throw new BadRequestException(
+        'Invalid CID number. It must be 11 digits and contain only numbers.',
+      );
+    }
+
     const user = await this.fetchCitizenDetailsFromDataHub(cidNo);
 
     if (!user) {
@@ -225,22 +224,35 @@ export class UserService {
   }
 
   async sendMailOtp(user: Users, otp: string) {
-    await this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Your OTP Code',
-      template: './otp',
-      context: {
-        otp: otp,
-        name: user.name,
-      },
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Your OTP Code',
+        template: './otp',
+        context: {
+          otp: otp,
+          name: user.name,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to send OTP email:', error);
+      throw new InternalServerErrorException(
+        "OTP couldn't be sent. Please try again",
+      );
+    }
   }
 
   async phoneOtp(mobileNo: string, otp: string) {
     let prefix = '+975';
     let phone = prefix.concat(mobileNo);
-
-    await this.sendOtp(phone, otp);
+    try {
+      await this.sendOtp(phone, otp);
+    } catch (error) {
+      console.error('Failed to send OTP email:', error);
+      throw new InternalServerErrorException(
+        "OTP couldn't be sent. Please try again",
+      );
+    }
   }
 
   async generateOtp() {
@@ -263,6 +275,23 @@ export class UserService {
       );
     }
 
+    const [existingEmail, existingMobileNo] = await Promise.all([
+      this.usersRepository.findOne({ where: { email: userData.email } }),
+      this.usersRepository.findOne({ where: { mobileNo: userData.mobileNo } }),
+    ]);
+
+    if (existingEmail) {
+      throw new ConflictException(
+        `User with email ${userData.email} already exists`,
+      );
+    }
+
+    if (existingMobileNo) {
+      throw new ConflictException(
+        `User with mobile number ${userData.mobileNo} already exists`,
+      );
+    }
+
     const permitDto = {
       name: userData.name,
       cidNo: userData.cidNo,
@@ -272,6 +301,10 @@ export class UserService {
       userType: userData.userType as userType,
     };
     const user = await this.usersRepository.save(permitDto);
+
+    if (!user) {
+      throw new InternalServerErrorException('Erro while creating user!');
+    }
 
     const newOtp = await this.generateOtp();
 
@@ -297,22 +330,18 @@ export class UserService {
 
     await this.otpRepository.save(otpEntity);
 
-    if (userData.otpOption === 'email') {
-      try {
+    try {
+      if (userData.otpOption === 'email') {
         await this.sendMailOtp(user, newOtp.otp);
-      } catch (e) {
-        console.error(e);
-        throw new ConflictException("OTP couldn't be sent. Please try again");
-      }
-    } else {
-      try {
+      } else {
         await this.phoneOtp(user.mobileNo, newOtp.otp);
-      } catch (e) {
-        console.error(e);
-        throw new ConflictException("OTP couldn't be sent. Please try again");
       }
+    } catch (error) {
+      console.error('Failed to send OTP:', error);
+      throw new InternalServerErrorException(
+        "OTP couldn't be sent. Please try again",
+      );
     }
-
     return { user, message: 'OTP sent successfully!' };
   }
 }

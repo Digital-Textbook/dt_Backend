@@ -8,12 +8,18 @@ import {
   ValidationPipe,
   ParseUUIDPipe,
   Post,
+  HttpCode,
 } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CommonService } from '../service/common.service';
 
 @ApiTags('common')
-@Controller('common')
+@Controller('Digital-textbook/common')
 export class CommonController {
   constructor(private commonService: CommonService) {}
 
@@ -31,9 +37,12 @@ export class CommonController {
     return await this.commonService.getAllSchool(schoolName);
   }
 
-  @Get('/:classId')
+  @Get('class/:classId')
   @ApiOkResponse({ description: 'Class found!' })
-  @ApiBadRequestResponse({ description: 'Class not found!' })
+  @ApiNotFoundResponse({
+    description: 'Class not found or no subjects available!',
+  })
+  @ApiBadRequestResponse({ description: 'Invalid class ID!' })
   async getSubjectByClass(@Param('classId') classId: string) {
     return await this.commonService.getSubjectByClass(classId);
   }

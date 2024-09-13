@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Class } from 'src/modules/class/entities/class.entity';
 import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
 import { School } from 'src/modules/school/entities/school.entity';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { Repository } from 'typeorm';
+import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class CommonService {
@@ -65,6 +70,9 @@ export class CommonService {
   }
 
   async getSubjectByClass(classId: string) {
+    if (!this.isValidClassId(classId)) {
+      throw new BadRequestException('Invalid class ID format!');
+    }
     const subjects = await this.subjectRepository.find({
       where: { class: { id: classId } },
       relations: ['class'],
@@ -81,5 +89,9 @@ export class CommonService {
       subjectName: subject.subjectName,
       subjectId: subject.id,
     }));
+  }
+
+  private isValidClassId(classId: string): boolean {
+    return isUUID(classId);
   }
 }
