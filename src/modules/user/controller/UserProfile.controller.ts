@@ -30,7 +30,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { BufferedFile } from 'src/minio-client/file.model';
 
 @ApiTags('user-profile')
-@Controller('Digital-text/user-profile')
+@Controller('Digital-textbook/user-profile')
 @UseGuards(AuthGuard())
 @ApiBearerAuth()
 export class UserProfileController {
