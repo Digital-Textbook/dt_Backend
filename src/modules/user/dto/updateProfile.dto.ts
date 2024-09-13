@@ -5,6 +5,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'Name is required!',
     example: 'Tshering',
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'Name must be a string' })
@@ -13,6 +14,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'Student code is required!',
     example: '201.00345.33.0042',
+    required: false,
   })
   @IsOptional()
   @IsString({
@@ -23,6 +25,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'Mobile Number is required!',
     example: '17654321',
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'Mobile number must be string' })
@@ -31,6 +34,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'Class is required!',
     example: '10',
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'Class must be a string' })
@@ -39,6 +43,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'User gender must be Male or Female',
     example: 'Male',
+    required: false,
   })
   @IsOptional()
   gender: string;
@@ -47,6 +52,7 @@ export class UpdateProfileDto {
     description:
       'Date of birth is required and must be a valid date in the format YYYY-MM-DD.',
     example: '2000-05-15',
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'Date of birth is required!' })
@@ -64,6 +70,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'School Id is required!',
     example: 'School Id',
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'School must be a string' })
@@ -72,6 +79,7 @@ export class UpdateProfileDto {
   @ApiProperty({
     description: 'Dzongkhag Id is required!',
     example: 'Dzongkhag Id',
+    required: false,
   })
   @IsOptional()
   @IsString({ message: 'Dzongkhag must be a string' })

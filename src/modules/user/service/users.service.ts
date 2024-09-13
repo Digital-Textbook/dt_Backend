@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Users } from '../entities/users.entity';
-import { UserProfile } from '../entities/UserProfile.entity';
 import { OtpEntity } from '../entities/otp.entity';
 
 import * as bcrypt from 'bcrypt';
@@ -28,8 +27,6 @@ export class UserService {
 
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
-    @InjectRepository(UserProfile)
-    private userProfileRepository: Repository<UserProfile>,
     @InjectRepository(OtpEntity) private otpRepository: Repository<OtpEntity>,
     private readonly configService: ConfigService,
     private httpService: HttpService,
@@ -65,26 +62,18 @@ export class UserService {
   }
 
   async verifyByEmail(id: string, otp: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id: id },
-    });
+    const [user, otpEntry] = await Promise.all([
+      this.usersRepository.findOne({ where: { id } }),
+      this.otpRepository.findOne({ where: { user: { id } } }),
+    ]);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const otpEntry = await this.otpRepository.findOne({
-      where: {
-        user: { id: id },
-      },
-    });
-
     if (!otpEntry) {
       throw new BadRequestException('No OTP entry found');
     }
-
-    // console.log('Stored OTP (hashed):', otpEntry.otp);
-    // console.log('Provided OTP:', otp);
 
     const isValidOtp = await bcrypt.compare(otp, otpEntry.otp);
     if (!isValidOtp) {
@@ -96,12 +85,14 @@ export class UserService {
     }
 
     user.status = Status.ACTIVE;
-    await this.usersRepository.save(user);
-
+    const verifiedUser = await this.usersRepository.save(user);
+    if (!verifiedUser) {
+      throw new InternalServerErrorException('Error while verifying OTP!');
+    }
     return { user, msg: `OTP is verified.` };
   }
 
-  //   ////////////////////////
+  //////////////////////////////////////////////////////////////////////////
   async forgotPasswordByEmail(email: string) {
     const user = await this.usersRepository.findOne({
       where: { email: email, status: Status.ACTIVE },
@@ -112,9 +103,6 @@ export class UserService {
       const otpExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
       const hashedOtp = await bcrypt.hash(otp, 10);
-
-      console.log('OTP: ', otp);
-      console.log('Hashed OTP: ', hashedOtp);
 
       const existingUser = await this.usersRepository.findOne({
         where: {
@@ -169,7 +157,6 @@ export class UserService {
       where: { id: id },
     });
 
-    console.log('Users: ', user);
     if (!user) {
       throw new NotFoundException('User ID not found');
     }
@@ -288,23 +275,16 @@ export class UserService {
       );
     }
 
-    const existingEmail = await this.usersRepository.findOne({
-      where: {
-        email: userData.email,
-      },
-    });
+    const [existingEmail, existingMobileNo] = await Promise.all([
+      this.usersRepository.findOne({ where: { email: userData.email } }),
+      this.usersRepository.findOne({ where: { mobileNo: userData.mobileNo } }),
+    ]);
 
     if (existingEmail) {
       throw new ConflictException(
         `User with email ${userData.email} already exists`,
       );
     }
-
-    const existingMobileNo = await this.usersRepository.findOne({
-      where: {
-        mobileNo: userData.mobileNo,
-      },
-    });
 
     if (existingMobileNo) {
       throw new ConflictException(

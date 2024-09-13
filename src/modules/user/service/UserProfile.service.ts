@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -35,20 +36,45 @@ export class UserProfileService {
     userProfileData: CreateUserProfileDto,
     profileImage: BufferedFile,
   ) {
-    const existingUser = await this.userRepository.findOne({
-      where: { id: userId },
-    });
+    const [existingUser, existingDzongkhag, existingSchool, student, mobile] =
+      await Promise.all([
+        this.userRepository.findOne({ where: { id: userId } }),
+        this.dzongkhagRepository.findOne({
+          where: { id: userProfileData.dzongkhagId },
+        }),
+        this.schoolRepository.findOne({
+          where: { id: userProfileData.schoolId },
+        }),
+        this.profileRepository.findOne({
+          where: { studentCode: userProfileData.studentCode },
+        }),
+        this.profileRepository.findOne({
+          where: { mobileNo: userProfileData.mobileNo },
+        }),
+      ]);
 
-    const existingSchool = await this.schoolRepository.findOne({
-      where: { id: userProfileData.schoolId },
-    });
+    if (!existingUser) {
+      throw new NotFoundException('Invalid user!');
+    }
 
-    const existingDzongkhag = await this.dzongkhagRepository.findOne({
-      where: { id: userProfileData.dzongkhagId },
-    });
+    if (!existingDzongkhag) {
+      throw new NotFoundException('Invalid dzongkhag details');
+    }
 
-    if (!existingUser || !existingSchool || !existingDzongkhag) {
-      throw new NotFoundException('Invalid data provided by the user!');
+    if (!existingSchool) {
+      throw new NotFoundException('Invalid school details');
+    }
+
+    if (student) {
+      throw new ConflictException(
+        `Student with this student code ${userProfileData.studentCode} already exist!`,
+      );
+    }
+
+    if (mobile) {
+      throw new ConflictException(
+        `Student with this mobile number ${userProfileData.mobileNo} already exist!`,
+      );
     }
 
     const uploadProfile =
@@ -67,14 +93,17 @@ export class UserProfileService {
       profileImageUrl: uploadProfile.url,
     };
 
-    return await this.profileRepository.save(userProfile);
+    const result = await this.profileRepository.save(userProfile);
+    if (!result) {
+      throw new InternalServerErrorException(
+        'Error while creating new user profile!',
+      );
+    }
+
+    return userProfile;
   }
 
   async getProfileById(id: string) {
-    if (!id) {
-      throw new Error('ID is required');
-    }
-
     const profile = await this.profileRepository.findOne({
       where: { id },
       relations: ['school', 'dzongkhag'],
@@ -108,14 +137,35 @@ export class UserProfileService {
       throw new NotFoundException(`Profile with ID ${id} was not found`);
     }
 
+    const [existingMobile, existingStudentCode] = await Promise.all([
+      userData.mobileNo !== profile.mobileNo
+        ? this.profileRepository.findOne({
+            where: { mobileNo: userData.mobileNo },
+          })
+        : null,
+      userData.studentCode !== profile.studentCode
+        ? this.profileRepository.findOne({
+            where: { studentCode: userData.studentCode },
+          })
+        : null,
+    ]);
+
+    if (existingMobile) {
+      throw new ConflictException(`This ${userData.mobileNo} is already used!`);
+    }
+
+    if (existingStudentCode) {
+      throw new ConflictException(
+        `This ${userData.studentCode} is already used!`,
+      );
+    }
+
     Object.assign(profile, userData);
 
     if (profileImage) {
       const oldProfileImage = profile.profileImageUrl;
 
-      if (!oldProfileImage) {
-        console.log('No previous profile image found.');
-      } else {
+      if (oldProfileImage) {
         const oldFileName = oldProfileImage.split('/').pop();
         await this.minioClientService.deleteProfileImage(oldFileName);
       }
@@ -123,10 +173,7 @@ export class UserProfileService {
       const newProfileImage =
         await this.minioClientService.uploadProfile(profileImage);
       profile.profileImageUrl = newProfileImage.url;
-
-      await this.profileRepository.save(profile);
     }
-
     return await this.profileRepository.save(profile);
   }
 
@@ -134,7 +181,7 @@ export class UserProfileService {
     const result = await this.profileRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new ConflictException(
+      throw new InternalServerErrorException(
         `Error deleting user profile with User ID ${id}!`,
       );
     }
@@ -147,7 +194,7 @@ export class UserProfileService {
       where: { id: id },
     });
     if (!existingUser) {
-      throw new NotFoundException('Invalid user!');
+      throw new NotFoundException('Invalid User ID!');
     }
     const isPasswordValid = await bcrypt.compare(
       data.currentPassword,
@@ -166,7 +213,11 @@ export class UserProfileService {
     const hashedPassword = await bcrypt.hash(data.newPassword, 10);
 
     existingUser.password = hashedPassword;
-    await this.userRepository.save(existingUser);
+    const result = await this.userRepository.save(existingUser);
+
+    if (!result) {
+      throw new InternalServerErrorException('Error while updating password!');
+    }
 
     return { message: 'Password updated successfully!' };
   }

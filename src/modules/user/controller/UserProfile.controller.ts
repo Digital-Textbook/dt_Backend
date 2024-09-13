@@ -12,6 +12,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  HttpCode,
 } from '@nestjs/common';
 import { UserProfileService } from '../service/UserProfile.service';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
@@ -20,7 +21,11 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiConsumes,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -37,8 +42,13 @@ export class UserProfileController {
   constructor(private userProfileService: UserProfileService) {}
 
   @Post('/:id')
-  @ApiOkResponse({ description: 'User profile successfully created!' })
-  @ApiBadRequestResponse({ description: 'User profile cannot be created!' })
+  @ApiCreatedResponse({ description: 'User profile successfully created!' })
+  @ApiBadRequestResponse({ description: 'Invalid user data!' })
+  @ApiNotFoundResponse({ description: 'User not found!' })
+  @ApiConflictResponse({ description: 'Duplicate entity!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while creating user profile!',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload user profile image and user data',
@@ -60,15 +70,18 @@ export class UserProfileController {
   @Get('/:id')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully fetched!' })
-  @ApiBadRequestResponse({ description: 'User profile not found!' })
+  @ApiNotFoundResponse({ description: 'User not found!' })
   async getProfileById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userProfileService.getProfileById(id);
   }
 
   @Patch('/:id')
-  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully updated!' })
-  @ApiBadRequestResponse({ description: 'User profile cannot updated!' })
+  @ApiNotFoundResponse({ description: 'User not found!' })
+  @ApiConflictResponse({ description: 'Duplicate entry!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while updating user profile!',
+  })
   @UseInterceptors(FileInterceptor('profileImage'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -87,20 +100,29 @@ export class UserProfileController {
     );
   }
 
-  @Delete('/:id')
+  @Delete('/:userId')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully deleted!' })
-  @ApiBadRequestResponse({ description: 'User profile cannot be deleted!' })
-  async deleteUserProfile(@Param('id') id: string) {
-    return await this.userProfileService.deleteProfile(id);
+  @ApiBadRequestResponse({ description: 'Invalid user Id!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while deleting user profile!',
+  })
+  async deleteUserProfile(@Param('userId', ParseUUIDPipe) userId: string) {
+    return await this.userProfileService.deleteProfile(userId);
   }
 
-  @Patch('/:id/setting')
+  @Patch('/:userId/setting')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User password upadted successfully!' })
-  @ApiBadRequestResponse({ description: 'User password cannot updated!' })
+  @ApiBadRequestResponse({ description: 'Invalid data!' })
+  @ApiNotFoundResponse({ description: 'User not found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while updating password!',
+  })
   async changePassword(
-    @Param('id') id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Body() data: UpdateUserProfilePassword,
   ) {
-    return await this.userProfileService.changePassword(id, data);
+    return await this.userProfileService.changePassword(userId, data);
   }
 }
