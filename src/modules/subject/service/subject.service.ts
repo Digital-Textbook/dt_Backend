@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -30,17 +34,11 @@ export class SubjectService {
     return await this.subjectRepository.save(subject);
   }
 
-  async deleteSubject(id: string) {
-    const subject = await this.subjectRepository.findOne({
-      where: { id },
-    });
-
-    if (!subject) {
-      throw new NotFoundException(`Subject with ID ${id} not found`);
+  async deleteSubject(subjectId: string) {
+    const result = await this.subjectRepository.delete(subjectId);
+    if (result.affected === 0) {
+      throw new InternalServerErrorException('Error while deleting subject!');
     }
-
-    await this.subjectRepository.delete(id);
-
     return { msg: 'Subject successfully deleted!' };
   }
 
@@ -56,7 +54,11 @@ export class SubjectService {
 
     subject.subjectName = name;
 
-    await this.subjectRepository.save(subject);
+    const result = await this.subjectRepository.save(subject);
+
+    if (!result) {
+      throw new InternalServerErrorException('Error while updating subject!');
+    }
 
     return { msg: 'Subject successfully updated!', subject };
   }
@@ -64,7 +66,6 @@ export class SubjectService {
   async getSubjectByClass(id: string) {
     const subject = await this.subjectRepository.find({
       where: { class: { id: id } },
-      //   relations: ['class'],
     });
 
     if (!subject) {

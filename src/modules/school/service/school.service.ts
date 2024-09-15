@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { School } from '../entities/school.entity';
 import { CreateSchoolDto } from '../dto/school.dto';
@@ -30,20 +34,22 @@ export class SchoolService {
       dzongkhag: dzongkhagEntity,
     });
 
-    return await this.schoolRepository.save(school);
+    const result = await this.schoolRepository.save(school);
+    if (!result) {
+      throw new InternalServerErrorException('Error while creating school!');
+    }
+
+    return school;
   }
 
   async deleteSchool(id: string) {
-    const school = this.schoolRepository.findOne({
-      where: { id: id },
-    });
-    if (!school) {
-      throw new NotFoundException(`School with ID ${id} not found!`);
+    const result = await this.schoolRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new InternalServerErrorException('Error while deleting school!');
     }
 
-    await this.schoolRepository.delete(id);
-
-    return { msg: 'School successfully deleted!', school };
+    return { msg: 'School successfully deleted!' };
   }
 
   async updateSchool(id: string, data: UpdateSchoolDto) {
@@ -83,6 +89,7 @@ export class SchoolService {
   async getSchoolById(id: string) {
     const school = await this.schoolRepository.findOne({
       where: { id: id },
+      relations: ['dzongkhag'],
     });
 
     if (!school) {

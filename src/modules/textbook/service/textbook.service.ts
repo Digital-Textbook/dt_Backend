@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +16,7 @@ import { MinioClientService } from 'src/minio-client/minio-client.service';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
 import { text } from 'stream/consumers';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class TextbookService {
@@ -29,6 +32,10 @@ export class TextbookService {
     textbookFile: BufferedFile,
   ) {
     try {
+      if (!isUUID(data.subjectID)) {
+        throw new BadRequestException('Invalid subject ID format');
+      }
+
       const uploadImageResult =
         await this.minioClientService.upload(textbookImage);
 
@@ -40,10 +47,7 @@ export class TextbookService {
       });
 
       if (!subject) {
-        throw new HttpException(
-          'Invalid subject ID provided',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new NotFoundException('Invalid subject Id!');
       }
 
       const newTextbook = {
@@ -65,6 +69,13 @@ export class TextbookService {
       };
     } catch (error) {
       console.error('Error creating textbook:', error);
+
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
 
       throw new HttpException(
         'Failed to create textbook',
@@ -92,7 +103,9 @@ export class TextbookService {
         return { msg: 'Textbook cover URL not found!' };
       }
     } catch (error) {
-      throw new Error(`Error retrieving image: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Error retrieving image: ${error.message}`,
+      );
     }
   }
 
@@ -151,7 +164,11 @@ export class TextbookService {
     }
 
     Object.assign(textbook, data);
-    await this.textbookRepository.save(textbook);
+
+    const result = await this.textbookRepository.save(textbook);
+    if (!result) {
+      throw new InternalServerErrorException('Error while updating textbook!');
+    }
     return { msg: 'Textbook updated successfully!', textbook };
   }
   //////////////////// DELETE PNG OR PDF ///////////////
@@ -160,7 +177,9 @@ export class TextbookService {
     const result = await this.textbookRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Textbook with ID ${id} not found!`);
+      throw new InternalServerErrorException(
+        `Error while deleting textbook with ID ${id}!`,
+      );
     }
 
     return { msg: 'Textbook deleted successfully!' };
@@ -218,7 +237,7 @@ export class TextbookService {
         return { msg: 'Textbook Information not found!' };
       }
     } catch (error) {
-      throw new Error(
+      throw new InternalServerErrorException(
         `Error retrieving textbook information: ${error.message}`,
       );
     }

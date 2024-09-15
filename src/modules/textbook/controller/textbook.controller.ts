@@ -12,12 +12,18 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  UsePipes,
+  ValidationPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
   ApiBody,
   ApiConsumes,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -29,7 +35,7 @@ import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
 import { Response } from 'express';
 
-@Controller('textbook')
+@Controller('Digital-textbook/textbook')
 @ApiTags('textbook')
 export class TextbookController {
   constructor(
@@ -40,15 +46,23 @@ export class TextbookController {
   //////////////// Get All Textbook ///////////////////////
   @Get('/')
   @ApiOkResponse({ description: 'Textbook found!' })
-  @ApiBadRequestResponse({ description: 'Textbook not found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fecthing textbook from database',
+  })
   async getAllTextbook() {
     return await this.textbookService.getAllTextbook();
   }
 
   //////////////// Create Textbook ///////////////////////
   @Post('/')
-  @ApiOkResponse({ description: 'Textbook successfully uploaded!' })
-  @ApiBadRequestResponse({ description: 'Textbook cannot be uploaded!' })
+  @ApiCreatedResponse({ description: 'Textbook successfully uploaded!' })
+  @ApiBadRequestResponse({
+    description: 'Invalid data or information for uploading textbook!',
+  })
+  @ApiNotFoundResponse({ description: 'Invalid subject Id!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while uploading textbook!',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload textbook image and content file',
@@ -77,8 +91,13 @@ export class TextbookController {
 
   //////////////// Updated Textbook By ID ///////////////////////
   @Patch('/:id')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Textbook successfully updated!' })
-  @ApiBadRequestResponse({ description: 'Textbook cannot be updated!' })
+  @ApiBadRequestResponse({ description: 'Invalid textbook ID!' })
+  @ApiNotFoundResponse({ description: 'Textbook Id not found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while updating textbook',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload textbook image and content file',
@@ -91,7 +110,7 @@ export class TextbookController {
     ]),
   )
   async updateTextbook(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @UploadedFiles()
     files: { textbookImage?: BufferedFile[]; textbookFile?: BufferedFile[] },
     @Body() data: UpdateTextbookDto,
@@ -110,23 +129,32 @@ export class TextbookController {
   //////////////// Delete Textbook By ID ///////////////////////
   @Delete('/:id')
   @ApiOkResponse({ description: 'Textbook deleted successfully!' })
-  @ApiBadRequestResponse({ description: 'Textbook cannot be deleted!' })
+  @ApiBadRequestResponse({ description: 'Invalid textbook ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while deleting textbook!',
+  })
   async deleteTextbook(@Param('id') id: string): Promise<void> {
     await this.textbookService.deleteTextbook(id);
   }
 
   //////////////// Get textbook By ID///////////////////////
   @Get(':id/textbook-details')
-  @ApiOkResponse({ description: 'Textbook successfully found!' })
-  @ApiBadRequestResponse({ description: 'Textbook not found!' })
-  async getTextbook(@Param('id') id: string) {
+  @UsePipes(ValidationPipe)
+  @ApiOkResponse({ description: 'Textbook successfully fetched!' })
+  @ApiBadRequestResponse({ description: 'Invalid textbook Id!' })
+  @ApiNotFoundResponse({ description: 'Textbook not found!' })
+  async getTextbook(@Param('id', ParseUUIDPipe) id: string) {
     return await this.textbookService.getTextbookById(id);
   }
 
   @Get('/:id/textbook-cover')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Textbook cover Url successfully found!' })
-  @ApiBadRequestResponse({ description: 'Textbook cover Url not found!' })
-  async getBookCover(@Param('id') id: string) {
+  @ApiBadRequestResponse({ description: 'Invalid Textbook ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching textbook cover!',
+  })
+  async getBookCover(@Param('id', ParseUUIDPipe) id: string) {
     try {
       const result = await this.textbookService.getImage(id);
 
@@ -145,9 +173,17 @@ export class TextbookController {
 
   //////////////// Download textbook By ID///////////////////////
   @Get(':id/download')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Textbook successfully downloaded!' })
-  @ApiBadRequestResponse({ description: 'Textbook cannot download!' })
-  async downloadTextbook(@Param('id') id: string, @Res() res: Response) {
+  @ApiBadRequestResponse({ description: 'Invalid Textbook ID!' })
+  @ApiNotFoundResponse({ description: 'Textbook not found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fecthing textbook url!',
+  })
+  async downloadTextbook(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ) {
     const textbook = await this.textbookService.getTextbookById(id);
 
     if (!textbook || !textbook.textbookUrl) {
@@ -190,9 +226,14 @@ export class TextbookController {
   }
 
   @Get('/:id/textbook-info')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Textbook Url successfully found!' })
-  @ApiBadRequestResponse({ description: 'Textbook Url not found!' })
-  async getTextbookInfo(@Param('id') id: string) {
+  @ApiBadRequestResponse({ description: 'Invalid Textbook Id!' })
+  @ApiNotFoundResponse({ description: 'Textbook not found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fecthing textbook information!',
+  })
+  async getTextbookInfo(@Param('id', ParseUUIDPipe) id: string) {
     return await this.textbookService.getTextbookInfo(id);
   }
 }

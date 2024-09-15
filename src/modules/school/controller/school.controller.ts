@@ -7,33 +7,46 @@ import {
   Patch,
   Get,
   HttpCode,
+  ParseUUIDPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SchoolService } from '../service/school.service';
 import { CreateSchoolDto } from '../dto/school.dto';
 import { UpdateSchoolDto } from '../dto/updateSchool.dto';
 
-@Controller('school')
+@Controller('Digital-textbook/school')
 @ApiTags('school')
 export class SchoolController {
   constructor(private schoolService: SchoolService) {}
 
   @Post('/')
-  @ApiOkResponse({ description: 'School creacted successfully!' })
-  @ApiBadRequestResponse({
-    description: 'School cannot be created. Please try again',
+  @ApiCreatedResponse({ description: 'School creacted successfully!' })
+  @ApiNotFoundResponse({ description: 'Dzongkhag Id is invalid!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while creating school!',
   })
   async addSubject(@Body() data: CreateSchoolDto) {
     return await this.schoolService.addSchool(data);
   }
 
   @Delete('/:id')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School delete successfully!' })
-  @ApiBadRequestResponse({
-    description: 'School cannot be delete. Please try again',
+  @ApiBadRequestResponse({ description: 'Invalid School ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while deleting school!',
   })
-  async deleteSubject(@Param('id') id: string) {
+  async deleteSubject(@Param('id', ParseUUIDPipe) id: string) {
     return await this.schoolService.deleteSchool(id);
   }
 
@@ -42,25 +55,37 @@ export class SchoolController {
   @ApiBadRequestResponse({
     description: 'School cannot be updated. Please try again',
   })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while updating school!',
+  })
+  @ApiNotFoundResponse({ description: 'School not found!' })
   async updateSchool(@Param('id') id: string, @Body() data: UpdateSchoolDto) {
     return await this.schoolService.updateSchool(id, data);
   }
 
-  @Get('/dzongkhag/:id')
+  @Get('/dzongkhag/:dzongkhagId')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School successfully found.' })
   @ApiBadRequestResponse({
-    description: 'School not found. Please try again',
+    description: 'School Id invalid. Please try again',
   })
-  async getSchoolByDzongkhag(@Param('id') id: string) {
-    return await this.schoolService.getSchoolByDzongkhag(id);
+  @ApiInternalServerErrorResponse({
+    description: 'Error while fetching school by dzongkhag ID!',
+  })
+  async getSchoolByDzongkhag(
+    @Param('dzongkhagId', ParseUUIDPipe) dzongkhagId: string,
+  ) {
+    return await this.schoolService.getSchoolByDzongkhag(dzongkhagId);
   }
 
-  @Get('/id')
+  @Get('/:schoolId')
+  @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School successfully found.' })
   @ApiBadRequestResponse({
-    description: 'School not found. Please try again',
+    description: 'Invalid school ID. Please try again',
   })
-  async getSchoolById(@Param('id') id: string) {
-    return await this.schoolService.getSchoolById(id);
+  @ApiNotFoundResponse({ description: 'School not found!' })
+  async getSchoolById(@Param('schoolId', ParseUUIDPipe) schoolId: string) {
+    return await this.schoolService.getSchoolById(schoolId);
   }
 }

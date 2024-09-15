@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -85,7 +86,13 @@ export class NoteService {
 
     notes.notes = updateNote.notes;
 
-    return await this.noteRepository.save(notes);
+    const result = await this.noteRepository.save(notes);
+
+    if (!result) {
+      throw new InternalServerErrorException('Error while updating notes!');
+    }
+
+    return notes;
   }
 
   async deleteNoteById(noteId: string) {
@@ -97,5 +104,20 @@ export class NoteService {
       );
     }
     return { msg: 'Note deleted successfully!' };
+  }
+
+  async getNotesByUserId(userId: string, textbookId: string) {
+    const notes = await this.noteRepository.find({
+      where: {
+        user: { id: userId },
+        textbook: { id: textbookId },
+      },
+    });
+
+    if (!notes || notes.length === 0) {
+      throw new NotFoundException(`No notes for User with ID ${userId}!`);
+    }
+
+    return notes;
   }
 }
