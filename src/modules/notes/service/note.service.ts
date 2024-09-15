@@ -105,4 +105,19 @@ export class NoteService {
     }
     return { msg: 'Note deleted successfully!' };
   }
+
+  async getNotesByUserId(userId: string, textbookId: string) {
+    const notes = await this.noteRepository.find({
+      where: {
+        user: { id: userId },
+        textbook: { id: textbookId },
+      },
+    });
+
+    if (!notes || notes.length === 0) {
+      throw new NotFoundException(`No notes for User with ID ${userId}!`);
+    }
+
+    return notes;
+  }
 }

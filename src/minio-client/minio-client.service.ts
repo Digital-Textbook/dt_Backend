@@ -60,8 +60,6 @@ export class MinioClientService {
     const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;
 
-    console.log('Filename: ', filename);
-
     const metaData = {
       'Content-Type': file.mimetype,
       'Content-Disposition': 'inline',

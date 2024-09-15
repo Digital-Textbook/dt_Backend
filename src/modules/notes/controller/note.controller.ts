@@ -74,4 +74,18 @@ export class NoteController {
   async deleteNoteById(@Param('noteId') noteId: string) {
     return await this.noteService.deleteNoteById(noteId);
   }
+
+  @Get('/:userId/:textbookId')
+  @UsePipes(ValidationPipe)
+  @ApiOkResponse({ description: 'Notes successfully fetched!' })
+  @ApiBadRequestResponse({ description: 'Invalid Note ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching notes!',
+  })
+  async getNotesByUserId(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('textbookId', ParseUUIDPipe) textbookId: string,
+  ) {
+    return await this.noteService.getNotesByUserId(userId, textbookId);
+  }
 }
