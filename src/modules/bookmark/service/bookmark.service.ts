@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,21 +26,17 @@ export class BookmarkService {
     try {
       const { pageNumber, userId, textbookId } = createBookmarkDto;
 
-      const user = await this.userRepository.findOne({ where: { id: userId } });
-      const textbook = await this.textbookRepository.findOne({
-        where: { id: textbookId },
-      });
+      const [user, textbook, existingBookmark] = await Promise.all([
+        this.userRepository.findOne({ where: { id: userId } }),
+        this.textbookRepository.findOne({ where: { id: textbookId } }),
+        this.bookmarkRepository.findOne({
+          where: { user: { id: userId }, textbook: { id: textbookId } },
+        }),
+      ]);
 
       if (!user || !textbook) {
-        throw new Error('Invalid user or textbook ID provided');
+        throw new NotFoundException('Invalid user or textbook ID provided');
       }
-
-      const existingBookmark = await this.bookmarkRepository.findOne({
-        where: {
-          user: { id: userId },
-          textbook: { id: textbookId },
-        },
-      });
 
       if (existingBookmark && existingBookmark.isBookmark === true) {
         existingBookmark.pageNumber = pageNumber;
@@ -51,8 +48,13 @@ export class BookmarkService {
           textbook,
           isBookmark: true,
         });
-
-        return await this.bookmarkRepository.save(newBookmark);
+        const result = await this.bookmarkRepository.save(newBookmark);
+        if (!result) {
+          throw new InternalServerErrorException(
+            'Internal server error while creating bookmark',
+          );
+        }
+        return newBookmark;
       }
     } catch (error) {
       console.error('Error creating bookmark: ', error);
@@ -69,14 +71,17 @@ export class BookmarkService {
     });
 
     if (!existingBookmark) {
-      throw new HttpException(
-        'Failed to upadte bookmark',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new NotFoundException('Bookmark not found!');
     }
 
     existingBookmark.pageNumber = pageNumber;
-    await this.bookmarkRepository.save(existingBookmark);
+    const result = this.bookmarkRepository.save(existingBookmark);
+
+    if (!result) {
+      throw new InternalServerErrorException(
+        'Internal server error while updating bookmark!',
+      );
+    }
 
     return { msg: 'Bookmark updated successfully!', existingBookmark };
   }
@@ -85,7 +90,9 @@ export class BookmarkService {
     const result = await this.bookmarkRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Bookmark with ID ${id} not found!`);
+      throw new InternalServerErrorException(
+        `Bookmark with ID ${id} not found!`,
+      );
     }
 
     return { msg: 'Bookmark deleted successfully!' };

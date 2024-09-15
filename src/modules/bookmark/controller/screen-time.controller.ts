@@ -2,20 +2,28 @@ import { Controller, Post, Body } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
-  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { ScreenTimeService } from '../service/sreen-time.service';
 import { CreateScreenTimeDto } from '../dto/secreen-time.dto';
 
-@Controller('screen-time')
+@Controller('Digital-textbook/screen-time')
 @ApiTags('screen')
 export class ScreenTimeController {
   constructor(private screenTimeService: ScreenTimeService) {}
 
   @Post('/')
-  @ApiOkResponse({ description: 'Screen Time successfully created!' })
-  @ApiBadRequestResponse({ description: 'Screen Time cannot be created!' })
+  @ApiCreatedResponse({ description: 'Screen Time successfully created!' })
+  @ApiBadRequestResponse({
+    description: 'Invalid data for creating screen time!!',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while creating screen time!',
+  })
+  @ApiNotFoundResponse({ description: 'User or textbook not found!' })
   @ApiBody({
     description: 'To create screen time recode of user!',
     type: CreateScreenTimeDto,
