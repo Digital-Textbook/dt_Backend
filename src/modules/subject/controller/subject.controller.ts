@@ -8,18 +8,29 @@ import {
   Get,
 } from '@nestjs/common';
 
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SubjectService } from '../service/subject.service';
 import { CreateSubjectDto } from '../dto/createSubject.dto';
 
-@Controller('subject')
+@Controller('Digital-textbook/subject')
 @ApiTags('subject')
 export class SubjectController {
   constructor(private subjectService: SubjectService) {}
 
   @Post('/')
-  @ApiOkResponse({ description: 'Subject creacted successfully!' })
+  @ApiCreatedResponse({ description: 'Subject creacted successfully!' })
+  @ApiNotFoundResponse({ description: 'Invalid Class Id!' })
   @ApiBadRequestResponse({
+    description: 'Invalid data. Please try again',
+  })
+  @ApiInternalServerErrorResponse({
     description: 'Subject cannot be created. Please try again',
   })
   async addSubject(@Body() data: CreateSubjectDto) {
@@ -28,8 +39,8 @@ export class SubjectController {
 
   @Delete('/:id')
   @ApiOkResponse({ description: 'Subject delete successfully!' })
-  @ApiBadRequestResponse({
-    description: 'Subject cannot be delete. Please try again',
+  @ApiInternalServerErrorResponse({
+    description: 'Error while deleting subject!',
   })
   async deleteSubject(@Param('id') id: string) {
     return await this.subjectService.deleteSubject(id);
@@ -40,6 +51,9 @@ export class SubjectController {
   @ApiBadRequestResponse({
     description: 'Subject cannot be updated. Please try again',
   })
+  @ApiInternalServerErrorResponse({
+    description: 'Error while updating subject!',
+  })
   async updateSubject(
     @Param('id') id: string,
     @Param('subjectName') subjectName: string,
@@ -47,16 +61,21 @@ export class SubjectController {
     return await this.subjectService.updateSubject(id, subjectName);
   }
 
-  @Get(':id/subject')
+  @Get(':classId/subject')
   @ApiOkResponse({ description: 'Subject successfully found based on Class.' })
   @ApiBadRequestResponse({
     description: 'Subject not found based on Class. Please try again',
   })
-  async getSubject(@Param('id') id: string) {
-    return await this.subjectService.getSubjectByClass(id);
+  @ApiNotFoundResponse({ description: 'Invalid class. Try again!' })
+  async getSubject(@Param('classId') classId: string) {
+    return await this.subjectService.getSubjectByClass(classId);
   }
 
   @Get('/allSubject')
+  @ApiOkResponse({ description: 'Subject found!' })
+  @ApiNotFoundResponse({
+    description: 'Error while fetching subject!',
+  })
   async getAllSubject() {
     return await this.subjectService.getAllSubject();
   }

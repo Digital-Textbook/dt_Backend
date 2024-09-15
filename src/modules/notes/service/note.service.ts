@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -85,7 +86,13 @@ export class NoteService {
 
     notes.notes = updateNote.notes;
 
-    return await this.noteRepository.save(notes);
+    const result = await this.noteRepository.save(notes);
+
+    if (!result) {
+      throw new InternalServerErrorException('Error while updating notes!');
+    }
+
+    return notes;
   }
 
   async deleteNoteById(noteId: string) {

@@ -6,9 +6,19 @@ import {
   Patch,
   Delete,
   Get,
+  ParseUUIDPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { NoteService } from '../service/note.service';
 import { CreateNoteDto } from '../dto/note.dto';
 import { UpdateNoteDto } from '../dto/update-note.dto';
@@ -19,10 +29,15 @@ export class NoteController {
   constructor(private noteService: NoteService) {}
 
   @Post('/:userId')
-  @ApiOkResponse({ description: 'Notes successfully created!' })
-  @ApiBadRequestResponse({ description: 'Notes cannot be created!' })
+  @UsePipes(ValidationPipe)
+  @ApiCreatedResponse({ description: 'Notes successfully created!' })
+  @ApiBadRequestResponse({ description: 'Invalid data for notes!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while creating notes!',
+  })
+  @ApiNotFoundResponse({ description: 'User Id invalid!' })
   async createNote(
-    @Param('userId') userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Body() noteData: CreateNoteDto,
   ) {
     return await this.noteService.createNote(userId, noteData);
@@ -30,14 +45,19 @@ export class NoteController {
 
   @Get('/textbook/:textbookId')
   @ApiOkResponse({ description: 'Notes successfully found!' })
-  @ApiBadRequestResponse({ description: 'Notes not found!' })
+  @ApiBadRequestResponse({ description: 'Invalid textbook Id!' })
+  @ApiNotFoundResponse({ description: 'Textbook not found!' })
   async getNoteByTextbookId(@Param('textbookId') textbookId: string) {
     return await this.noteService.getNoteByTextbookId(textbookId);
   }
 
   @Patch('/textbook/:noteId')
   @ApiOkResponse({ description: 'Notes successfully updated!' })
-  @ApiBadRequestResponse({ description: 'Notes cannot be updated!' })
+  @ApiBadRequestResponse({ description: 'Invalid Note Id!' })
+  @ApiNotFoundResponse({ description: 'Notes not found! ' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while updating notes!',
+  })
   async updateNotesById(
     @Param('noteId') noteId: string,
     @Body() updateNote: UpdateNoteDto,
@@ -47,7 +67,10 @@ export class NoteController {
 
   @Delete('/:noteId')
   @ApiOkResponse({ description: 'Notes successfully deleted!' })
-  @ApiBadRequestResponse({ description: 'Notes cannot be deleted!' })
+  @ApiBadRequestResponse({ description: 'Invalid Note ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while deleting notes!',
+  })
   async deleteNoteById(@Param('noteId') noteId: string) {
     return await this.noteService.deleteNoteById(noteId);
   }
