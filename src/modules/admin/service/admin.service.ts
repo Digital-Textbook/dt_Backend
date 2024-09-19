@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -36,9 +37,32 @@ export class AdminService {
         },
       });
     } catch (error) {
-      throw new Error('Error retrieving Admins from the database');
+      throw new InternalServerErrorException(
+        'Error retrieving Admins from the database',
+      );
     }
   }
+
+  //   async getAllAdmin(): Promise<Admin[]> {
+  //     try {
+  //       const admins = await this.adminRepository.find({
+  //         where: {
+  //           roles: RoleType.ADMIN,
+  //         },
+  //       });
+
+  //       // Log the hashed password of each admin
+  //       admins.forEach((admin) => {
+  //         console.log(`Admin ${admin.name}: Hashed Password -> ${admin.password}`);
+  //       });
+
+  //       return admins;
+  //     } catch (error) {
+  //       throw new InternalServerErrorException(
+  //         'Error retrieving Admins from the database',
+  //       );
+  //     }
+  //   }
 
   async createNewAdmin(admin: CreateAdminDto) {
     const existingAdmin = await this.adminRepository.findOne({
