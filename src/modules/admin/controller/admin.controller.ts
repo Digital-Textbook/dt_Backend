@@ -28,8 +28,8 @@ import {
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(AuthGuard())
-@ApiBearerAuth()
+// @UseGuards(AuthGuard())
+// @ApiBearerAuth()
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
@@ -41,7 +41,6 @@ export class AdminController {
   @Post('/register')
   @ApiCreatedResponse({
     description: 'Admin registered successfully',
-    type: Admin,
   })
   @ApiBadRequestResponse({ description: 'Admin cannot be registered' })
   @UsePipes(ValidationPipe)

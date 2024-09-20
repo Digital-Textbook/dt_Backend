@@ -4,8 +4,6 @@ import { BufferedFile } from './file.model';
 import * as crypto from 'crypto';
 import { config } from './config';
 import { Stream } from 'stream';
-import * as Minio from 'minio';
-import { error } from 'console';
 
 @Injectable()
 export class MinioClientService {
@@ -32,20 +30,50 @@ export class MinioClientService {
     return hashedFileName + ext;
   }
 
-  private validateFile(file: BufferedFile, allowedMimeTypes: string[]): void {
+  private validateFile(
+    file: BufferedFile,
+    fileType: 'image' | 'document',
+  ): void {
     if (!file || !file.originalname || !file.mimetype || !file.buffer) {
       console.log('File object:', file);
       throw new HttpException('Invalid file', HttpStatus.BAD_REQUEST);
     }
 
     const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
-    const mimeType = file.mimetype.split('/').pop()?.toLowerCase();
+    const mimeType = file.mimetype.toLowerCase();
 
-    if (
-      !allowedMimeTypes.includes(fileExtension) ||
-      !allowedMimeTypes.includes(mimeType)
-    ) {
-      throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST);
+    console.log('File MIME type:', mimeType);
+    console.log('File extension:', fileExtension);
+
+    const allowedImageExtensions = ['jpeg', 'jpg', 'png'];
+    const allowedImageMimeTypes = ['image/jpeg', 'image/png'];
+
+    const allowedDocumentExtensions = ['pdf', 'epub'];
+    const allowedDocumentMimeTypes = [
+      'application/pdf',
+      'application/epub+zip',
+    ];
+
+    if (fileType === 'image') {
+      if (
+        !allowedImageExtensions.includes(fileExtension) ||
+        !allowedImageMimeTypes.includes(mimeType)
+      ) {
+        throw new HttpException(
+          'Invalid image file type',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } else if (fileType === 'document') {
+      if (
+        !allowedDocumentExtensions.includes(fileExtension) ||
+        !allowedDocumentMimeTypes.includes(mimeType)
+      ) {
+        throw new HttpException(
+          'Invalid document file type',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
   }
 
@@ -53,9 +81,7 @@ export class MinioClientService {
     file: BufferedFile,
     baseBucket: string = this.imageBucket,
   ) {
-    const allowedMimeTypes = ['jpeg', 'png', 'jpg'];
-
-    this.validateFile(file, allowedMimeTypes);
+    this.validateFile(file, 'image');
 
     const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;
@@ -90,9 +116,7 @@ export class MinioClientService {
     file: BufferedFile,
     baseBucket: string = this.baseBucket,
   ) {
-    const allowedMimeTypes = ['jpeg', 'png', 'pdf', 'epub'];
-
-    this.validateFile(file, allowedMimeTypes);
+    this.validateFile(file, 'document');
 
     const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;
@@ -167,7 +191,7 @@ export class MinioClientService {
   ) {
     const allowedMimeTypes = ['jpeg', 'png', 'jpg'];
 
-    this.validateFile(file, allowedMimeTypes);
+    this.validateFile(file, 'image');
 
     const filename = this.generateFileName(file.originalname);
     const fileBuffer = file.buffer;

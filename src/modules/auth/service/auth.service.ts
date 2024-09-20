@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -69,12 +70,18 @@ export class AuthService {
     }
   }
 
-  async adminSignIn(
-    admin: LoginAdminDto,
-  ): Promise<{ adminAccessToken: string }> {
+  async adminSignIn(admin: LoginAdminDto) {
     const existingAdmin = await this.adminRepository.findOne({
       where: { email: admin.email },
     });
+
+    if (!existingAdmin) {
+      throw new UnauthorizedException('Admin not found');
+    }
+
+    if (existingAdmin.isLoggedIn) {
+      throw new ConflictException('Admin already logged in to the system!');
+    }
 
     if (
       existingAdmin &&
@@ -82,7 +89,9 @@ export class AuthService {
     ) {
       const adminPayload: AdminJwtPayload = { email: existingAdmin.email };
       const adminAccessToken: string = await this.jwtService.sign(adminPayload);
-      return { adminAccessToken };
+      existingAdmin.isLoggedIn = true;
+      await this.adminRepository.save(existingAdmin);
+      return { adminAccessToken, existingAdmin };
     } else {
       throw new UnauthorizedException('Please check your login credentials');
     }

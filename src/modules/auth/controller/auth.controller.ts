@@ -10,7 +10,13 @@ import {
 import { AuthService } from '../service/auth.service';
 import { LoginUserDto } from '../dto/loginUser.dto';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Users } from 'src/modules/user/entities/users.entity';
 
 @Controller('auth')
@@ -31,10 +37,12 @@ export class AuthController {
   @Post('/admin/login')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Admin successfully login!' })
-  @ApiBadRequestResponse({ description: 'Admin cannot login!' })
-  async adminSignIn(
-    @Body() adminSignInData: LoginAdminDto,
-  ): Promise<{ adminAccessToken }> {
+  @ApiBadRequestResponse({ description: 'Invalid admin data!' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized admin user!' })
+  @ApiConflictResponse({
+    description: 'User already logged in another devices!',
+  })
+  async adminSignIn(@Body() adminSignInData: LoginAdminDto) {
     return await this.authService.adminSignIn(adminSignInData);
   }
 
