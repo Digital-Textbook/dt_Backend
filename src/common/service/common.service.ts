@@ -141,37 +141,22 @@ export class CommonService {
 
   ///////////////////
   async getAllSubject() {
-    const classes = await this.classRepository.find();
+    const classes = await this.classRepository.find({
+      select: ['id', 'class'],
+      relations: ['subjects'],
+    });
 
     if (!classes || classes.length === 0) {
       throw new NotFoundException('Empty class in database!');
     }
-    const subjectPromises = classes.map(async (classItem) => {
-      const subjects = await this.subjectRepository.find({
-        where: { class: { id: classItem.id } },
-        select: ['subjectName', 'id'],
-      });
 
-      return {
-        classId: classItem.id,
-        className: classItem.class,
-        subjects: subjects,
-      };
-    });
-
-    const subjectsByClass = await Promise.all(subjectPromises);
-
-    const responseData = subjectsByClass.flatMap((classData) =>
-      classData.subjects.map((subject) => ({
-        classId: classData.classId,
-        className: classData.className,
+    return classes.map((cls) => ({
+      classId: cls.id,
+      className: cls.class,
+      subjects: cls.subjects.map((subject) => ({
         id: subject.id,
         subjectName: subject.subjectName,
       })),
-    );
-
-    return {
-      data: responseData,
-    };
+    }));
   }
 }
