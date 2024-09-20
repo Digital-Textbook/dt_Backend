@@ -4,7 +4,7 @@
       "path": ".",
     },
     {
-      "path": "../dt_admin/dt-dashboard",
+      "path": "../admin_dashboard",
     },
   ],
   "settings": {},

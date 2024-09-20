@@ -94,4 +94,69 @@ export class CommonService {
   private isValidClassId(classId: string): boolean {
     return isUUID(classId);
   }
+
+  //   async getAllSubjectByClassName(className?: string) {
+  //     const query = this.classRepository
+  //       .createQueryBuilder('class')
+  //       .select(['class.id', 'class.class']);
+
+  //     if (className) {
+  //       query.where('class.class = :class', { class: className });
+  //     }
+
+  //     const classes = await query.getMany();
+
+  //     if (!classes || classes.length === 0) {
+  //       throw new NotFoundException('No class found!');
+  //     }
+
+  //     const subjectPromises = classes.map(async (classItem) => {
+  //       const subjects = await this.subjectRepository.find({
+  //         where: { class: { id: classItem.id } },
+  //         select: ['subjectName', 'id'],
+  //       });
+
+  //       return {
+  //         classId: classItem.id,
+  //         className: classItem.class,
+  //         subjects: subjects,
+  //       };
+  //     });
+
+  //     const subjectsByClass = await Promise.all(subjectPromises);
+
+  //     const responseData = subjectsByClass.flatMap((classData) =>
+  //       classData.subjects.map((subject) => ({
+  //         classId: classData.classId,
+  //         className: classData.className,
+  //         id: subject.id,
+  //         subjectName: subject.subjectName,
+  //       })),
+  //     );
+
+  //     return {
+  //       data: responseData,
+  //     };
+  //   }
+
+  ///////////////////
+  async getAllSubject() {
+    const classes = await this.classRepository.find({
+      select: ['id', 'class'],
+      relations: ['subjects'],
+    });
+
+    if (!classes || classes.length === 0) {
+      throw new NotFoundException('Empty class in database!');
+    }
+
+    return classes.map((cls) => ({
+      classId: cls.id,
+      className: cls.class,
+      subjects: cls.subjects.map((subject) => ({
+        id: subject.id,
+        subjectName: subject.subjectName,
+      })),
+    }));
+  }
 }

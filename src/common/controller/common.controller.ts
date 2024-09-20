@@ -46,4 +46,18 @@ export class CommonController {
   async getSubjectByClass(@Param('classId') classId: string) {
     return await this.commonService.getSubjectByClass(classId);
   }
+
+  //   @Get('/subject/:className')
+  //   @ApiOkResponse({ description: 'Subject found!' })
+  //   @ApiBadRequestResponse({ description: 'Subject not found!' })
+  //   async getAllSubjectByClassName(@Param('className') className: string) {
+  //     return await this.commonService.getAllSubjectByClassName(className);
+  //   }
+
+  @Get('/subject')
+  @ApiOkResponse({ description: 'Subject found!' })
+  @ApiBadRequestResponse({ description: 'Subject not found!' })
+  async getAllSubject() {
+    return await this.commonService.getAllSubject();
+  }
 }
