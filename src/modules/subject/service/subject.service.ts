@@ -80,12 +80,18 @@ export class SubjectService {
   async getAllSubject() {
     const subjects = await this.subjectRepository.find({
       relations: ['class'],
+      select: ['subjectName', 'id'],
     });
 
     if (!subjects || subjects.length === 0) {
       throw new NotFoundException('There are no subjects in the database!');
     }
 
-    return subjects;
+    return subjects.map((subject) => ({
+      className: subject.class.class,
+      classId: subject.class.id,
+      subjectName: subject.subjectName,
+      subjectId: subject.id,
+    }));
   }
 }
