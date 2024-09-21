@@ -61,5 +61,5 @@ export class CreateTextbookDto {
   })
   @IsNotEmpty({ message: 'Subject ID is required!' })
   @IsString({ message: 'Subject ID be string' })
-  subjectID: string;
+  subjectId: string;
 }

@@ -32,7 +32,9 @@ export class TextbookService {
     textbookFile: BufferedFile,
   ) {
     try {
-      if (!isUUID(data.subjectID)) {
+      console.log('Subject Data::: ', data);
+      console.log('Subject Data::: ', data.subjectId);
+      if (!isUUID(data.subjectId)) {
         throw new BadRequestException('Invalid subject ID format');
       }
 
@@ -43,7 +45,7 @@ export class TextbookService {
         await this.minioClientService.uploadTextbook(textbookFile);
 
       const subject = await this.subjectRepository.findOne({
-        where: { id: data.subjectID },
+        where: { id: data.subjectId },
       });
 
       if (!subject) {

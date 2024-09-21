@@ -94,4 +94,15 @@ export class SubjectService {
       subjectId: subject.id,
     }));
   }
+
+  async getAllClass() {
+    const classes = await this.classRepository.find({
+      select: ['id', 'class'],
+    });
+
+    if (!classes || classes.length === 0) {
+      throw new NotFoundException('There are no classes in the database!');
+    }
+    return classes;
+  }
 }

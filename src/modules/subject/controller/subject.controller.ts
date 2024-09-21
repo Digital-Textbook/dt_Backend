@@ -79,4 +79,13 @@ export class SubjectController {
   async getAllSubject() {
     return await this.subjectService.getAllSubject();
   }
+
+  @Get('/class')
+  @ApiOkResponse({ description: 'Classes not found in database!' })
+  @ApiNotFoundResponse({
+    description: 'Error while fetching classes!',
+  })
+  async getAllClass() {
+    return await this.subjectService.getAllClass();
+  }
 }
