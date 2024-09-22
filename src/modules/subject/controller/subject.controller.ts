@@ -71,7 +71,7 @@ export class SubjectController {
     return await this.subjectService.getSubjectByClass(classId);
   }
 
-  @Get('/allSubject')
+  @Get('/')
   @ApiOkResponse({ description: 'Subject found!' })
   @ApiNotFoundResponse({
     description: 'Error while fetching subject!',
@@ -87,5 +87,14 @@ export class SubjectController {
   })
   async getAllClass() {
     return await this.subjectService.getAllClass();
+  }
+
+  @Get('/:id')
+  @ApiOkResponse({ description: 'Subject data not found in database!' })
+  @ApiNotFoundResponse({
+    description: 'Error while fetching subject data!',
+  })
+  async getSubjectById(@Param('id') id: string) {
+    return await this.subjectService.getSubjectById(id);
   }
 }

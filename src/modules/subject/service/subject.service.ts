@@ -91,7 +91,7 @@ export class SubjectService {
       className: subject.class.class,
       classId: subject.class.id,
       subjectName: subject.subjectName,
-      subjectId: subject.id,
+      id: subject.id,
     }));
   }
 
@@ -104,5 +104,24 @@ export class SubjectService {
       throw new NotFoundException('There are no classes in the database!');
     }
     return classes;
+  }
+
+  async getSubjectById(id: string) {
+    const subjects = await this.subjectRepository.findOne({
+      where: { id: id },
+      relations: ['class'],
+      select: ['subjectName', 'id'],
+    });
+
+    if (!subjects) {
+      throw new NotFoundException(`Subject not found with ID ${id}`);
+    }
+
+    return {
+      class: subjects.class.class,
+      classId: subjects.class.id,
+      subjectName: subjects.subjectName,
+      id: subjects.id,
+    };
   }
 }
