@@ -92,16 +92,22 @@ export class Textbook extends BaseEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @ManyToOne(() => Subject, (subjects) => subjects.textbooks)
+  @ManyToOne(() => Subject, (subjects) => subjects.textbooks, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   subject: Subject;
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.textbook)
-  bookmark: Bookmark;
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.textbook, {
+    cascade: ['remove'],
+  })
+  bookmark: Bookmark[];
 
-  @OneToMany(() => ScreenTime, (screenTime) => screenTime.textbook)
+  @OneToMany(() => ScreenTime, (screenTime) => screenTime.textbook, {
+    cascade: ['remove'],
+  })
   screenTime: ScreenTime;
 
-  @OneToMany(() => Notes, (notes) => notes.textbook)
+  @OneToMany(() => Notes, (notes) => notes.textbook, { cascade: ['remove'] })
   notes: Notes;
 }

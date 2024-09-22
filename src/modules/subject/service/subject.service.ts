@@ -42,7 +42,7 @@ export class SubjectService {
     return { msg: 'Subject successfully deleted!' };
   }
 
-  async updateSubject(id: string, name: string) {
+  async updateSubject(id: string, subjectData: CreateSubjectDto) {
     const subject = await this.subjectRepository.findOne({
       where: { id },
       relations: ['class'],
@@ -52,7 +52,18 @@ export class SubjectService {
       throw new NotFoundException(`Subject with ID ${id} not found!`);
     }
 
-    subject.subjectName = name;
+    const classEntity = await this.classRepository.findOne({
+      where: { id: subjectData.classId },
+    });
+
+    if (!classEntity) {
+      throw new NotFoundException(
+        `Class with ID ${subjectData.classId} not found!`,
+      );
+    }
+
+    subject.subjectName = subjectData.subjectName;
+    subject.class = classEntity;
 
     const result = await this.subjectRepository.save(subject);
 

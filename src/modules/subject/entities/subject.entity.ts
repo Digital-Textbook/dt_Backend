@@ -35,9 +35,13 @@ export class Subject extends BaseEntity {
   @ManyToOne(() => Class, (classEntity) => classEntity.subjects)
   class: Class;
 
-  @OneToMany(() => PastQuestionPaper, (question) => question.subject)
+  @OneToMany(() => PastQuestionPaper, (question) => question.subject, {
+    cascade: ['remove'],
+  })
   question: PastQuestionPaper;
 
-  @OneToMany(() => Textbook, (textbooks) => textbooks.subject)
+  @OneToMany(() => Textbook, (textbooks) => textbooks.subject, {
+    cascade: ['remove'],
+  })
   textbooks: Textbook;
 }

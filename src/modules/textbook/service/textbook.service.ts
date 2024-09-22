@@ -17,6 +17,9 @@ import { Subject } from 'src/modules/subject/entities/subject.entity';
 import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
 import { text } from 'stream/consumers';
 import { isUUID } from 'class-validator';
+import { Bookmark } from 'src/modules/bookmark/entities/bookmark.entities';
+import { Notes } from 'src/modules/notes/entities/note.entities';
+import { ScreenTime } from 'src/modules/bookmark/entities/screen-time.entities';
 
 @Injectable()
 export class TextbookService {
@@ -25,6 +28,12 @@ export class TextbookService {
     private textbookRepository: Repository<Textbook>,
     @InjectRepository(Subject) private subjectRepository: Repository<Subject>,
     private minioClientService: MinioClientService,
+    @InjectRepository(Bookmark)
+    private bookmarkRepository: Repository<Bookmark>,
+    @InjectRepository(Notes)
+    private noteRepository: Repository<Notes>,
+    @InjectRepository(ScreenTime)
+    private screenTimeRepository: Repository<ScreenTime>,
   ) {}
   async createTextbook(
     data: CreateTextbookDto,
@@ -176,6 +185,15 @@ export class TextbookService {
   //////////////////// DELETE PNG OR PDF ///////////////
 
   async deleteTextbook(id: string) {
+    // Delete bookmarks associated to textbook
+    await this.bookmarkRepository.delete({ textbook: { id } });
+
+    // Delete notes associated to textbook
+    await this.noteRepository.delete({ textbook: { id } });
+
+    // Delete screen time associated to textbook
+    await this.screenTimeRepository.delete({ textbook: { id } });
+
     const result = await this.textbookRepository.delete(id);
 
     if (result.affected === 0) {
@@ -184,7 +202,9 @@ export class TextbookService {
       );
     }
 
-    return { msg: 'Textbook deleted successfully!' };
+    return {
+      msg: 'Textbook and associated bookmarks and notes deleted successfully!',
+    };
   }
 
   //////////////////// GET TEXTBOOK BY ID ///////////////

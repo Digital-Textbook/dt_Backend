@@ -50,7 +50,9 @@ export class ScreenTime extends BaseEntity {
   @JoinColumn()
   user: Users;
 
-  @ManyToOne(() => Textbook, (textbook) => textbook.screenTime)
+  @ManyToOne(() => Textbook, (textbook) => textbook.screenTime, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   textbook: Textbook;
 }
