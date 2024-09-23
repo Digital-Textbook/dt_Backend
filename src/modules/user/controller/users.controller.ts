@@ -23,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateRegisterDto } from '../dto/createRegister.dto';
+import { UpdateUserDto } from '../dto/updateUser.dto';
 
 @ApiTags('users')
 @Controller('Digital-textbook/user')
@@ -106,9 +107,13 @@ export class UserController {
   @ApiInternalServerErrorResponse({
     description: 'Internal server code while updating user!',
   })
+  @ApiNotFoundResponse({ description: 'User not found!' })
   @UsePipes(ValidationPipe)
-  async updateUser(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.userService.deleteUserById(id);
+  async updateUser(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() userData: UpdateUserDto,
+  ) {
+    return await this.userService.updateUserById(id, userData);
   }
 
   /////////////////////////////// Delete By Admin //////////////////////
