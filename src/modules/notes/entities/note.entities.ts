@@ -45,7 +45,7 @@ export class Notes extends BaseEntity {
   })
   notes: string;
 
-  @ManyToOne(() => Users, (user) => user.notes)
+  @ManyToOne(() => Users, (user) => user.notes, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Users;
 

@@ -191,9 +191,7 @@ export class UserService {
     }
 
     const dateOfBirth = censusData.dob.split('/').reverse().join('-');
-
     const gender = censusData.gender === 'M' ? Gender.MALE : Gender.FEMALE;
-
     const contactNo = censusData.mobileNumber;
 
     const citizenDto = {
@@ -343,5 +341,34 @@ export class UserService {
       );
     }
     return { user, message: 'OTP sent successfully!' };
+  }
+
+  ////////////////////////// Update By Admin ///////////////////
+
+  ////////////////////////// Delete By Admin //////////////////
+  async deleteUserById(id: string) {
+    const result = await this.usersRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new InternalServerErrorException(
+        `Error while deleting User with ID ${id}!`,
+      );
+    }
+
+    return {
+      msg: 'User and associated bookmarks, user profile, otp, screen time  and notes deleted successfully!',
+    };
+  }
+
+  async getAllUser() {
+    const users = await this.usersRepository.find({
+      select: ['name', 'email', 'cidNo', 'mobileNo', 'userType'],
+    });
+
+    if (!users || users.length === 0) {
+      throw new NotFoundException('User not found in database!');
+    }
+
+    return users;
   }
 }

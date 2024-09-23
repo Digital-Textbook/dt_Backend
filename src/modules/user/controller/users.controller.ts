@@ -6,6 +6,11 @@ import {
   Patch,
   BadRequestException,
   HttpCode,
+  Delete,
+  UsePipes,
+  ValidationPipe,
+  ParseUUIDPipe,
+  Get,
 } from '@nestjs/common';
 import { UserService } from '../service/users.service';
 import {
@@ -19,7 +24,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateRegisterDto } from '../dto/createRegister.dto';
 
-@ApiTags('user')
+@ApiTags('users')
 @Controller('Digital-textbook/user')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -92,5 +97,40 @@ export class UserController {
   })
   async registerByPermit(@Body() userData: CreateRegisterDto) {
     return await this.userService.register(userData);
+  }
+
+  ////////////////////////////// User Update by Admin //////////////////////
+  @Patch('/:id')
+  @ApiOkResponse({ description: 'User updated successfully.' })
+  @ApiBadRequestResponse({ description: 'Invalid user data!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server code while updating user!',
+  })
+  @UsePipes(ValidationPipe)
+  async updateUser(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.deleteUserById(id);
+  }
+
+  /////////////////////////////// Delete By Admin //////////////////////
+  @Delete('/:id')
+  @ApiOkResponse({ description: 'User deleted successfully.' })
+  @ApiBadRequestResponse({ description: 'Invalid User ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while deleting user!',
+  })
+  @UsePipes(ValidationPipe)
+  async deleteAdmin(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.deleteUserById(id);
+  }
+
+  ///////////////////////////// Get All User By Admin ///////////////
+  @Get('/')
+  @ApiOkResponse({ description: 'User successfully fetch from database!' })
+  @ApiBadRequestResponse({ description: 'Invalid User ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching user!',
+  })
+  async getAllUser() {
+    return await this.userService.getAllUser();
   }
 }
