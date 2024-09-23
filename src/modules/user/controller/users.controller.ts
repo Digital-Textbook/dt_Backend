@@ -138,4 +138,14 @@ export class UserController {
   async getAllUser() {
     return await this.userService.getAllUser();
   }
+
+  @Get('/:id')
+  @ApiOkResponse({ description: 'User successfully fetch from database!' })
+  @ApiBadRequestResponse({ description: 'Invalid User ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching user!',
+  })
+  async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.getUserById(id);
+  }
 }

@@ -383,4 +383,17 @@ export class UserService {
 
     return users;
   }
+
+  async getUserById(id: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'cidNo', 'mobileNo', 'userType', 'email'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found!`);
+    }
+
+    return user;
+  }
 }
