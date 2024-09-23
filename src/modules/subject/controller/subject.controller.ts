@@ -46,7 +46,7 @@ export class SubjectController {
     return await this.subjectService.deleteSubject(id);
   }
 
-  @Patch(':id/subject/:subjectName')
+  @Patch('/:id')
   @ApiOkResponse({ description: 'Subject updated successfully!' })
   @ApiBadRequestResponse({
     description: 'Subject cannot be updated. Please try again',
@@ -56,9 +56,9 @@ export class SubjectController {
   })
   async updateSubject(
     @Param('id') id: string,
-    @Param('subjectName') subjectName: string,
+    @Body() subjectData: CreateSubjectDto,
   ) {
-    return await this.subjectService.updateSubject(id, subjectName);
+    return await this.subjectService.updateSubject(id, subjectData);
   }
 
   @Get(':classId/subject')

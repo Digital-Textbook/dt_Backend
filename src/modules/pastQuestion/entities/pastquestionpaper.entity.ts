@@ -36,7 +36,9 @@ export class PastQuestionPaper {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Subject, (subject) => subject.question)
+  @ManyToOne(() => Subject, (subject) => subject.question, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   subject: Subject;
 }

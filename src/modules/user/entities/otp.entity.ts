@@ -31,7 +31,7 @@ export class OtpEntity extends BaseEntity {
   })
   updatedAt: Date;
 
-  @OneToOne(() => Users, (user) => user.otp)
+  @OneToOne(() => Users, (user) => user.otp, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Users;
 }

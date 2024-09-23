@@ -44,11 +44,13 @@ export class Bookmark extends BaseEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.bookmark)
+  @ManyToOne(() => Users, (user) => user.bookmark, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Users;
 
-  @ManyToOne(() => Textbook, (textbook) => textbook.bookmark)
+  @ManyToOne(() => Textbook, (textbook) => textbook.bookmark, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   textbook: Textbook;
 }

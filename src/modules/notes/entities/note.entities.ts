@@ -45,11 +45,13 @@ export class Notes extends BaseEntity {
   })
   notes: string;
 
-  @ManyToOne(() => Users, (user) => user.notes)
+  @ManyToOne(() => Users, (user) => user.notes, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Users;
 
-  @ManyToOne(() => Textbook, (textbook) => textbook.notes)
+  @ManyToOne(() => Textbook, (textbook) => textbook.notes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   textbook: Textbook;
 }

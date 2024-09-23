@@ -17,6 +17,9 @@ import { HttpModule } from '@nestjs/axios';
 import { DataHubApiService } from '../user/service/datahub.service';
 import { AdminOtp } from '../admin/entities/admin-otp.entity';
 import * as session from 'express-session';
+import { Notes } from '../notes/entities/note.entities';
+import { ScreenTime } from '../bookmark/entities/screen-time.entities';
+import { Bookmark } from '../bookmark/entities/bookmark.entities';
 
 @Module({
   imports: [
@@ -28,7 +31,16 @@ import * as session from 'express-session';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, Users, UserProfile, OtpEntity, AdminOtp]),
+    TypeOrmModule.forFeature([
+      Admin,
+      Users,
+      UserProfile,
+      OtpEntity,
+      AdminOtp,
+      Notes,
+      ScreenTime,
+      Bookmark,
+    ]),
   ],
   controllers: [UserController, AdminController, AuthController],
   providers: [

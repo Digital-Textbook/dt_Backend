@@ -102,18 +102,24 @@ export class Users extends BaseEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @OneToOne(() => OtpEntity, (otp) => otp.user)
+  @OneToOne(() => OtpEntity, (otp) => otp.user, { cascade: ['remove'] })
   otp: OtpEntity;
 
-  @OneToOne(() => UserProfile, (profile) => profile.user)
+  @OneToOne(() => UserProfile, (profile) => profile.user, {
+    cascade: ['remove'],
+  })
   profile: UserProfile;
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user, {
+    cascade: ['remove'],
+  })
   bookmark: Bookmark;
 
-  @OneToMany(() => ScreenTime, (screenTime) => screenTime.user)
+  @OneToMany(() => ScreenTime, (screenTime) => screenTime.user, {
+    cascade: ['remove'],
+  })
   screenTime: ScreenTime;
 
-  @OneToMany(() => Notes, (notes) => notes.user)
+  @OneToMany(() => Notes, (notes) => notes.user, { cascade: ['remove'] })
   notes: Notes;
 }

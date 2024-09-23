@@ -46,11 +46,13 @@ export class ScreenTime extends BaseEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.screenTime)
+  @ManyToOne(() => Users, (user) => user.screenTime, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Users;
 
-  @ManyToOne(() => Textbook, (textbook) => textbook.screenTime)
+  @ManyToOne(() => Textbook, (textbook) => textbook.screenTime, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   textbook: Textbook;
 }

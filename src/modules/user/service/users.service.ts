@@ -20,6 +20,7 @@ import { DataHubApiService } from './datahub.service';
 import { userType } from 'src/constants/user-type';
 import { Status } from 'src/constants/status';
 import { CreateRegisterDto } from '../dto/createRegister.dto';
+import { UpdateUserDto } from '../dto/updateUser.dto';
 
 @Injectable()
 export class UserService {
@@ -191,9 +192,7 @@ export class UserService {
     }
 
     const dateOfBirth = censusData.dob.split('/').reverse().join('-');
-
     const gender = censusData.gender === 'M' ? Gender.MALE : Gender.FEMALE;
-
     const contactNo = censusData.mobileNumber;
 
     const citizenDto = {
@@ -343,5 +342,45 @@ export class UserService {
       );
     }
     return { user, message: 'OTP sent successfully!' };
+  }
+
+  ////////////////////////// Update By Admin ///////////////////
+  async updateUserById(id: string, userData: UpdateUserDto) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    Object.assign(user, userData);
+
+    return await this.usersRepository.save(user);
+  }
+  ////////////////////////// Delete By Admin //////////////////
+  async deleteUserById(id: string) {
+    const result = await this.usersRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new InternalServerErrorException(
+        `Error while deleting User with ID ${id}!`,
+      );
+    }
+
+    return {
+      msg: 'User and associated bookmarks, user profile, otp, screen time  and notes deleted successfully!',
+    };
+  }
+
+  async getAllUser() {
+    const users = await this.usersRepository.find({
+      select: ['id', 'name', 'cidNo', 'email', 'mobileNo', 'userType'],
+    });
+
+    if (!users || users.length === 0) {
+      throw new NotFoundException('User not found in database!');
+    }
+
+    return users;
   }
 }
