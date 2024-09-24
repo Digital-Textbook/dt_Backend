@@ -23,7 +23,7 @@ export class UpdateAdminDto {
     example: '17543213',
   })
   @IsOptional()
-  @IsInt()
+  @IsString()
   mobile_no?: string;
 
   @ApiProperty({
@@ -45,12 +45,4 @@ export class UpdateAdminDto {
   @IsOptional()
   @IsArray()
   permission?: string[];
-
-  //   @ApiProperty({
-  //     description: 'Password is required',
-  //     example: 'Password#76',
-  //   })
-  //   @IsOptional()
-  //   @IsString()
-  //   password?: string;
 }
