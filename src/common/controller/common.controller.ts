@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Patch,
-  Get,
-  UsePipes,
-  ValidationPipe,
-  ParseUUIDPipe,
-  Post,
-  HttpCode,
-} from '@nestjs/common';
+import { Controller, Param, Get } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
@@ -19,7 +8,7 @@ import {
 import { CommonService } from '../service/common.service';
 
 @ApiTags('common')
-@Controller('Digital-textbook/common')
+@Controller('digital-textbook/common')
 export class CommonController {
   constructor(private commonService: CommonService) {}
 
@@ -59,5 +48,12 @@ export class CommonController {
   @ApiBadRequestResponse({ description: 'Subject not found!' })
   async getAllSubject() {
     return await this.commonService.getAllSubject();
+  }
+
+  @Get('/dzongkhag')
+  @ApiOkResponse({ description: 'Dzongkhag found!' })
+  @ApiBadRequestResponse({ description: 'Invalid data!' })
+  async getDzongkhag() {
+    return await this.commonService.getDzongkhag();
   }
 }

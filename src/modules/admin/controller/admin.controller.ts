@@ -26,8 +26,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
-@ApiTags('Admin')
-@Controller('admin')
+@ApiTags('admin')
+@Controller('digital-textbook/admin')
 // @UseGuards(AuthGuard())
 // @ApiBearerAuth()
 export class AdminController {
@@ -93,7 +93,7 @@ export class AdminController {
     return await this.adminService.verifyByEmail(id, otp);
   }
 
-  @Post(':id/reset-password-byEmail/:password')
+  @Post(':id/reset-password-by-email/:password')
   @ApiOkResponse({ description: 'Reset password is successfully done.' })
   @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
   async resetPasswordByEmail(

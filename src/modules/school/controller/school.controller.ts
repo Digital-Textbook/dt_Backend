@@ -24,8 +24,8 @@ import { SchoolService } from '../service/school.service';
 import { CreateSchoolDto } from '../dto/school.dto';
 import { UpdateSchoolDto } from '../dto/updateSchool.dto';
 
-@Controller('Digital-textbook/school')
 @ApiTags('school')
+@Controller('digital-textbook/school')
 export class SchoolController {
   constructor(private schoolService: SchoolService) {}
 
@@ -87,5 +87,18 @@ export class SchoolController {
   @ApiNotFoundResponse({ description: 'School not found!' })
   async getSchoolById(@Param('schoolId', ParseUUIDPipe) schoolId: string) {
     return await this.schoolService.getSchoolById(schoolId);
+  }
+
+  @Get('/')
+  @ApiOkResponse({ description: 'School successfully found.' })
+  @ApiBadRequestResponse({
+    description: 'Invalid data. Please try again',
+  })
+  @ApiNotFoundResponse({ description: 'School not found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching school',
+  })
+  async getAllSchool() {
+    return await this.schoolService.getAllSchool();
   }
 }

@@ -22,8 +22,8 @@ import {
 import { BookmarkService } from '../service/bookmark.service';
 import { CreateBookmarkDto } from '../dto/bookmark.dto';
 
-@Controller('Digital-textbook/bookmark')
 @ApiTags('bookmark')
+@Controller('digital-textbook/bookmark')
 export class BookmarkController {
   constructor(private bookmarkService: BookmarkService) {}
 

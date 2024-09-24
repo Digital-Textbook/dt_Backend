@@ -19,8 +19,8 @@ import {
 import { SubjectService } from '../service/subject.service';
 import { CreateSubjectDto } from '../dto/createSubject.dto';
 
-@Controller('Digital-textbook/subject')
 @ApiTags('subject')
+@Controller('digital-textbook/subject')
 export class SubjectController {
   constructor(private subjectService: SubjectService) {}
 

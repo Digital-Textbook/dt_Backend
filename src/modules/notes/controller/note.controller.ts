@@ -23,8 +23,8 @@ import { NoteService } from '../service/note.service';
 import { CreateNoteDto } from '../dto/note.dto';
 import { UpdateNoteDto } from '../dto/update-note.dto';
 
-@Controller('Digital-textbook/notes')
 @ApiTags('notes')
+@Controller('digital-textbook/notes')
 export class NoteController {
   constructor(private noteService: NoteService) {}
 
