@@ -83,6 +83,10 @@ export class AuthService {
       throw new ConflictException('Admin already logged in to the system!');
     }
 
+    if (existingAdmin.status === 'inactive') {
+      throw new UnauthorizedException('Please verify your account');
+    }
+
     if (
       existingAdmin &&
       (await bcrypt.compare(admin.password, existingAdmin.password))

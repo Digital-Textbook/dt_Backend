@@ -87,16 +87,22 @@ export class SchoolService {
   }
 
   async getSchoolById(id: string) {
-    const school = await this.schoolRepository.findOne({
+    const schools = await this.schoolRepository.findOne({
       where: { id: id },
       relations: ['dzongkhag'],
+      select: ['id', 'schoolName'],
     });
 
-    if (!school) {
+    if (!schools) {
       throw new NotFoundException(`School with ID ${id} not found`);
     }
 
-    return school;
+    return {
+      id: schools.id,
+      name: schools.schoolName,
+      dzongkhag: schools.dzongkhag.name,
+      DzongkhagId: schools.dzongkhag.id,
+    };
   }
 
   async getAllSchool() {
