@@ -19,8 +19,8 @@ import {
 } from '@nestjs/swagger';
 import { Users } from 'src/modules/user/entities/users.entity';
 
-@Controller('auth')
 @ApiTags('auth')
+@Controller('digital-textbook/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

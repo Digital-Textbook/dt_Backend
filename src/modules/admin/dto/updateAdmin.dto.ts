@@ -23,22 +23,26 @@ export class UpdateAdminDto {
     example: '17543213',
   })
   @IsOptional()
-  @IsInt()
+  @IsString()
   mobile_no?: string;
 
+  @ApiProperty({
+    description: 'Roles is required',
+    example: 'ADMIN',
+  })
   @IsOptional()
   @IsString()
   roles?: string;
 
-  @IsOptional()
-  @IsArray()
-  permission?: string[];
-
   @ApiProperty({
-    description: 'Password is required',
-    example: 'Password#76',
+    description: 'Status is required',
+    example: 'active',
   })
   @IsOptional()
   @IsString()
-  password?: string;
+  status?: string;
+
+  @IsOptional()
+  @IsArray()
+  permission?: string[];
 }

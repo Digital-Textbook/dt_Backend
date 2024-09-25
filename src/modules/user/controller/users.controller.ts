@@ -26,20 +26,20 @@ import { CreateRegisterDto } from '../dto/createRegister.dto';
 import { UpdateUserDto } from '../dto/updateUser.dto';
 
 @ApiTags('users')
-@Controller('Digital-textbook/user')
+@Controller('digital-textbook/user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post(':id/VerifyOtpEmail/:otp')
-  @ApiOkResponse({ description: 'OTP is successfully verified.' })
-  @ApiBadRequestResponse({ description: 'Invalid otp.' })
-  @ApiNotFoundResponse({ description: 'User not found!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while verifying otp!',
-  })
-  async verifyByEmail(@Param('id') id: string, @Param('otp') otp: string) {
-    return await this.userService.verifyByEmail(id, otp);
-  }
+  //   @Post(':id/VerifyOtpEmail/:otp')
+  //   @ApiOkResponse({ description: 'OTP is successfully verified.' })
+  //   @ApiBadRequestResponse({ description: 'Invalid otp.' })
+  //   @ApiNotFoundResponse({ description: 'User not found!' })
+  //   @ApiInternalServerErrorResponse({
+  //     description: 'Internal server error while verifying otp!',
+  //   })
+  //   async verifyByEmail(@Param('id') id: string, @Param('otp') otp: string) {
+  //     return await this.userService.verifyByEmail(id, otp);
+  //   }
 
   @Post('/forgot-password/:email')
   @ApiOkResponse({ description: 'OTP is successfully send.' })
@@ -137,5 +137,15 @@ export class UserController {
   })
   async getAllUser() {
     return await this.userService.getAllUser();
+  }
+
+  @Get('/:id')
+  @ApiOkResponse({ description: 'User successfully fetch from database!' })
+  @ApiBadRequestResponse({ description: 'Invalid User ID!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching user!',
+  })
+  async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.userService.getUserById(id);
   }
 }

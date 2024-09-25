@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { School } from '../entities/school.entity';
 import { CreateSchoolDto } from '../dto/school.dto';
@@ -87,15 +87,44 @@ export class SchoolService {
   }
 
   async getSchoolById(id: string) {
-    const school = await this.schoolRepository.findOne({
+    const schools = await this.schoolRepository.findOne({
       where: { id: id },
       relations: ['dzongkhag'],
+      select: ['id', 'schoolName'],
     });
 
-    if (!school) {
+    if (!schools) {
       throw new NotFoundException(`School with ID ${id} not found`);
     }
 
-    return school;
+    return {
+      id: schools.id,
+      name: schools.schoolName,
+      dzongkhag: schools.dzongkhag.name,
+      DzongkhagId: schools.dzongkhag.id,
+    };
+  }
+
+  async getAllSchool() {
+    const schools = await this.schoolRepository.find({
+      relations: ['dzongkhag'],
+      select: ['id', 'schoolName'],
+    });
+
+    if (!schools || schools.length === 0) {
+      throw new InternalServerErrorException(
+        'Internal server error while fetching schools!',
+      );
+    }
+
+    return schools.map((school) => {
+      const dzongkhagName = school.dzongkhag?.name || 'N/A';
+
+      return {
+        id: school.id,
+        name: school.schoolName,
+        dzongkhag: dzongkhagName,
+      };
+    });
   }
 }

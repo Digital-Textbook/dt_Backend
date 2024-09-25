@@ -35,8 +35,8 @@ import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
 import { Response } from 'express';
 
-@Controller('Digital-textbook/textbook')
 @ApiTags('textbook')
+@Controller('digital-textbook/textbook')
 export class TextbookController {
   constructor(
     private textbookService: TextbookService,

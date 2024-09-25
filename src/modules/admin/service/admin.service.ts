@@ -29,12 +29,10 @@ export class AdminService {
     @InjectRepository(AdminOtp) private otpRepository: Repository<AdminOtp>,
   ) {}
 
-  async getAllAdmin(): Promise<Admin[]> {
+  async getAllAdmin() {
     try {
       return await this.adminRepository.find({
-        where: {
-          roles: RoleType.ADMIN,
-        },
+        select: ['id', 'name', 'email', 'roles', 'status', 'mobile_no'],
       });
     } catch (error) {
       throw new InternalServerErrorException(
@@ -42,27 +40,6 @@ export class AdminService {
       );
     }
   }
-
-  //   async getAllAdmin(): Promise<Admin[]> {
-  //     try {
-  //       const admins = await this.adminRepository.find({
-  //         where: {
-  //           roles: RoleType.ADMIN,
-  //         },
-  //       });
-
-  //       // Log the hashed password of each admin
-  //       admins.forEach((admin) => {
-  //         console.log(`Admin ${admin.name}: Hashed Password -> ${admin.password}`);
-  //       });
-
-  //       return admins;
-  //     } catch (error) {
-  //       throw new InternalServerErrorException(
-  //         'Error retrieving Admins from the database',
-  //       );
-  //     }
-  //   }
 
   async createNewAdmin(admin: CreateAdminDto) {
     const existingAdmin = await this.adminRepository.findOne({
@@ -115,10 +92,10 @@ export class AdminService {
       throw new NotFoundException(`Admin with ID ${id} not found`);
     }
 
-    if (adminData.password) {
-      const hashedPassword = await bcrypt.hash(adminData.password, 10);
-      adminData.password = hashedPassword;
-    }
+    // if (adminData.password) {
+    //   const hashedPassword = await bcrypt.hash(adminData.password, 10);
+    //   adminData.password = hashedPassword;
+    // }
 
     Object.assign(admin, adminData);
 
@@ -160,7 +137,7 @@ export class AdminService {
   ///////////////////////////////////////////////////////////////////
   async forgotPasswordByEmail(email: string) {
     const admin = await this.adminRepository.findOne({
-      where: { email: email, status: 'active' },
+      where: { email: email },
     });
 
     if (admin) {
@@ -172,7 +149,6 @@ export class AdminService {
       const existingUser = await this.adminRepository.findOne({
         where: {
           email: admin.email,
-          status: 'active',
         },
       });
       let otpEntity = await this.otpRepository.findOne({
@@ -227,6 +203,7 @@ export class AdminService {
 
     const hashedPassword = await bcrypt.hash(password, this.saltRounds);
     admin.password = hashedPassword;
+    admin.status = 'active';
 
     await this.adminRepository.save(admin);
 
@@ -269,5 +246,16 @@ export class AdminService {
     await this.adminRepository.save(admin);
 
     return { msg: `OTP is verified.`, admin };
+  }
+
+  async deactivateAccount(id: string) {
+    const admin = await this.adminRepository.findOne({ where: { id } });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin ID with ${id} not found!`);
+    }
+
+    admin.status = 'inactive';
+    return await this.adminRepository.save(admin);
   }
 }

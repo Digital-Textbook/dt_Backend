@@ -10,8 +10,8 @@ import {
 import { ScreenTimeService } from '../service/sreen-time.service';
 import { CreateScreenTimeDto } from '../dto/secreen-time.dto';
 
-@Controller('Digital-textbook/screen-time')
 @ApiTags('screen')
+@Controller('digital-textbook/screen-time')
 export class ScreenTimeController {
   constructor(private screenTimeService: ScreenTimeService) {}
 

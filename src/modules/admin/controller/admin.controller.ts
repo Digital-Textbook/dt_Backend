@@ -22,19 +22,24 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
-@ApiTags('Admin')
-@Controller('admin')
+@ApiTags('admin')
+@Controller('digital-textbook/admin')
 // @UseGuards(AuthGuard())
 // @ApiBearerAuth()
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
   @Get()
-  async getAllAdmin(): Promise<Admin[]> {
+  @ApiOkResponse({ description: 'Admin and super admin fetch successfully.' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching admin and super admin!',
+  })
+  async getAllAdmin() {
     return await this.adminService.getAllAdmin();
   }
 
@@ -93,7 +98,7 @@ export class AdminController {
     return await this.adminService.verifyByEmail(id, otp);
   }
 
-  @Post(':id/reset-password-byEmail/:password')
+  @Post(':id/reset-password-by-email/:password')
   @ApiOkResponse({ description: 'Reset password is successfully done.' })
   @ApiBadRequestResponse({ description: 'Reset password cannot be done.' })
   async resetPasswordByEmail(
@@ -101,5 +106,11 @@ export class AdminController {
     @Param('password') password: string,
   ) {
     return await this.adminService.resetPasswordByEmail(id, password);
+  }
+
+  @Patch('/:id/deactive')
+  @UsePipes(ValidationPipe)
+  async deactivateAccount(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.adminService.deactivateAccount(id);
   }
 }

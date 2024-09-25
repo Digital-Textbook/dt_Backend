@@ -159,4 +159,16 @@ export class CommonService {
       })),
     }));
   }
+
+  async getDzongkhag() {
+    const dzongkhag = await this.dzongkhagRepository.find({
+      select: ['id', 'name'],
+    });
+
+    if (!dzongkhag || dzongkhag.length === 0) {
+      throw new NotFoundException('Empty class in database!');
+    }
+
+    return dzongkhag;
+  }
 }

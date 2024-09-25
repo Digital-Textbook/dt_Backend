@@ -9,6 +9,9 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { AdminOtp } from './entities/admin-otp.entity';
 import { Admin } from './entities/admin.entity';
+import { PermissionController } from './controller/permission.controller';
+import { PermissionService } from './service/permission.service';
+import { Permission } from './entities/permission.entity';
 
 @Module({
   imports: [
@@ -20,9 +23,9 @@ import { Admin } from './entities/admin.entity';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, AdminOtp]),
+    TypeOrmModule.forFeature([Admin, AdminOtp, Permission]),
   ],
-  controllers: [AdminController],
-  providers: [AdminService],
+  controllers: [AdminController, PermissionController],
+  providers: [AdminService, PermissionService],
 })
 export class AdminModule {}
