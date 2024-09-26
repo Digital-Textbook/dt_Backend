@@ -33,7 +33,8 @@ export class AdminService {
   async getAllAdmin() {
     try {
       return await this.adminRepository.find({
-        select: ['id', 'name', 'email', 'role', 'status', 'mobileNo'],
+        select: ['id', 'name', 'email', 'status', 'mobileNo'],
+        relations: ['role'],
       });
     } catch (error) {
       throw new InternalServerErrorException(

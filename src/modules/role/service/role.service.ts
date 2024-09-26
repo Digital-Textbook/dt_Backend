@@ -74,12 +74,22 @@ export class RoleService {
     if (!role) {
       throw new NotFoundException('Role not found');
     }
-
-    // Filter out the permission to be removed
     role.permissions = role.permissions.filter(
       (permission) => permission.id !== permissionId,
     );
 
     return await this.roleRepository.save(role);
+  }
+
+  async getRolesWithAdminCount() {
+    const roles = await this.roleRepository
+      .createQueryBuilder('role')
+      .leftJoinAndSelect('role.admins', 'admin')
+      .select('role.role', 'role')
+      .addSelect('COUNT(admin.id)', 'count')
+      .groupBy('role.id')
+      .getRawMany();
+
+    return roles;
   }
 }

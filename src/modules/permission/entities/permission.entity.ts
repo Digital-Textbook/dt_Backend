@@ -35,6 +35,19 @@ export class Permission extends BaseEntity {
   })
   description: string;
 
-  @ManyToMany(() => Role, (role) => role.permissions)
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
+
+  @ManyToMany(() => Role, (role) => role.permissions, { onDelete: 'CASCADE' })
   roles: Role[];
 }

@@ -33,7 +33,7 @@ import {
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
-  @Get()
+  @Get('/')
   @ApiOkResponse({ description: 'Admin and super admin fetch successfully.' })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error while fetching admin and super admin!',

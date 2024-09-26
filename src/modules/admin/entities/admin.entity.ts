@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from '../../role/entities/role.entity';
+import { Role } from 'src/modules/role/entities/role.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { AdminOtp } from './admin-otp.entity';
 
@@ -36,13 +36,6 @@ export class Admin extends BaseEntity {
   })
   mobileNo: string;
 
-  @ManyToOne(() => Role, { eager: true })
-  @ApiProperty({
-    description: 'Role assigned to the admin',
-    example: 'ADMIN',
-  })
-  role: Role;
-
   @ApiProperty({
     description: 'Status must be inactive',
     example: 'inactive',
@@ -63,15 +56,18 @@ export class Admin extends BaseEntity {
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  created_at: Date;
+  createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => AdminOtp, (adminOtp) => adminOtp.admin)
   adminOtp: AdminOtp;
+
+  @ManyToOne(() => Role, (role) => role.admins)
+  role: Role;
 }

@@ -11,7 +11,6 @@ import { Repository } from 'typeorm';
 import { Permission } from '../entities/permission.entity';
 import { CreatePermissionDto } from '../dto/createPermission.dto';
 import { UpdatePermissionDto } from '../dto/updatePermission.dto';
-import { Role } from '../../role/entities/role.entity';
 
 @Injectable()
 export class PermissionService {
@@ -36,8 +35,6 @@ export class PermissionService {
       throw new NotFoundException('Permission not found!');
     }
 
-    console.log('Update permission::', permissionData.permissionName);
-    console.log('Update ID::', id);
     await this.permissionRepository.update(id, permissionData);
     return this.permissionRepository.findOne({ where: { id } });
   }
@@ -58,8 +55,31 @@ export class PermissionService {
 
     return { msg: 'Pemission deleted successfully1' };
   }
-
   async getPermissionsWithRoles() {
-    return await this.permissionRepository.find({ relations: ['roles'] });
+    return await this.permissionRepository
+      .createQueryBuilder('permission')
+      .leftJoinAndSelect('permission.roles', 'role')
+      .select([
+        'permission.id',
+        'permission.permissionName',
+        'permission.description',
+        'permission.createdAt',
+        'role.id',
+        'role.role',
+      ])
+      .getMany();
+  }
+
+  async getPermissionById(id: string) {
+    const permission = await this.permissionRepository.findOne({
+      where: { id },
+      select: ['id', 'permissionName', 'description'],
+      relations: ['roles'],
+    });
+    if (!permission) {
+      throw new NotFoundException(`Permission not found based on ID:: ${id}`);
+    }
+
+    return permission;
   }
 }
