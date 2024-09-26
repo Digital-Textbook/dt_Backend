@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsPhoneNumber } from 'src/decorators/field.decorators';
-import { Role } from '../entities/role.entity';
+import { Role } from '../../role/entities/role.entity';
 
 export class CreateAdminDto {
   @ApiProperty({

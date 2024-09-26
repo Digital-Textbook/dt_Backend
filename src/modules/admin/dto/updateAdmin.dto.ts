@@ -6,7 +6,7 @@ import {
   IsUUID,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../entities/role.entity';
+import { Role } from '../../role/entities/role.entity';
 
 export class UpdateAdminDto {
   @ApiProperty({

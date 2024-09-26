@@ -17,7 +17,7 @@ import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Admin } from '../entities/admin.entity';
 import { AdminOtp } from '../entities/admin-otp.entity';
-import { Role } from '../entities/role.entity';
+import { Role } from '../../role/entities/role.entity';
 
 @Injectable()
 export class AdminService {

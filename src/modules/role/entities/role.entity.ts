@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Permission } from './permission.entity';
+import { Permission } from '../../permission/entities/permission.entity';
 
 @Entity('roles')
 export class Role extends BaseEntity {
@@ -26,7 +26,7 @@ export class Role extends BaseEntity {
   })
   role: string;
 
-  @ManyToMany(() => Permission)
+  @ManyToMany(() => Permission, (permission) => permission.roles)
   @JoinTable({
     name: 'role_permissions',
     joinColumn: { name: 'roleId', referencedColumnName: 'id' },

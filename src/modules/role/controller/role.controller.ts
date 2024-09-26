@@ -21,7 +21,7 @@ import {
 } from '@nestjs/swagger';
 
 import { RoleService } from '../service/role.service';
-import { CreateRoleDto } from '../dto/createRole.dto';
+import { CreateRoleDto } from '../../role/dto/createRole.dto';
 
 @ApiTags('roles&permission')
 @Controller('digital-textbook/role')
@@ -66,5 +66,24 @@ export class RoleController {
   @ApiNotFoundResponse({ description: 'Role Id not found!' })
   async deleteRole(@Param('id') id: string) {
     return await this.roleService.deleteRole(id);
+  }
+
+  @Post(':roleId/permissions/:permissionId')
+  async addPermissionToRole(
+    @Param('roleId') roleId: string,
+    @Param('permissionId') permissionId: string,
+  ) {
+    return await this.roleService.addPermissionToRole(roleId, permissionId);
+  }
+
+  @Delete(':roleId/permissions/:permissionId')
+  async removePermissionFromRole(
+    @Param('roleId') roleId: string,
+    @Param('permissionId') permissionId: string,
+  ) {
+    return await this.roleService.removePermissionFromRole(
+      roleId,
+      permissionId,
+    );
   }
 }

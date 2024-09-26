@@ -1,6 +1,13 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../role/entities/role.entity';
 
 @Entity('permission')
 export class Permission extends BaseEntity {
@@ -27,4 +34,7 @@ export class Permission extends BaseEntity {
     length: 255,
   })
   description: string;
+
+  @ManyToMany(() => Role, (role) => role.permissions)
+  roles: Role[];
 }

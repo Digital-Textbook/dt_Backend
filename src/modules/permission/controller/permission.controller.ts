@@ -34,6 +34,7 @@ export class PermissionController {
 
   @Get('/')
   @ApiOkResponse({ description: 'Permission fetched successfully!' })
+  @ApiNotFoundResponse({ description: 'Permission not found!' })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error while fetching permission',
   })
@@ -71,5 +72,10 @@ export class PermissionController {
   @ApiNotFoundResponse({ description: 'Permission Id not found!' })
   async deletePermission(@Param('id') id: string) {
     return await this.permissionService.deletePermission(id);
+  }
+
+  @Get('roles')
+  async getPermissionsWithRoles() {
+    return await this.permissionService.getPermissionsWithRoles();
   }
 }

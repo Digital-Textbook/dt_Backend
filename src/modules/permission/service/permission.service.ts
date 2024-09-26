@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { Permission } from '../entities/permission.entity';
 import { CreatePermissionDto } from '../dto/createPermission.dto';
 import { UpdatePermissionDto } from '../dto/updatePermission.dto';
+import { Role } from '../../role/entities/role.entity';
 
 @Injectable()
 export class PermissionService {
@@ -42,7 +43,11 @@ export class PermissionService {
   }
 
   async findAll(): Promise<Permission[]> {
-    return this.permissionRepository.find();
+    const permission = await this.permissionRepository.find();
+    if (!permission || permission.length === 0) {
+      throw new NotFoundException('Permission not found in database!');
+    }
+    return permission;
   }
 
   async deletePermission(id: string) {
@@ -52,5 +57,9 @@ export class PermissionService {
     }
 
     return { msg: 'Pemission deleted successfully1' };
+  }
+
+  async getPermissionsWithRoles() {
+    return await this.permissionRepository.find({ relations: ['roles'] });
   }
 }
