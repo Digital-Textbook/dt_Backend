@@ -120,18 +120,54 @@ export class TextbookService {
     }
   }
 
-  async getAllTextbook() {
-    const textbooks = await this.textbookRepository.find({
+  //   async getAllTextbook() {
+  //     const textbooks = await this.textbookRepository.find({
+  //       relations: ['subject', 'subject.class'],
+  //     });
+
+  //     if (!textbooks || textbooks.length === 0) {
+  //       throw new NotFoundException('No textbooks found in the database!');
+  //     }
+
+  //     return textbooks.map((textbook) => {
+  //       const className = textbook.subject?.class?.class || 'N/A';
+
+  //       const subjectName = textbook.subject?.subjectName || 'N/A';
+
+  //       return {
+  //         id: textbook.id,
+  //         author: textbook.author,
+  //         chapter: textbook.chapter,
+  //         totalPages: textbook.totalPages,
+  //         summary: textbook.summary,
+  //         edition: textbook.edition,
+  //         coverUrl: textbook.coverUrl,
+  //         textbookUrl: textbook.textbookUrl,
+  //         class: className,
+  //         subjectName: subjectName,
+  //       };
+  //     });
+  //   }
+
+  async getAllTextbook(page: number = 1, limit: number = 15) {
+    // Ensure the limit is not more than 100 for performance
+    limit = Math.min(limit, 100);
+
+    // Calculate the number of records to skip
+    const skip = (page - 1) * limit;
+
+    const [textbooks, total] = await this.textbookRepository.findAndCount({
       relations: ['subject', 'subject.class'],
+      skip,
+      take: limit,
     });
 
     if (!textbooks || textbooks.length === 0) {
       throw new NotFoundException('No textbooks found in the database!');
     }
 
-    return textbooks.map((textbook) => {
+    const formattedTextbooks = textbooks.map((textbook) => {
       const className = textbook.subject?.class?.class || 'N/A';
-
       const subjectName = textbook.subject?.subjectName || 'N/A';
 
       return {
@@ -147,6 +183,14 @@ export class TextbookService {
         subjectName: subjectName,
       };
     });
+
+    // Return paginated result
+    return {
+      data: formattedTextbooks,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   //////////////////// UPDATE TEXTBOOK ///////////////
@@ -242,26 +286,26 @@ export class TextbookService {
   }
 
   ////////////////////// GET TEXTBOOK INFORMATION /////////////
-  async getTextbookInfo(id: string) {
-    try {
-      const textbookInfo = await this.textbookRepository.findOne({
-        where: { id: id },
-      });
-      if (!textbookInfo) {
-        throw new NotFoundException(`No Textbook found with ID ${id}!`);
-      }
-      if (textbookInfo.textbookUrl) {
-        return {
-          msg: 'Textbook information found!',
-          coverUrl: textbookInfo.textbookUrl,
-        };
-      } else {
-        return { msg: 'Textbook Information not found!' };
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Error retrieving textbook information: ${error.message}`,
-      );
-    }
-  }
+  //   async getTextbookInfo(id: string) {
+  //     try {
+  //       const textbookInfo = await this.textbookRepository.findOne({
+  //         where: { id: id },
+  //       });
+  //       if (!textbookInfo) {
+  //         throw new NotFoundException(`No Textbook found with ID ${id}!`);
+  //       }
+  //       if (textbookInfo.textbookUrl) {
+  //         return {
+  //           msg: 'Textbook information found!',
+  //           coverUrl: textbookInfo.textbookUrl,
+  //         };
+  //       } else {
+  //         return { msg: 'Textbook Information not found!' };
+  //       }
+  //     } catch (error) {
+  //       throw new InternalServerErrorException(
+  //         `Error retrieving textbook information: ${error.message}`,
+  //       );
+  //     }
+  //   }
 }

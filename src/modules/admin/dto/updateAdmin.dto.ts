@@ -1,9 +1,16 @@
-import { IsOptional, IsString, IsEmail, IsArray, IsInt } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEmail,
+  IsArray,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../entities/role.entity';
 
 export class UpdateAdminDto {
   @ApiProperty({
-    description: 'Name must be string',
+    description: 'Name must be a string',
     example: 'John Doe',
   })
   @IsOptional()
@@ -11,7 +18,7 @@ export class UpdateAdminDto {
   name?: string;
 
   @ApiProperty({
-    description: 'Email is required',
+    description: 'Email must be a valid email address',
     example: 'example@gmail.com',
   })
   @IsOptional()
@@ -19,30 +26,38 @@ export class UpdateAdminDto {
   email?: string;
 
   @ApiProperty({
-    description: 'Phone number is required',
+    description: 'Phone number must be a string',
     example: '17543213',
   })
   @IsOptional()
   @IsString()
-  mobile_no?: string;
+  mobileNo?: string;
 
   @ApiProperty({
-    description: 'Roles is required',
-    example: 'ADMIN',
+    description: 'Role must reference a valid role entity',
+    example: 'UUID for a role',
   })
   @IsOptional()
-  @IsString()
-  roles?: string;
+  @IsUUID('4', {
+    message: 'Role must be a valid UUID',
+  })
+  roleId?: string;
 
   @ApiProperty({
-    description: 'Status is required',
+    description: 'Status is either active or inactive',
     example: 'active',
   })
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: 'active' | 'inactive';
 
+  @ApiProperty({
+    description: 'Permissions can be updated, but usually handled by the role',
+    example: '["create", "delete"]',
+  })
   @IsOptional()
-  @IsArray()
+  @IsArray({
+    message: 'Permissions must be an array',
+  })
   permission?: string[];
 }

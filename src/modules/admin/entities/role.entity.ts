@@ -1,6 +1,14 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { Permission } from './permission.entity';
 
 @Entity('roles')
 export class Role extends BaseEntity {
@@ -17,4 +25,12 @@ export class Role extends BaseEntity {
     type: 'varchar',
   })
   role: string;
+
+  @ManyToMany(() => Permission)
+  @JoinTable({
+    name: 'role_permissions',
+    joinColumn: { name: 'roleId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'permissionId', referencedColumnName: 'id' },
+  })
+  permissions: Permission[];
 }

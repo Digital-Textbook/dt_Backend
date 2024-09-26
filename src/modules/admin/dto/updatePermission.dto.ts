@@ -14,4 +14,12 @@ export class UpdatePermissionDto {
   })
   @IsOptional()
   permissionName: string;
+
+  @ApiProperty({
+    description: 'A brief description of the permission functionality',
+    example: 'Allows reading data from the system',
+  })
+  @IsString()
+  @IsOptional()
+  description: string;
 }

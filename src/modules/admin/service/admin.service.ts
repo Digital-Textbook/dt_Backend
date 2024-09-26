@@ -32,7 +32,7 @@ export class AdminService {
   async getAllAdmin() {
     try {
       return await this.adminRepository.find({
-        select: ['id', 'name', 'email', 'roles', 'status', 'mobile_no'],
+        select: ['id', 'name', 'email', 'role', 'status', 'mobileNo'],
       });
     } catch (error) {
       throw new InternalServerErrorException(
@@ -107,9 +107,21 @@ export class AdminService {
       throw new Error('ID is required');
     }
 
-    const admin = await this.adminRepository.findOne({
-      where: { id },
-    });
+    const admin = await this.adminRepository
+      .createQueryBuilder('admin')
+      .leftJoinAndSelect('admin.role', 'role')
+      .select([
+        'admin.id',
+        'admin.name',
+        'admin.email',
+        'admin.mobileNo',
+        'admin.status',
+        'role.id',
+        'role.role',
+      ])
+      .where('admin.id = :id', { id })
+      .getOne();
+
     if (!admin) {
       throw new NotFoundException(`No matching data found with ID: ${id}`);
     }
