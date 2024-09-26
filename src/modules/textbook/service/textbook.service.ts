@@ -120,34 +120,34 @@ export class TextbookService {
     }
   }
 
-  //   async getAllTextbook() {
-  //     const textbooks = await this.textbookRepository.find({
-  //       relations: ['subject', 'subject.class'],
-  //     });
+  async getAll() {
+    const textbooks = await this.textbookRepository.find({
+      relations: ['subject', 'subject.class'],
+    });
 
-  //     if (!textbooks || textbooks.length === 0) {
-  //       throw new NotFoundException('No textbooks found in the database!');
-  //     }
+    if (!textbooks || textbooks.length === 0) {
+      throw new NotFoundException('No textbooks found in the database!');
+    }
 
-  //     return textbooks.map((textbook) => {
-  //       const className = textbook.subject?.class?.class || 'N/A';
+    return textbooks.map((textbook) => {
+      const className = textbook.subject?.class?.class || 'N/A';
 
-  //       const subjectName = textbook.subject?.subjectName || 'N/A';
+      const subjectName = textbook.subject?.subjectName || 'N/A';
 
-  //       return {
-  //         id: textbook.id,
-  //         author: textbook.author,
-  //         chapter: textbook.chapter,
-  //         totalPages: textbook.totalPages,
-  //         summary: textbook.summary,
-  //         edition: textbook.edition,
-  //         coverUrl: textbook.coverUrl,
-  //         textbookUrl: textbook.textbookUrl,
-  //         class: className,
-  //         subjectName: subjectName,
-  //       };
-  //     });
-  //   }
+      return {
+        id: textbook.id,
+        author: textbook.author,
+        chapter: textbook.chapter,
+        totalPages: textbook.totalPages,
+        summary: textbook.summary,
+        edition: textbook.edition,
+        coverUrl: textbook.coverUrl,
+        textbookUrl: textbook.textbookUrl,
+        class: className,
+        subjectName: subjectName,
+      };
+    });
+  }
 
   async getAllTextbook(page: number = 1, limit: number = 15) {
     // Ensure the limit is not more than 100 for performance

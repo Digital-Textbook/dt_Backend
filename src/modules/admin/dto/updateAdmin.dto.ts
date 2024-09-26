@@ -35,11 +35,11 @@ export class UpdateAdminDto {
 
   @ApiProperty({
     description: 'Role must reference a valid role entity',
-    example: 'UUID for a role',
+    example: 'Role ID',
   })
   @IsOptional()
   @IsUUID('4', {
-    message: 'Role must be a valid UUID',
+    message: 'Role ID must be a valid UUID',
   })
   roleId?: string;
 
@@ -50,14 +50,4 @@ export class UpdateAdminDto {
   @IsOptional()
   @IsString()
   status?: 'active' | 'inactive';
-
-  @ApiProperty({
-    description: 'Permissions can be updated, but usually handled by the role',
-    example: '["create", "delete"]',
-  })
-  @IsOptional()
-  @IsArray({
-    message: 'Permissions must be an array',
-  })
-  permission?: string[];
 }

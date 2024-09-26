@@ -45,14 +45,14 @@ export class TextbookController {
   ) {}
 
   //////////////// Get All Textbook ///////////////////////
-  //   @Get('/')
-  //   @ApiOkResponse({ description: 'Textbook found!' })
-  //   @ApiInternalServerErrorResponse({
-  //     description: 'Internal server error while fecthing textbook from database',
-  //   })
-  //   async getAllTextbook() {
-  //     return await this.textbookService.getAllTextbook();
-  //   }
+  @Get('/all')
+  @ApiOkResponse({ description: 'Textbook found!' })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fecthing textbook from database',
+  })
+  async getAllTextbook() {
+    return await this.textbookService.getAll();
+  }
 
   @Get('/')
   async getAllTextbooks(

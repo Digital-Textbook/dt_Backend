@@ -20,6 +20,8 @@ import * as session from 'express-session';
 import { Notes } from '../notes/entities/note.entities';
 import { ScreenTime } from '../bookmark/entities/screen-time.entities';
 import { Bookmark } from '../bookmark/entities/bookmark.entities';
+import { Role } from '../admin/entities/role.entity';
+import { Permission } from '../admin/entities/permission.entity';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { Bookmark } from '../bookmark/entities/bookmark.entities';
       Notes,
       ScreenTime,
       Bookmark,
+      Role,
+      Permission,
     ]),
   ],
   controllers: [UserController, AdminController, AuthController],
