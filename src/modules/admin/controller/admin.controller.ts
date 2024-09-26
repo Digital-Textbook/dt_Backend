@@ -16,7 +16,6 @@ import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { Admin } from '../entities/admin.entity';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateForgotPasswordDto } from 'src/common/dto/forgotPassword.dto';
 
 import {
   ApiBadRequestResponse,

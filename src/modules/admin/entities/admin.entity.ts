@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from './role.entity';
+import { Role } from '../../role/entities/role.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { AdminOtp } from './admin-otp.entity';
 

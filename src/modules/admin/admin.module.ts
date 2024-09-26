@@ -9,12 +9,12 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { AdminOtp } from './entities/admin-otp.entity';
 import { Admin } from './entities/admin.entity';
-import { PermissionController } from './controller/permission.controller';
-import { PermissionService } from './service/permission.service';
-import { Permission } from './entities/permission.entity';
-import { RoleController } from './controller/role.controller';
-import { RoleService } from './service/role.service';
-import { Role } from './entities/role.entity';
+import { RoleService } from '../role/service/role.service';
+import { Role } from '../role/entities/role.entity';
+import { RoleController } from '../role/controller/role.controller';
+import { PermissionService } from '../permission/service/permission.service';
+import { PermissionController } from '../permission/controller/permission.controller';
+import { Permission } from '../permission/entities/permission.entity';
 
 @Module({
   imports: [
@@ -26,9 +26,9 @@ import { Role } from './entities/role.entity';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, AdminOtp, Permission, Role]),
+    TypeOrmModule.forFeature([Admin, AdminOtp, Role, Permission]),
   ],
-  controllers: [AdminController, PermissionController, RoleController],
-  providers: [AdminService, PermissionService, RoleService],
+  controllers: [AdminController, RoleController, PermissionController],
+  providers: [AdminService, RoleService, PermissionService],
 })
 export class AdminModule {}
