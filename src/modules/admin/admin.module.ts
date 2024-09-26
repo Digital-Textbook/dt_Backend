@@ -12,6 +12,9 @@ import { Admin } from './entities/admin.entity';
 import { PermissionController } from './controller/permission.controller';
 import { PermissionService } from './service/permission.service';
 import { Permission } from './entities/permission.entity';
+import { RoleController } from './controller/role.controller';
+import { RoleService } from './service/role.service';
+import { Role } from './entities/role.entity';
 
 @Module({
   imports: [
@@ -23,9 +26,9 @@ import { Permission } from './entities/permission.entity';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([Admin, AdminOtp, Permission]),
+    TypeOrmModule.forFeature([Admin, AdminOtp, Permission, Role]),
   ],
-  controllers: [AdminController, PermissionController],
-  providers: [AdminService, PermissionService],
+  controllers: [AdminController, PermissionController, RoleController],
+  providers: [AdminService, PermissionService, RoleService],
 })
 export class AdminModule {}

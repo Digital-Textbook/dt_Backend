@@ -15,6 +15,7 @@ import {
   UsePipes,
   ValidationPipe,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import {
@@ -44,13 +45,21 @@ export class TextbookController {
   ) {}
 
   //////////////// Get All Textbook ///////////////////////
-  @Get('/')
+  @Get('/all')
   @ApiOkResponse({ description: 'Textbook found!' })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error while fecthing textbook from database',
   })
   async getAllTextbook() {
-    return await this.textbookService.getAllTextbook();
+    return await this.textbookService.getAll();
+  }
+
+  @Get('/')
+  async getAllTextbooks(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.textbookService.getAllTextbook(page, limit);
   }
 
   //////////////// Create Textbook ///////////////////////
@@ -138,7 +147,7 @@ export class TextbookController {
   }
 
   //////////////// Get textbook By ID///////////////////////
-  @Get(':id/textbook-details')
+  @Get(':id/textbook-info')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Textbook successfully fetched!' })
   @ApiBadRequestResponse({ description: 'Invalid textbook Id!' })
@@ -225,15 +234,15 @@ export class TextbookController {
     }
   }
 
-  @Get('/:id/textbook-info')
-  @UsePipes(ValidationPipe)
-  @ApiOkResponse({ description: 'Textbook Url successfully found!' })
-  @ApiBadRequestResponse({ description: 'Invalid Textbook Id!' })
-  @ApiNotFoundResponse({ description: 'Textbook not found!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while fecthing textbook information!',
-  })
-  async getTextbookInfo(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.textbookService.getTextbookInfo(id);
-  }
+  //   @Get('/:id/textbook-info')
+  //   @UsePipes(ValidationPipe)
+  //   @ApiOkResponse({ description: 'Textbook Url successfully found!' })
+  //   @ApiBadRequestResponse({ description: 'Invalid Textbook Id!' })
+  //   @ApiNotFoundResponse({ description: 'Textbook not found!' })
+  //   @ApiInternalServerErrorResponse({
+  //     description: 'Internal server error while fecthing textbook information!',
+  //   })
+  //   async getTextbookInfo(@Param('id', ParseUUIDPipe) id: string) {
+  //     return await this.textbookService.getTextbookInfo(id);
+  //   }
 }

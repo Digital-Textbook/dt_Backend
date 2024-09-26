@@ -13,11 +13,11 @@ import * as crypto from 'crypto';
 
 import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
-import { RoleType } from 'src/constants/role-type';
 
 import { MailerService } from '@nestjs-modules/mailer';
 import { Admin } from '../entities/admin.entity';
 import { AdminOtp } from '../entities/admin-otp.entity';
+import { Role } from '../entities/role.entity';
 
 @Injectable()
 export class AdminService {
@@ -27,12 +27,13 @@ export class AdminService {
     private adminRepository: Repository<Admin>,
     private readonly mailerService: MailerService,
     @InjectRepository(AdminOtp) private otpRepository: Repository<AdminOtp>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
   ) {}
 
   async getAllAdmin() {
     try {
       return await this.adminRepository.find({
-        select: ['id', 'name', 'email', 'roles', 'status', 'mobile_no'],
+        select: ['id', 'name', 'email', 'role', 'status', 'mobileNo'],
       });
     } catch (error) {
       throw new InternalServerErrorException(
@@ -87,17 +88,16 @@ export class AdminService {
 
   async updateAdmin(id: string, adminData: UpdateAdminDto): Promise<Admin> {
     const admin = await this.adminRepository.findOne({ where: { id } });
+    const roleId = await this.roleRepository.findOne({
+      where: { id: adminData.roleId },
+    });
 
     if (!admin) {
       throw new NotFoundException(`Admin with ID ${id} not found`);
     }
 
-    // if (adminData.password) {
-    //   const hashedPassword = await bcrypt.hash(adminData.password, 10);
-    //   adminData.password = hashedPassword;
-    // }
-
     Object.assign(admin, adminData);
+    admin.role = roleId;
 
     return await this.adminRepository.save(admin);
   }
@@ -107,9 +107,21 @@ export class AdminService {
       throw new Error('ID is required');
     }
 
-    const admin = await this.adminRepository.findOne({
-      where: { id },
-    });
+    const admin = await this.adminRepository
+      .createQueryBuilder('admin')
+      .leftJoinAndSelect('admin.role', 'role')
+      .select([
+        'admin.id',
+        'admin.name',
+        'admin.email',
+        'admin.mobileNo',
+        'admin.status',
+        'role.id',
+        'role.role',
+      ])
+      .where('admin.id = :id', { id })
+      .getOne();
+
     if (!admin) {
       throw new NotFoundException(`No matching data found with ID: ${id}`);
     }

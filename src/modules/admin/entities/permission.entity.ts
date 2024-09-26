@@ -17,4 +17,14 @@ export class Permission extends BaseEntity {
     type: 'varchar',
   })
   permissionName: string;
+
+  @ApiProperty({
+    description: 'A brief description of the permission functionality',
+    example: 'Allows reading data from the system',
+  })
+  @Column({
+    type: 'varchar',
+    length: 255,
+  })
+  description: string;
 }

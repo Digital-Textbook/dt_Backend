@@ -2,10 +2,11 @@ import {
   BaseEntity,
   Column,
   Entity,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { RoleType } from 'src/constants/role-type';
+import { Role } from './role.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { AdminOtp } from './admin-otp.entity';
 
@@ -33,14 +34,14 @@ export class Admin extends BaseEntity {
     length: 255,
     unique: true,
   })
-  mobile_no: string;
+  mobileNo: string;
 
-  @Column({
-    type: 'enum',
-    enum: RoleType,
-    default: RoleType.ADMIN,
+  @ManyToOne(() => Role, { eager: true })
+  @ApiProperty({
+    description: 'Role assigned to the admin',
+    example: 'ADMIN',
   })
-  roles: RoleType;
+  role: Role;
 
   @ApiProperty({
     description: 'Status must be inactive',
@@ -48,11 +49,6 @@ export class Admin extends BaseEntity {
   })
   @Column({ type: 'varchar' })
   status: 'active' | 'inactive';
-
-  @Column({
-    type: 'json',
-  })
-  permission: string[];
 
   @Column({
     type: 'varchar',
