@@ -78,4 +78,9 @@ export class PermissionController {
   async getPermissionsWithRoles() {
     return await this.permissionService.getPermissionsWithRoles();
   }
+
+  @Get('/:id')
+  async permission(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.permissionService.getPermissionById(id);
+  }
 }

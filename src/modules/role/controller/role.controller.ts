@@ -86,4 +86,10 @@ export class RoleController {
       permissionId,
     );
   }
+
+  @Get('dashboard-count')
+  async getRolesWithAdminCount() {
+    const roles = await this.roleService.getRolesWithAdminCount();
+    return roles;
+  }
 }
