@@ -1,10 +1,10 @@
 import { IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePermissionDto {
   @ApiProperty({
-    description: 'Permisson must be string',
-    example: 'Read',
+    description: 'Name of the permission',
+    example: 'Manage Products',
   })
   @IsNotEmpty({
     message: 'Permisson name is required',
@@ -15,10 +15,20 @@ export class CreatePermissionDto {
   permissionName: string;
 
   @ApiProperty({
-    description: 'A brief description of the permission functionality',
-    example: 'Allows reading data from the system',
+    description:
+      'The action this permission allows (e.g., create, read, update, delete)',
+    example: 'create',
   })
-  @IsString({ message: 'Description must be string' })
-  @IsNotEmpty({ message: 'Description is required!' })
-  description: string;
+  @IsString()
+  @IsNotEmpty()
+  action: string;
+
+  @ApiProperty({
+    description:
+      'The subject or entity that the action is applied to (e.g., User, Product)',
+    example: 'Product',
+  })
+  @IsString()
+  @IsNotEmpty()
+  subject: string;
 }

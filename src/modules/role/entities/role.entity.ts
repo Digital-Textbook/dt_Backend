@@ -19,14 +19,11 @@ export class Role extends BaseEntity {
   })
   id: string;
 
-  @ApiProperty({
-    description: 'Role can be ADMIN, SUPER ADMIN and etc',
-    example: 'ADMIN',
-  })
-  @Column({
-    type: 'varchar',
-  })
-  role: string;
+  @Column({ nullable: false })
+  name!: string;
+
+  @Column({ nullable: true })
+  description!: string;
 
   @Column({
     type: 'timestamp',

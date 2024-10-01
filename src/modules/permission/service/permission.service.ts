@@ -57,15 +57,17 @@ export class PermissionService {
   }
   async getPermissionsWithRoles() {
     return await this.permissionRepository
-      .createQueryBuilder('permission')
-      .leftJoinAndSelect('permission.roles', 'role')
+      .createQueryBuilder('permissions')
+      .leftJoinAndSelect('permissions.roles', 'role')
       .select([
-        'permission.id',
-        'permission.permissionName',
-        'permission.description',
-        'permission.createdAt',
+        'permissions.id',
+        'permissions.permissionName',
+        'permissions.action',
+        'permissions.subject',
+        'permissions.createdAt',
         'role.id',
-        'role.role',
+        'role.name',
+        'role.description',
       ])
       .getMany();
   }
@@ -73,7 +75,7 @@ export class PermissionService {
   async getPermissionById(id: string) {
     const permission = await this.permissionRepository.findOne({
       where: { id },
-      select: ['id', 'permissionName', 'description'],
+      select: ['id', 'permissionName', 'action', 'subject'],
       relations: ['roles'],
     });
     if (!permission) {

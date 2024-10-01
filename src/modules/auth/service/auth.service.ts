@@ -73,6 +73,7 @@ export class AuthService {
   async adminSignIn(admin: LoginAdminDto) {
     const existingAdmin = await this.adminRepository.findOne({
       where: { email: admin.email },
+      relations: ['role'],
     });
 
     if (!existingAdmin) {

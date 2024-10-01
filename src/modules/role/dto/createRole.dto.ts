@@ -1,16 +1,22 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateRoleDto {
   @ApiProperty({
-    description: 'Role must be string',
+    description: 'Role can be ADMIN, SUPER ADMIN and etc',
     example: 'ADMIN',
   })
-  @IsNotEmpty({
-    message: 'Role is required',
+  @IsNotEmpty()
+  @IsString()
+  name!: string;
+
+  @ApiProperty({
+    description: 'Description of their role',
+    example:
+      'Has access to all administrative features, including user management and system settings',
   })
-  @IsString({
-    message: 'Role must be a string',
-  })
-  role: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  description!: string;
 }
