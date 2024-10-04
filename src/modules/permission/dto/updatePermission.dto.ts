@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdatePermissionDto {
   @ApiProperty({
@@ -16,10 +16,18 @@ export class UpdatePermissionDto {
   permissionName: string;
 
   @ApiProperty({
-    description: 'A brief description of the permission functionality',
-    example: 'Allows reading data from the system',
+    description:
+      'The action this permission allows (e.g., create, read, update, delete)',
+    example: 'create',
   })
-  @IsString()
-  @IsOptional()
-  description: string;
+  @ApiPropertyOptional()
+  action: string;
+
+  @ApiProperty({
+    description:
+      'The subject or entity that the action is applied to (e.g., User, Product)',
+    example: 'Product',
+  })
+  @ApiPropertyOptional()
+  subject: string;
 }

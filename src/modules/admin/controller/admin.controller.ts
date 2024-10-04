@@ -112,4 +112,9 @@ export class AdminController {
   async deactivateAccount(@Param('id', ParseUUIDPipe) id: string) {
     return await this.adminService.deactivateAccount(id);
   }
+  //////////////////////////////////////////////////////////
+  @Post(':id/role/:roleId')
+  async assignRole(@Param('id') id: string, @Param('roleId') roleId: string) {
+    return this.adminService.assignRoleToAdmin(id, roleId);
+  }
 }

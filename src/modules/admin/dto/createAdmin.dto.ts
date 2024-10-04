@@ -46,5 +46,5 @@ export class CreateAdminDto {
   @IsNotEmpty({
     message: 'Role is required',
   })
-  role: Role;
+  roleId: Role;
 }

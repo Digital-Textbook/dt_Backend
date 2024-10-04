@@ -10,7 +10,6 @@ import { AdminController } from '../admin/controller/admin.controller';
 import { AuthService } from './service/auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './controller/auth.controller';
 import { OtpEntity } from '../user/entities/otp.entity';
 import { HttpModule } from '@nestjs/axios';
@@ -22,6 +21,12 @@ import { ScreenTime } from '../bookmark/entities/screen-time.entities';
 import { Bookmark } from '../bookmark/entities/bookmark.entities';
 import { Role } from '../role/entities/role.entity';
 import { Permission } from '../permission/entities/permission.entity';
+import { AdminJwtStrategy } from './jwt-strategy/AdminJwtStrategy';
+import { UserJwtStrategy } from './jwt-strategy/UserJwtStrategy';
+import { AuthGuard } from '../guard/auth.guard';
+import { RolesGuard } from '../guard/role.guard';
+import { PermissionsGuard } from '../guard/permission.guard';
+import { AdminJwtGuard } from './guard/AdminAuthGuard';
 
 @Module({
   imports: [
@@ -51,10 +56,16 @@ import { Permission } from '../permission/entities/permission.entity';
     UserService,
     AdminService,
     AuthService,
-    JwtStrategy,
+
     DataHubApiService,
+    AuthGuard,
+    AdminJwtGuard,
+    AdminJwtStrategy,
+    UserJwtStrategy,
+    RolesGuard,
+    PermissionsGuard,
   ],
-  exports: [JwtStrategy, PassportModule],
+  exports: [AdminJwtStrategy, PassportModule],
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {

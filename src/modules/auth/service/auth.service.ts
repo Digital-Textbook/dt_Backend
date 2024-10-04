@@ -12,14 +12,13 @@ import { Admin } from '../../admin/entities/admin.entity';
 import { LoginUserDto } from '../dto/loginUser.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from '../dto/jwt-payload.interface';
+import { UsersJwtPayload } from '../jwt-strategy/UsersJwtPayload.interface';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
-import { AdminJwtPayload } from '../dto/admin-jwt-payload.interface';
+import { AdminJwtPayload } from '../jwt-strategy/AdminJwtPayload.interface';
 import { Status } from 'src/constants/status';
 
 @Injectable()
 export class AuthService {
-  private saltRounds = 10;
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
@@ -53,7 +52,7 @@ export class AuthService {
     );
 
     if (passwordMatches) {
-      const payload: JwtPayload = { cidNo: existingUser.cidNo };
+      const payload: UsersJwtPayload = { cidNo: existingUser.cidNo };
       const accessToken: string = await this.jwtService.sign(payload);
 
       existingUser.isLoggedIn = true;
@@ -73,6 +72,7 @@ export class AuthService {
   async adminSignIn(admin: LoginAdminDto) {
     const existingAdmin = await this.adminRepository.findOne({
       where: { email: admin.email },
+      relations: ['role', 'role.permissions'],
     });
 
     if (!existingAdmin) {
@@ -91,7 +91,15 @@ export class AuthService {
       existingAdmin &&
       (await bcrypt.compare(admin.password, existingAdmin.password))
     ) {
-      const adminPayload: AdminJwtPayload = { email: existingAdmin.email };
+      const adminPayload: AdminJwtPayload = {
+        email: existingAdmin.email,
+        role: existingAdmin.role.name,
+        permissions: existingAdmin.role.permissions.map(
+          (permission) => permission.permissionName,
+        ),
+      };
+
+      console.log('Admin Payload::', adminPayload);
       const adminAccessToken: string = await this.jwtService.sign(adminPayload);
       existingAdmin.isLoggedIn = true;
       await this.adminRepository.save(existingAdmin);

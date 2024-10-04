@@ -19,7 +19,7 @@ export class Admin extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    length: 255,
+    length: 50,
   })
   name: string;
 
@@ -31,7 +31,7 @@ export class Admin extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    length: 255,
+    length: 50,
     unique: true,
   })
   mobileNo: string;

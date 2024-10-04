@@ -7,12 +7,16 @@ import {
   Patch,
   Delete,
   UseGuards,
+  ParseUUIDPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -22,6 +26,7 @@ import {
 
 import { RoleService } from '../service/role.service';
 import { CreateRoleDto } from '../../role/dto/createRole.dto';
+import { UpdateRoleDto } from '../dto/updateRole.dto';
 
 @ApiTags('roles&permission')
 @Controller('digital-textbook/role')
@@ -39,6 +44,12 @@ export class RoleController {
     return await this.roleService.findAll();
   }
 
+  @Get('/:id')
+  @UsePipes(ValidationPipe)
+  async getRoleById(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.roleService.getRoleById(id);
+  }
+
   @Post('/')
   @ApiCreatedResponse({ description: 'Role created successfully!' })
   @ApiBadRequestResponse({
@@ -46,16 +57,6 @@ export class RoleController {
   })
   async createRole(@Body() roleData: CreateRoleDto) {
     return await this.roleService.create(roleData);
-  }
-
-  @Patch('/:id')
-  @ApiOkResponse({ description: 'Role updated successfully!' })
-  @ApiBadRequestResponse({
-    description: 'Invalid Role Id. Please try again',
-  })
-  @ApiNotFoundResponse({ description: 'Role Id not found!' })
-  async updateRole(@Param('id') id: string, @Body() roleData: CreateRoleDto) {
-    return await this.roleService.update(id, roleData);
   }
 
   @Delete('/:id')
@@ -68,28 +69,47 @@ export class RoleController {
     return await this.roleService.deleteRole(id);
   }
 
-  @Post(':roleId/permissions/:permissionId')
-  async addPermissionToRole(
-    @Param('roleId') roleId: string,
-    @Param('permissionId') permissionId: string,
-  ) {
-    return await this.roleService.addPermissionToRole(roleId, permissionId);
+  @Get('/:id/permission')
+  async getRoleForPermission(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.roleService.getRoleForPermission(id);
   }
 
-  @Delete(':roleId/permissions/:permissionId')
-  async removePermissionFromRole(
-    @Param('roleId') roleId: string,
-    @Param('permissionId') permissionId: string,
+  //   @Get('dashboard-count')
+  //   async getRolesWithAdminCount() {
+  //     const roles = await this.roleService.getRolesWithAdminCount();
+  //     return roles;
+  //   }
+
+  @Patch(':id/permissions')
+  @ApiOkResponse({ description: 'Role updated successfully!' })
+  @ApiBadRequestResponse({
+    description: 'Invalid Role Id. Please try again',
+  })
+  @ApiNotFoundResponse({ description: 'Role Id not found!' })
+  @ApiBody({
+    description: 'Array of permission IDs to update the role with',
+    schema: {
+      properties: {
+        permissionIds: { type: 'array', items: { type: 'string' } },
+        roleData: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            description: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  async updateRolePermissions(
+    @Param('id') id: string,
+    @Body() body: { permissionIds: string[]; roleData: UpdateRoleDto },
   ) {
-    return await this.roleService.removePermissionFromRole(
-      roleId,
-      permissionId,
+    const { permissionIds, roleData } = body;
+    return await this.roleService.updateRolePermissions(
+      id,
+      permissionIds,
+      roleData,
     );
-  }
-
-  @Get('dashboard-count')
-  async getRolesWithAdminCount() {
-    const roles = await this.roleService.getRolesWithAdminCount();
-    return roles;
   }
 }

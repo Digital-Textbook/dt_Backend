@@ -9,7 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../role/entities/role.entity';
 
-@Entity('permission')
+@Entity('permissions')
 export class Permission extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', {
     comment: 'This is the unique ID',
@@ -20,20 +20,14 @@ export class Permission extends BaseEntity {
     description: 'Permission name must be Read, Write, Delete and etc',
     example: 'Read',
   })
-  @Column({
-    type: 'varchar',
-  })
+  @Column({ nullable: false, unique: true })
   permissionName: string;
 
-  @ApiProperty({
-    description: 'A brief description of the permission functionality',
-    example: 'Allows reading data from the system',
-  })
-  @Column({
-    type: 'varchar',
-    length: 255,
-  })
-  description: string;
+  @Column({ nullable: false })
+  action!: string;
+
+  @Column({ nullable: false })
+  subject!: string;
 
   @Column({
     type: 'timestamp',

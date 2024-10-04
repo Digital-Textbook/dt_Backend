@@ -6,10 +6,10 @@ import {
   Delete,
   Patch,
   Get,
-  HttpCode,
   ParseUUIDPipe,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -24,12 +24,18 @@ import { SchoolService } from '../service/school.service';
 import { CreateSchoolDto } from '../dto/school.dto';
 import { UpdateSchoolDto } from '../dto/updateSchool.dto';
 
+import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
+import { AuthGuard } from 'src/modules/guard/auth.guard';
+
 @ApiTags('school')
+@UseGuards(AuthGuard)
 @Controller('digital-textbook/school')
 export class SchoolController {
   constructor(private schoolService: SchoolService) {}
 
   @Post('/')
+  @Roles('Admin')
+  @Permissions('create')
   @ApiCreatedResponse({ description: 'School creacted successfully!' })
   @ApiNotFoundResponse({ description: 'Dzongkhag Id is invalid!' })
   @ApiInternalServerErrorResponse({

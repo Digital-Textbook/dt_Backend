@@ -108,20 +108,25 @@ export class AdminService {
       throw new Error('ID is required');
     }
 
-    const admin = await this.adminRepository
-      .createQueryBuilder('admin')
-      .leftJoinAndSelect('admin.role', 'role')
-      .select([
-        'admin.id',
-        'admin.name',
-        'admin.email',
-        'admin.mobileNo',
-        'admin.status',
-        'role.id',
-        'role.role',
-      ])
-      .where('admin.id = :id', { id })
-      .getOne();
+    // const admin = await this.adminRepository
+    //   .createQueryBuilder('admin')
+    //   .leftJoinAndSelect('admin.role', 'role')
+    //   .select([
+    //     'admin.id',
+    //     'admin.name',
+    //     'admin.email',
+    //     'admin.mobileNo',
+    //     'admin.status',
+    //     'role.id',
+    //     'role.roleName',
+    //   ])
+    //   .where('admin.id = :id', { id })
+    //   .getOne();
+
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
 
     if (!admin) {
       throw new NotFoundException(`No matching data found with ID: ${id}`);
@@ -269,6 +274,23 @@ export class AdminService {
     }
 
     admin.status = 'inactive';
+    return await this.adminRepository.save(admin);
+  }
+
+  async assignRoleToAdmin(id: string, roleId: string) {
+    const admin = await this.adminRepository.findOne({ where: { id } });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with ID ${id} not found!`);
+    }
+
+    const role = await this.roleRepository.findOne({ where: { id: roleId } });
+
+    if (!role) {
+      throw new NotFoundException(`Role with ID ${id} not found!`);
+    }
+    admin.role = role;
+
     return await this.adminRepository.save(admin);
   }
 }
