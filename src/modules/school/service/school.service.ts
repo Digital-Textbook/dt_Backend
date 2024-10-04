@@ -108,7 +108,7 @@ export class SchoolService {
   async getAllSchool() {
     const schools = await this.schoolRepository.find({
       relations: ['dzongkhag'],
-      select: ['id', 'schoolName'],
+      select: ['id', 'schoolName', 'createdAt'],
     });
 
     if (!schools || schools.length === 0) {
@@ -124,6 +124,7 @@ export class SchoolService {
         id: school.id,
         name: school.schoolName,
         dzongkhag: dzongkhagName,
+        createdAt: school.createdAt,
       };
     });
   }

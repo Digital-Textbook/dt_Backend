@@ -81,8 +81,10 @@ export class RoleService {
       throw new NotFoundException('Role not found');
     }
 
+    console.log('Role Data::', roleData);
+
     if (roleData && (roleData.name || roleData.description)) {
-      await this.roleRepository.update(id, roleData);
+      Object.assign(role, roleData);
     }
 
     const newPermissions = await this.permissionRepository.find({

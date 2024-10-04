@@ -20,7 +20,7 @@ export class Permission extends BaseEntity {
     description: 'Permission name must be Read, Write, Delete and etc',
     example: 'Read',
   })
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   permissionName: string;
 
   @Column({ nullable: false })

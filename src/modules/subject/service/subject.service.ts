@@ -91,7 +91,7 @@ export class SubjectService {
   async getAllSubject() {
     const subjects = await this.subjectRepository.find({
       relations: ['class'],
-      select: ['subjectName', 'id'],
+      select: ['id', 'subjectName', 'createdAt'],
     });
 
     if (!subjects || subjects.length === 0) {
@@ -103,6 +103,7 @@ export class SubjectService {
       classId: subject.class.id,
       subjectName: subject.subjectName,
       id: subject.id,
+      createdAt: subject.createdAt,
     }));
   }
 
