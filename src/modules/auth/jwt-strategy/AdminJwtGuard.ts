@@ -5,12 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Admin } from 'src/modules/admin/entities/admin.entity';
 import { AdminJwtPayload } from './AdminJwtPayload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   constructor(
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
+    private readonly jwtService: JwtService,
   ) {
     super({
       secretOrKey: 'topSecret51',
@@ -19,16 +21,26 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   }
 
   async validate(payload: AdminJwtPayload) {
-    const { email } = payload;
-    const existingAdmin = await this.adminRepository.findOne({
-      where: { email },
-      relations: ['role', 'role.permissions'],
-    });
+    try {
+      const { email } = payload;
+      const admin = await this.adminRepository.findOne({
+        where: { email },
+        relations: ['role', 'role.permissions'],
+      });
 
-    if (!existingAdmin) {
-      throw new UnauthorizedException('Admin not found or invalid token');
+      if (!admin) {
+        throw new UnauthorizedException('Admin not found or invalid token');
+      }
+
+      return admin;
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException(
+          'Token has expired, please login again',
+        );
+      } else {
+        throw new UnauthorizedException('Invalid token');
+      }
     }
-
-    return existingAdmin;
   }
 }

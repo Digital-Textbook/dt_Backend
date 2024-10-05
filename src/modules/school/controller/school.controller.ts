@@ -19,6 +19,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { SchoolService } from '../service/school.service';
 import { CreateSchoolDto } from '../dto/school.dto';
@@ -28,16 +29,19 @@ import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
 import { AuthGuard } from 'src/modules/guard/auth.guard';
 
 @ApiTags('school')
-@UseGuards(AuthGuard)
 @Controller('digital-textbook/school')
 export class SchoolController {
   constructor(private schoolService: SchoolService) {}
 
   @Post('/')
-  @Roles('Admin')
+  @UseGuards(AuthGuard)
+  @Roles('Admin', 'Super Admin')
   @Permissions('create')
   @ApiCreatedResponse({ description: 'School creacted successfully!' })
   @ApiNotFoundResponse({ description: 'Dzongkhag Id is invalid!' })
+  @ApiUnauthorizedResponse({
+    description: 'User does not have permission to create school!',
+  })
   @ApiInternalServerErrorResponse({
     description: 'Error while creating school!',
   })
