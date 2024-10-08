@@ -1,14 +1,6 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  IsArray,
-  ArrayNotEmpty,
-  IsOptional,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsPhoneNumber } from 'src/decorators/field.decorators';
-import { Role } from '../../role/entities/role.entity';
 
 export class CreateAdminDto {
   @ApiProperty({
@@ -46,5 +38,5 @@ export class CreateAdminDto {
   @IsNotEmpty({
     message: 'Role is required',
   })
-  roleId: Role;
+  roleId: string;
 }
