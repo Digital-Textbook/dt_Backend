@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
+  ParseUUIDPipe,
   Post,
   UsePipes,
   ValidationPipe,
@@ -13,6 +15,7 @@ import { LoginAdminDto } from '../dto/admin-signin.dto';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -49,6 +52,7 @@ export class AuthController {
   @Post('/:id/user-logout')
   @ApiOkResponse({ description: 'User successfully logout!' })
   @ApiBadRequestResponse({ description: 'User cannot logout!' })
+  @ApiNotFoundResponse({ description: 'User not found!' })
   async userLogout(@Param('id') id: string) {
     return await this.authService.userLogOut(id);
   }
@@ -56,7 +60,13 @@ export class AuthController {
   @Post('/:id/admin-logout')
   @ApiOkResponse({ description: 'User successfully logout!' })
   @ApiBadRequestResponse({ description: 'User cannot logout!' })
+  @ApiNotFoundResponse({ description: 'User not found!' })
   async adminLogout(@Param('id') id: string) {
     return await this.authService.adminLogOut(id);
+  }
+
+  @Get('/:id')
+  async getAdminProfile(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.authService.adminProfile(id);
   }
 }

@@ -374,7 +374,15 @@ export class UserService {
 
   async getAllUser() {
     const users = await this.usersRepository.find({
-      select: ['id', 'name', 'cidNo', 'email', 'mobileNo', 'userType'],
+      select: [
+        'id',
+        'name',
+        'cidNo',
+        'email',
+        'mobileNo',
+        'userType',
+        'status',
+      ],
     });
 
     if (!users || users.length === 0) {

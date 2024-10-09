@@ -15,34 +15,27 @@ import { AdminService } from '../service/admin.service';
 import { CreateAdminDto } from '../../admin/dto/createAdmin.dto';
 import { UpdateAdminDto } from '../../admin/dto/updateAdmin.dto';
 import { Admin } from '../entities/admin.entity';
-import { AuthGuard } from '@nestjs/passport';
 
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
+import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
+import { AuthGuard } from 'src/modules/guard/auth.guard';
+
 @ApiTags('admin')
 @Controller('digital-textbook/admin')
-// @UseGuards(AuthGuard())
-// @ApiBearerAuth()
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
-  @Get('/')
-  @ApiOkResponse({ description: 'Admin and super admin fetch successfully.' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while fetching admin and super admin!',
-  })
-  async getAllAdmin() {
-    return await this.adminService.getAllAdmin();
-  }
-
   @Post('/register')
+  @UseGuards(AuthGuard)
+  @Roles('Super Admin')
+  @Permissions('create')
   @ApiCreatedResponse({
     description: 'Admin registered successfully',
   })
@@ -50,6 +43,15 @@ export class AdminController {
   @UsePipes(ValidationPipe)
   async createAdmin(@Body() adminData: CreateAdminDto) {
     return await this.adminService.createNewAdmin(adminData);
+  }
+
+  @Get('/')
+  @ApiOkResponse({ description: 'Admin and super admin fetch successfully.' })
+  @ApiNotFoundResponse({
+    description: 'Internal server error while fetching admin and super admin!',
+  })
+  async getAllAdmin() {
+    return await this.adminService.getAllAdmin();
   }
 
   @Get('/:id')

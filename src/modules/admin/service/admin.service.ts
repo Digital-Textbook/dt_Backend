@@ -37,54 +37,59 @@ export class AdminService {
         relations: ['role'],
       });
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error retrieving Admins from the database',
-      );
+      throw new NotFoundException('Error retrieving Admins from the database');
     }
   }
 
   async createNewAdmin(admin: CreateAdminDto) {
+    console.log('Register Admin Data by Super Admin::', admin);
+
     const existingAdmin = await this.adminRepository.findOne({
       where: { email: admin.email },
     });
 
     if (existingAdmin) {
       throw new ConflictException(
-        `User with this Email already exists: ${admin.email}`,
+        `Admin with this Email already exists: ${admin.email}`,
       );
     }
+    const role = await this.roleRepository.findOne({
+      where: { id: admin.roleId },
+    });
 
-    if (!existingAdmin) {
-      const generatedPassword = crypto.randomBytes(5).toString('hex');
-
-      const hashedPassword = await bcrypt.hash(
-        generatedPassword,
-        this.saltRounds,
-      );
-
-      let newUser = this.adminRepository.create({
-        ...admin,
-        password: hashedPassword,
-        status: 'active',
-      });
-
-      await this.mailerService.sendMail({
-        to: newUser.email,
-        subject: 'Your Password',
-        template: './admin',
-        context: {
-          generatedPassword,
-          name: newUser.name,
-        },
-      });
-
-      const savedUser = await this.adminRepository.save(newUser);
-      return savedUser;
-    } else {
+    if (!role) {
       throw new NotFoundException(
-        `No matching student data found for the provided CID No: ${admin.email}`,
+        `Role not found for the provided Role ID: ${admin.roleId}`,
       );
     }
+
+    const generatedPassword = crypto.randomBytes(5).toString('hex');
+    const hashedPassword = await bcrypt.hash(
+      generatedPassword,
+      this.saltRounds,
+    );
+
+    const newAdmin = this.adminRepository.create({
+      ...admin,
+      password: hashedPassword,
+      status: 'active',
+      role,
+    });
+
+    await this.mailerService.sendMail({
+      to: newAdmin.email,
+      subject: 'Your Admin Account Details',
+      template: './admin',
+      context: {
+        generatedPassword,
+        name: newAdmin.name,
+      },
+    });
+
+    const savedAdmin = await this.adminRepository.save(newAdmin);
+    console.log('New Admin Created::', savedAdmin);
+
+    return savedAdmin;
   }
 
   async updateAdmin(id: string, adminData: UpdateAdminDto): Promise<Admin> {

@@ -26,16 +26,16 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  app.use(
-    session({
-      secret: 'topSecret51',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: 3600000,
-      },
-    }),
-  );
+  //   app.use(
+  //     session({
+  //       secret: 'topSecret51',
+  //       resave: false,
+  //       saveUninitialized: false,
+  //       cookie: {
+  //         maxAge: 3600000,
+  //       },
+  //     }),
+  //   );
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

@@ -10,6 +10,7 @@ export class PermissionsGuard implements CanActivate {
       'permissions',
       context.getHandler(),
     );
+
     if (!requiredPermissions) {
       return true;
     }
@@ -17,14 +18,13 @@ export class PermissionsGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const admin = request.user;
 
-    if (!admin || !admin.permissions) {
+    if (!admin || !admin.role.permissions) {
       return false;
     }
 
     const hasPermission = requiredPermissions.every((permission) =>
-      admin.permissions.includes(permission),
+      admin.role.permissions.map((p) => p.permissionName).includes(permission),
     );
-
     return hasPermission;
   }
 }

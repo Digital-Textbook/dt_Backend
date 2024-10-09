@@ -8,9 +8,20 @@ import { Dzongkhag } from './entities/dzongkhag.entity';
 import { Role } from '../role/entities/role.entity';
 import { Admin } from '../admin/entities/admin.entity';
 
+import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { RolesGuard } from '../guard/role.guard';
+import { PermissionsGuard } from '../guard/permission.guard';
+import { AuthGuard } from '../guard/auth.guard';
+
 @Module({
   imports: [TypeOrmModule.forFeature([School, Dzongkhag, Role, Admin])],
   controllers: [SchoolController],
-  providers: [SchoolService],
+  providers: [
+    SchoolService,
+    AdminJwtGuard,
+    RolesGuard,
+    PermissionsGuard,
+    AuthGuard,
+  ],
 })
 export class SchoolModule {}

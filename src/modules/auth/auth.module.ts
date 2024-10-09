@@ -21,12 +21,12 @@ import { ScreenTime } from '../bookmark/entities/screen-time.entities';
 import { Bookmark } from '../bookmark/entities/bookmark.entities';
 import { Role } from '../role/entities/role.entity';
 import { Permission } from '../permission/entities/permission.entity';
-import { AdminJwtStrategy } from './jwt-strategy/AdminJwtStrategy';
+import { AdminJwtStrategy } from './jwt-strategy/AdminJwtGuard';
 import { UserJwtStrategy } from './jwt-strategy/UserJwtStrategy';
-import { AuthGuard } from '../guard/auth.guard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 import { AdminJwtGuard } from './guard/AdminAuthGuard';
+import { AuthGuard } from '../guard/auth.guard';
 
 @Module({
   imports: [
@@ -56,12 +56,13 @@ import { AdminJwtGuard } from './guard/AdminAuthGuard';
     UserService,
     AdminService,
     AuthService,
-
     DataHubApiService,
-    AuthGuard,
-    AdminJwtGuard,
+
     AdminJwtStrategy,
     UserJwtStrategy,
+
+    AuthGuard,
+    AdminJwtGuard,
     RolesGuard,
     PermissionsGuard,
   ],

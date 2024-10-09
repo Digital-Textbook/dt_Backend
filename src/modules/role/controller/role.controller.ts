@@ -6,16 +6,13 @@ import {
   Post,
   Patch,
   Delete,
-  UseGuards,
   ParseUUIDPipe,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 
-import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
@@ -30,8 +27,6 @@ import { UpdateRoleDto } from '../dto/updateRole.dto';
 
 @ApiTags('roles&permission')
 @Controller('digital-textbook/role')
-// @UseGuards(AuthGuard())
-// @ApiBearerAuth()
 export class RoleController {
   constructor(private roleService: RoleService) {}
 

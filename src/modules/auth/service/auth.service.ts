@@ -39,7 +39,9 @@ export class AuthService {
     }
 
     if (existingUser.status === Status.INACTIVE) {
-      throw new UnauthorizedException('Please verify your account');
+      throw new UnauthorizedException(
+        'User is not verified. Please verify your account',
+      );
     }
 
     if (existingUser.isLoggedIn === true) {
@@ -99,8 +101,13 @@ export class AuthService {
         ),
       };
 
-      console.log('Admin Payload::', adminPayload);
-      const adminAccessToken: string = await this.jwtService.sign(adminPayload);
+      //   console.log('Admin Payload::', adminPayload);
+      const adminAccessToken: string = await this.jwtService.sign(
+        adminPayload,
+        {
+          expiresIn: '1h',
+        },
+      );
       existingAdmin.isLoggedIn = true;
       await this.adminRepository.save(existingAdmin);
       return { adminAccessToken, existingAdmin };
@@ -111,30 +118,36 @@ export class AuthService {
 
   /////////////////////// User And Admin Log Out ////////////////////////////////////
   async userLogOut(id: string) {
-    const existingUser = await this.usersRepository.findOne({
-      where: { id: id },
-    });
+    const user = await this.usersRepository.findOne({ where: { id } });
 
-    if (!existingUser) {
+    if (!user) {
       throw new UnauthorizedException(`User cannot log out`);
     }
 
-    existingUser.isLoggedIn = false;
-
-    return await this.usersRepository.save(existingUser);
+    user.isLoggedIn = false;
+    return await this.usersRepository.save(user);
   }
 
   async adminLogOut(id: string) {
-    const existingUser = await this.adminRepository.findOne({
-      where: { id: id },
-    });
+    const admin = await this.adminRepository.findOne({ where: { id } });
 
-    if (!existingUser) {
-      throw new UnauthorizedException(`User cannot log out`);
+    if (!admin) {
+      throw new NotFoundException('User not found. Please try again');
     }
 
-    existingUser.isLoggedIn = false;
+    admin.isLoggedIn = false;
+    return await this.adminRepository.save(admin);
+  }
 
-    return await this.adminRepository.save(existingUser);
+  async adminProfile(id: string) {
+    const profile = await this.adminRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+    if (!profile) {
+      throw new NotFoundException('Admin not found. Please try again!');
+    }
+
+    return profile;
   }
 }

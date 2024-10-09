@@ -16,6 +16,11 @@ import { PermissionService } from '../permission/service/permission.service';
 import { PermissionController } from '../permission/controller/permission.controller';
 import { Permission } from '../permission/entities/permission.entity';
 
+import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { RolesGuard } from '../guard/role.guard';
+import { PermissionsGuard } from '../guard/permission.guard';
+import { AuthGuard } from '../guard/auth.guard';
+
 @Module({
   imports: [
     HttpModule,
@@ -29,6 +34,15 @@ import { Permission } from '../permission/entities/permission.entity';
     TypeOrmModule.forFeature([Admin, AdminOtp, Role, Permission]),
   ],
   controllers: [AdminController, RoleController, PermissionController],
-  providers: [AdminService, RoleService, PermissionService],
+  providers: [
+    AdminService,
+    RoleService,
+    PermissionService,
+
+    AdminJwtGuard,
+    RolesGuard,
+    PermissionsGuard,
+    AuthGuard,
+  ],
 })
 export class AdminModule {}
