@@ -6,18 +6,20 @@ import {
   Delete,
   Patch,
   Get,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { SubjectService } from '../service/subject.service';
 import { CreateSubjectDto } from '../dto/createSubject.dto';
+import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
+import { AuthGuard } from 'src/modules/guard/auth.guard';
 
 @ApiTags('subject')
 @Controller('digital-textbook/subject')
@@ -25,34 +27,35 @@ export class SubjectController {
   constructor(private subjectService: SubjectService) {}
 
   @Post('/')
+  @UseGuards(AuthGuard)
+  @Permissions('create')
+  @Roles('Admin', 'Super Admin')
   @ApiCreatedResponse({ description: 'Subject creacted successfully!' })
   @ApiNotFoundResponse({ description: 'Invalid Class Id!' })
   @ApiBadRequestResponse({
-    description: 'Invalid data. Please try again',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Subject cannot be created. Please try again',
+    description: 'Invalid data. Please check input data!',
   })
   async addSubject(@Body() data: CreateSubjectDto) {
     return await this.subjectService.addSubject(data);
   }
 
   @Delete('/:id')
+  @UseGuards(AuthGuard)
+  @Permissions('delete')
+  @Roles('Admin', 'Super Admin')
   @ApiOkResponse({ description: 'Subject delete successfully!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while deleting subject!',
-  })
+  @ApiNotFoundResponse({ description: 'Subject ID not found!' })
   async deleteSubject(@Param('id') id: string) {
     return await this.subjectService.deleteSubject(id);
   }
 
   @Patch('/:id')
+  @UseGuards(AuthGuard)
+  @Permissions('update')
+  @Roles('Admin', 'Super Admin')
   @ApiOkResponse({ description: 'Subject updated successfully!' })
   @ApiBadRequestResponse({
     description: 'Subject cannot be updated. Please try again',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while updating subject!',
   })
   async updateSubject(
     @Param('id') id: string,

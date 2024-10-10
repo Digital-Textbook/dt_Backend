@@ -3,7 +3,6 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -86,10 +85,7 @@ export class UserService {
     }
 
     user.status = Status.ACTIVE;
-    const verifiedUser = await this.usersRepository.save(user);
-    if (!verifiedUser) {
-      throw new InternalServerErrorException('Error while verifying OTP!');
-    }
+    await this.usersRepository.save(user);
     return { user, msg: `OTP is verified.` };
   }
 
@@ -168,7 +164,7 @@ export class UserService {
     const updated = await this.usersRepository.save(user);
 
     if (!updated) {
-      throw new InternalServerErrorException('Password update failed!');
+      throw new NotFoundException('Password update failed. User not found!');
     } else {
       return {
         msg: 'Password is updated for this user',
@@ -235,9 +231,7 @@ export class UserService {
       });
     } catch (error) {
       console.error('Failed to send OTP email:', error);
-      throw new InternalServerErrorException(
-        "OTP couldn't be sent. Please try again",
-      );
+      throw new NotFoundException("OTP couldn't be sent. Please try again");
     }
   }
 
@@ -248,9 +242,7 @@ export class UserService {
       await this.sendOtp(phone, otp);
     } catch (error) {
       console.error('Failed to send OTP email:', error);
-      throw new InternalServerErrorException(
-        "OTP couldn't be sent. Please try again",
-      );
+      throw new NotFoundException("OTP couldn't be sent. Please try again");
     }
   }
 
@@ -300,13 +292,7 @@ export class UserService {
       userType: userData.userType as userType,
     };
     const user = await this.usersRepository.save(permitDto);
-
-    if (!user) {
-      throw new InternalServerErrorException('Erro while creating user!');
-    }
-
     const newOtp = await this.generateOtp();
-
     const hashedOtp = await bcrypt.hash(newOtp.otp, 10);
 
     let otpEntity = await this.otpRepository.findOne({
@@ -337,9 +323,7 @@ export class UserService {
       }
     } catch (error) {
       console.error('Failed to send OTP:', error);
-      throw new InternalServerErrorException(
-        "OTP couldn't be sent. Please try again",
-      );
+      throw new NotFoundException("OTP couldn't be sent. Please try again");
     }
     return { user, message: 'OTP sent successfully!' };
   }
@@ -362,9 +346,7 @@ export class UserService {
     const result = await this.usersRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new InternalServerErrorException(
-        `Error while deleting User with ID ${id}!`,
-      );
+      throw new NotFoundException(`Error while deleting User with ID ${id}!`);
     }
 
     return {

@@ -37,7 +37,7 @@ export class SubjectService {
   async deleteSubject(subjectId: string) {
     const result = await this.subjectRepository.delete(subjectId);
     if (result.affected === 0) {
-      throw new InternalServerErrorException('Error while deleting subject!');
+      throw new NotFoundException('Subject not found!');
     }
     return { msg: 'Subject successfully deleted!' };
   }

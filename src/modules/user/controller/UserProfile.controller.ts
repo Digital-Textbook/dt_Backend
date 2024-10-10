@@ -46,9 +46,6 @@ export class UserProfileController {
   @ApiBadRequestResponse({ description: 'Invalid user data!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
   @ApiConflictResponse({ description: 'Duplicate entity!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while creating user profile!',
-  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload user profile image and user data',
@@ -79,9 +76,6 @@ export class UserProfileController {
   @ApiOkResponse({ description: 'User profile successfully updated!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
   @ApiConflictResponse({ description: 'Duplicate entry!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while updating user profile!',
-  })
   @UseInterceptors(FileInterceptor('profileImage'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -104,9 +98,6 @@ export class UserProfileController {
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'User profile successfully deleted!' })
   @ApiBadRequestResponse({ description: 'Invalid user Id!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while deleting user profile!',
-  })
   async deleteUserProfile(@Param('userId', ParseUUIDPipe) userId: string) {
     return await this.userProfileService.deleteProfile(userId);
   }

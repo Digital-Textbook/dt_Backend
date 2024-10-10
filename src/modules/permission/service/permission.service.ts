@@ -55,6 +55,7 @@ export class PermissionService {
 
     return { msg: 'Pemission deleted successfully1' };
   }
+
   async getPermissionsWithRoles() {
     return await this.permissionRepository
       .createQueryBuilder('permissions')

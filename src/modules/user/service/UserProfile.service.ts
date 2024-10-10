@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,7 +16,6 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
 import { BufferedFile } from 'src/minio-client/file.model';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
-import { Console } from 'console';
 
 @Injectable()
 export class UserProfileService {
@@ -93,14 +91,7 @@ export class UserProfileService {
       profileImageUrl: uploadProfile.url,
     };
 
-    const result = await this.profileRepository.save(userProfile);
-    if (!result) {
-      throw new InternalServerErrorException(
-        'Error while creating new user profile!',
-      );
-    }
-
-    return userProfile;
+    return await this.profileRepository.save(userProfile);
   }
 
   async getProfileById(id: string) {
@@ -181,7 +172,7 @@ export class UserProfileService {
     const result = await this.profileRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new InternalServerErrorException(
+      throw new NotFoundException(
         `Error deleting user profile with User ID ${id}!`,
       );
     }
@@ -216,7 +207,7 @@ export class UserProfileService {
     const result = await this.userRepository.save(existingUser);
 
     if (!result) {
-      throw new InternalServerErrorException('Error while updating password!');
+      throw new NotFoundException('Error while updating password!');
     }
 
     return { message: 'Password updated successfully!' };

@@ -55,18 +55,6 @@ export class RoleService {
     return role;
   }
 
-  //   async getRolesWithAdminCount() {
-  //     const roles = await this.roleRepository
-  //       .createQueryBuilder('role')
-  //       .leftJoinAndSelect('role.admins', 'admin')
-  //       .select('role.role', 'role')
-  //       .addSelect('COUNT(admin.id)', 'count')
-  //       .groupBy('role.id')
-  //       .getRawMany();
-
-  //     return roles;
-  //   }
-
   async updateRolePermissions(
     id: string,
     permissionIds: string[],

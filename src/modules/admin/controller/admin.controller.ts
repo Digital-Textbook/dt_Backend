@@ -36,9 +36,7 @@ export class AdminController {
   @UseGuards(AuthGuard)
   @Roles('Super Admin')
   @Permissions('create')
-  @ApiCreatedResponse({
-    description: 'Admin registered successfully',
-  })
+  @ApiCreatedResponse({ description: 'Admin registered successfully' })
   @ApiBadRequestResponse({ description: 'Admin cannot be registered' })
   @UsePipes(ValidationPipe)
   async createAdmin(@Body() adminData: CreateAdminDto) {
@@ -47,21 +45,23 @@ export class AdminController {
 
   @Get('/')
   @ApiOkResponse({ description: 'Admin and super admin fetch successfully.' })
-  @ApiNotFoundResponse({
-    description: 'Internal server error while fetching admin and super admin!',
-  })
+  @ApiNotFoundResponse({ description: 'Admin not found!' })
   async getAllAdmin() {
     return await this.adminService.getAllAdmin();
   }
 
   @Get('/:id')
   @ApiOkResponse({ description: 'Admin successfully found.' })
-  @ApiBadRequestResponse({ description: 'Admin does not exist' })
+  @ApiBadRequestResponse({ description: 'Invalid Admin ID' })
+  @ApiNotFoundResponse({ description: 'Admin not found!' })
   async getAdminById(@Param('id', ParseUUIDPipe) id: string): Promise<Admin> {
     return await this.adminService.getAdminById(id);
   }
 
   @Patch('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Super Admin')
+  @Permissions('update')
   @ApiOkResponse({ description: 'Admin updated successfully.' })
   @ApiBadRequestResponse({ description: 'Admin cannot be updated' })
   @UsePipes(ValidationPipe)
@@ -73,6 +73,9 @@ export class AdminController {
   }
 
   @Delete('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Super Admin')
+  @Permissions('update')
   @ApiOkResponse({ description: 'Admin delete successfully.' })
   @ApiBadRequestResponse({ description: 'Admin cannot be deleted' })
   @UsePipes(ValidationPipe)
@@ -113,10 +116,5 @@ export class AdminController {
   @UsePipes(ValidationPipe)
   async deactivateAccount(@Param('id', ParseUUIDPipe) id: string) {
     return await this.adminService.deactivateAccount(id);
-  }
-  //////////////////////////////////////////////////////////
-  @Post(':id/role/:roleId')
-  async assignRole(@Param('id') id: string, @Param('roleId') roleId: string) {
-    return this.adminService.assignRoleToAdmin(id, roleId);
   }
 }
