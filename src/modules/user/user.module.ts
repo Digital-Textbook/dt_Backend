@@ -18,6 +18,10 @@ import { CommonService } from 'src/common/service/common.service';
 import { MinioClientModule } from 'src/minio-client/minio-client.module';
 import { Class } from '../class/entities/class.entity';
 import { Subject } from '../subject/entities/subject.entity';
+import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { AuthGuard } from '../guard/auth.guard';
+import { RolesGuard } from '../guard/role.guard';
+import { PermissionsGuard } from '../guard/permission.guard';
 
 @Module({
   imports: [
@@ -46,6 +50,11 @@ import { Subject } from '../subject/entities/subject.entity';
     DataHubApiService,
     UserProfileService,
     CommonService,
+
+    AdminJwtGuard,
+    AuthGuard,
+    RolesGuard,
+    PermissionsGuard,
   ],
 })
 export class UserModule {}

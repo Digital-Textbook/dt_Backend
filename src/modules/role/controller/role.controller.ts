@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -24,6 +25,8 @@ import {
 import { RoleService } from '../service/role.service';
 import { CreateRoleDto } from '../../role/dto/createRole.dto';
 import { UpdateRoleDto } from '../dto/updateRole.dto';
+import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
+import { AuthGuard } from 'src/modules/guard/auth.guard';
 
 @ApiTags('roles&permission')
 @Controller('digital-textbook/role')
@@ -46,6 +49,9 @@ export class RoleController {
   }
 
   @Post('/')
+  @UseGuards(AuthGuard)
+  @Roles('Super Admin')
+  @Permissions('create')
   @ApiCreatedResponse({ description: 'Role created successfully!' })
   @ApiBadRequestResponse({
     description: 'Invalid Role data. Please try again',
@@ -55,6 +61,9 @@ export class RoleController {
   }
 
   @Delete('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Super Admin')
+  @Permissions('delete')
   @ApiOkResponse({ description: 'Role deleted successfully!' })
   @ApiBadRequestResponse({
     description: 'Invalid Role Id. Please try again',
@@ -69,13 +78,10 @@ export class RoleController {
     return await this.roleService.getRoleForPermission(id);
   }
 
-  //   @Get('dashboard-count')
-  //   async getRolesWithAdminCount() {
-  //     const roles = await this.roleService.getRolesWithAdminCount();
-  //     return roles;
-  //   }
-
   @Patch(':id/permissions')
+  @UseGuards(AuthGuard)
+  @Roles('Super Admin')
+  @Permissions('update')
   @ApiOkResponse({ description: 'Role updated successfully!' })
   @ApiBadRequestResponse({
     description: 'Invalid Role Id. Please try again',

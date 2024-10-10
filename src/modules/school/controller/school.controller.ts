@@ -15,7 +15,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
@@ -42,31 +42,34 @@ export class SchoolController {
   @ApiUnauthorizedResponse({
     description: 'User does not have permission to create school!',
   })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while creating school!',
+  @ApiForbiddenResponse({
+    description: 'User does not have permission to create school!',
   })
   async addSubject(@Body() data: CreateSchoolDto) {
     return await this.schoolService.addSchool(data);
   }
 
   @Delete('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Admin', 'Super Admin')
+  @Permissions('delete')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School delete successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid School ID!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while deleting school!',
+  @ApiNotFoundResponse({
+    description: 'School not found in database!',
   })
   async deleteSubject(@Param('id', ParseUUIDPipe) id: string) {
     return await this.schoolService.deleteSchool(id);
   }
 
   @Patch('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Admin', 'Super Admin')
+  @Permissions('update')
   @ApiOkResponse({ description: 'School updated successfully!' })
   @ApiBadRequestResponse({
-    description: 'School cannot be updated. Please try again',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while updating school!',
+    description: 'Invalid data. Please check input data',
   })
   @ApiNotFoundResponse({ description: 'School not found!' })
   async updateSchool(@Param('id') id: string, @Body() data: UpdateSchoolDto) {
@@ -77,10 +80,10 @@ export class SchoolController {
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School successfully found.' })
   @ApiBadRequestResponse({
-    description: 'School Id invalid. Please try again',
+    description: 'School Id invalid. Please check input data',
   })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while fetching school by dzongkhag ID!',
+  @ApiNotFoundResponse({
+    description: 'School not found by dzongkhag ID!',
   })
   async getSchoolByDzongkhag(
     @Param('dzongkhagId', ParseUUIDPipe) dzongkhagId: string,
@@ -92,7 +95,7 @@ export class SchoolController {
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School successfully found.' })
   @ApiBadRequestResponse({
-    description: 'Invalid school ID. Please try again',
+    description: 'Invalid school ID. Please check input data',
   })
   @ApiNotFoundResponse({ description: 'School not found!' })
   async getSchoolById(@Param('schoolId', ParseUUIDPipe) schoolId: string) {
@@ -102,12 +105,9 @@ export class SchoolController {
   @Get('/')
   @ApiOkResponse({ description: 'School successfully found.' })
   @ApiBadRequestResponse({
-    description: 'Invalid data. Please try again',
+    description: 'Invalid school ID. Please check input data!',
   })
   @ApiNotFoundResponse({ description: 'School not found!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while fetching school',
-  })
   async getAllSchool() {
     return await this.schoolService.getAllSchool();
   }

@@ -4,48 +4,37 @@ import {
   Param,
   Post,
   Patch,
-  BadRequestException,
   HttpCode,
   Delete,
   UsePipes,
   ValidationPipe,
   ParseUUIDPipe,
   Get,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../service/users.service';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateRegisterDto } from '../dto/createRegister.dto';
 import { UpdateUserDto } from '../dto/updateUser.dto';
+import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
+import { AuthGuard } from 'src/modules/guard/auth.guard';
 
 @ApiTags('users')
 @Controller('digital-textbook/user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  //   @Post(':id/VerifyOtpEmail/:otp')
-  //   @ApiOkResponse({ description: 'OTP is successfully verified.' })
-  //   @ApiBadRequestResponse({ description: 'Invalid otp.' })
-  //   @ApiNotFoundResponse({ description: 'User not found!' })
-  //   @ApiInternalServerErrorResponse({
-  //     description: 'Internal server error while verifying otp!',
-  //   })
-  //   async verifyByEmail(@Param('id') id: string, @Param('otp') otp: string) {
-  //     return await this.userService.verifyByEmail(id, otp);
-  //   }
-
   @Post('/forgot-password/:email')
   @ApiOkResponse({ description: 'OTP is successfully send.' })
   @ApiBadRequestResponse({ description: 'Invalid email format!' })
   @ApiNotFoundResponse({ description: 'Email not found or invalid!' })
-  @ApiInternalServerErrorResponse({ description: 'Error while sending otp!' })
   @HttpCode(200)
   async forgotPasswordByEmail(@Param('email') email: string) {
     return await this.userService.forgotPasswordByEmail(email);
@@ -53,11 +42,8 @@ export class UserController {
 
   @Post(':id/reset-password/:otp')
   @ApiOkResponse({ description: 'OTP is successfully verified.' })
-  @ApiBadRequestResponse({ description: 'Invalid otp.' })
-  @ApiNotFoundResponse({ description: 'User not found!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while verifying otp!',
-  })
+  @ApiBadRequestResponse({ description: 'Invalid data.' })
+  @ApiNotFoundResponse({ description: 'User ID not found!' })
   @HttpCode(200)
   async resetPasswordVerifyByEmail(
     @Param('id') id: string,
@@ -71,7 +57,6 @@ export class UserController {
   @ApiOkResponse({ description: 'Password successfully updated!' })
   @ApiBadRequestResponse({ description: 'Invalid user ID!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
-  @ApiInternalServerErrorResponse({ description: 'Password update failed!' })
   @HttpCode(200)
   async updatePassword(
     @Param('id') id: string,
@@ -93,20 +78,17 @@ export class UserController {
   @ApiCreatedResponse({ description: 'Registration successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid registration data!' })
   @ApiConflictResponse({ description: 'Duplicate creation of user!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Duplicated data or internal server error!',
-  })
   async registerByPermit(@Body() userData: CreateRegisterDto) {
     return await this.userService.register(userData);
   }
 
   ////////////////////////////// User Update by Admin //////////////////////
   @Patch('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Admin', 'Super Admin')
+  @Permissions('update')
   @ApiOkResponse({ description: 'User updated successfully.' })
   @ApiBadRequestResponse({ description: 'Invalid user data!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server code while updating user!',
-  })
   @ApiNotFoundResponse({ description: 'User not found!' })
   @UsePipes(ValidationPipe)
   async updateUser(
@@ -118,11 +100,11 @@ export class UserController {
 
   /////////////////////////////// Delete By Admin //////////////////////
   @Delete('/:id')
+  @UseGuards(AuthGuard)
+  @Roles('Admin', 'Super Admin')
+  @Permissions('delete')
   @ApiOkResponse({ description: 'User deleted successfully.' })
   @ApiBadRequestResponse({ description: 'Invalid User ID!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while deleting user!',
-  })
   @UsePipes(ValidationPipe)
   async deleteAdmin(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userService.deleteUserById(id);
@@ -131,10 +113,7 @@ export class UserController {
   ///////////////////////////// Get All User By Admin ///////////////
   @Get('/')
   @ApiOkResponse({ description: 'User successfully fetch from database!' })
-  @ApiBadRequestResponse({ description: 'Invalid User ID!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while fetching user!',
-  })
+  @ApiNotFoundResponse({ description: 'Users not found!' })
   async getAllUser() {
     return await this.userService.getAllUser();
   }
@@ -142,9 +121,6 @@ export class UserController {
   @Get('/:id')
   @ApiOkResponse({ description: 'User successfully fetch from database!' })
   @ApiBadRequestResponse({ description: 'Invalid User ID!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while fetching user!',
-  })
   async getUserById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userService.getUserById(id);
   }

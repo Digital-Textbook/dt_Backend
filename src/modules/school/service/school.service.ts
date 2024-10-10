@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -34,19 +30,14 @@ export class SchoolService {
       dzongkhag: dzongkhagEntity,
     });
 
-    const result = await this.schoolRepository.save(school);
-    if (!result) {
-      throw new InternalServerErrorException('Error while creating school!');
-    }
-
-    return school;
+    return await this.schoolRepository.save(school);
   }
 
   async deleteSchool(id: string) {
     const result = await this.schoolRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new InternalServerErrorException('Error while deleting school!');
+      throw new NotFoundException(`No school found with ID ${id}!`);
     }
 
     return { msg: 'School successfully deleted!' };
@@ -112,9 +103,7 @@ export class SchoolService {
     });
 
     if (!schools || schools.length === 0) {
-      throw new InternalServerErrorException(
-        'Internal server error while fetching schools!',
-      );
+      throw new NotFoundException('School not found in database!');
     }
 
     return schools.map((school) => {
