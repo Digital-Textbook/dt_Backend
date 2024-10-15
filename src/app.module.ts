@@ -18,6 +18,7 @@ import { MinioClientModule } from './minio-client/minio-client.module';
 import { TextbookModule } from './modules/textbook/textbook.module';
 import { BookmarkModule } from './modules/bookmark/bookmark.module';
 import { NoteModule } from './modules/notes/note.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { NoteModule } from './modules/notes/note.module';
     SchoolModule,
     MinioClientModule,
     NoteModule,
+    CommonModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

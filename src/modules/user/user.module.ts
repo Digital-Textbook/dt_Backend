@@ -13,8 +13,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { DataHubApiService } from './service/datahub.service';
 import { School } from '../school/entities/school.entity';
 import { Dzongkhag } from '../school/entities/dzongkhag.entity';
-import { CommonController } from 'src/common/controller/common.controller';
-import { CommonService } from 'src/common/service/common.service';
 import { MinioClientModule } from 'src/minio-client/minio-client.module';
 import { Class } from '../class/entities/class.entity';
 import { Subject } from '../subject/entities/subject.entity';
@@ -44,12 +42,11 @@ import { PermissionsGuard } from '../guard/permission.guard';
       Subject,
     ]),
   ],
-  controllers: [UserController, UserProfileController, CommonController],
+  controllers: [UserController, UserProfileController],
   providers: [
     UserService,
     DataHubApiService,
     UserProfileService,
-    CommonService,
 
     AdminJwtGuard,
     AuthGuard,

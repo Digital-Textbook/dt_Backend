@@ -7,24 +7,19 @@ import {
   UsePipes,
   ValidationPipe,
   ParseUUIDPipe,
-  UseGuards,
   Post,
   Delete,
   UseInterceptors,
   UploadedFile,
-  HttpCode,
 } from '@nestjs/common';
 import { UserProfileService } from '../service/UserProfile.service';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
-import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
@@ -36,8 +31,8 @@ import { BufferedFile } from 'src/minio-client/file.model';
 
 @ApiTags('user-profile')
 @Controller('digital-textbook/user-profile')
-@UseGuards(AuthGuard())
-@ApiBearerAuth()
+// @UseGuards(AuthGuard())
+// @ApiBearerAuth()
 export class UserProfileController {
   constructor(private userProfileService: UserProfileService) {}
 
@@ -107,9 +102,6 @@ export class UserProfileController {
   @ApiOkResponse({ description: 'User password upadted successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid data!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Error while updating password!',
-  })
   async changePassword(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() data: UpdateUserProfilePassword,

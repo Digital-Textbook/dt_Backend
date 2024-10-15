@@ -1,15 +1,15 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Admin } from 'src/modules/admin/entities/admin.entity';
 import { Class } from 'src/modules/class/entities/class.entity';
+import { Permission } from 'src/modules/permission/entities/permission.entity';
+import { Role } from 'src/modules/role/entities/role.entity';
 import { Dzongkhag } from 'src/modules/school/entities/dzongkhag.entity';
 import { School } from 'src/modules/school/entities/school.entity';
 import { Subject } from 'src/modules/subject/entities/subject.entity';
+import { Textbook } from 'src/modules/textbook/entities/textbook.entity';
+import { Users } from 'src/modules/user/entities/users.entity';
 import { Repository } from 'typeorm';
-import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class CommonService {
@@ -19,6 +19,13 @@ export class CommonService {
     @InjectRepository(School) private schoolRepository: Repository<School>,
     @InjectRepository(Subject) private subjectRepository: Repository<Subject>,
     @InjectRepository(Class) private classRepository: Repository<Class>,
+    @InjectRepository(Users) private userRepository: Repository<Users>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
+    @InjectRepository(Permission)
+    private permissionRepository: Repository<Permission>,
+    @InjectRepository(Textbook)
+    private textbookRepository: Repository<Textbook>,
   ) {}
 
   async getAllDzongkhag(dzongkhagName?: string) {
@@ -70,9 +77,6 @@ export class CommonService {
   }
 
   async getSubjectByClass(classId: string) {
-    if (!this.isValidClassId(classId)) {
-      throw new BadRequestException('Invalid class ID format!');
-    }
     const subjects = await this.subjectRepository.find({
       where: { class: { id: classId } },
       relations: ['class'],
@@ -90,54 +94,6 @@ export class CommonService {
       subjectId: subject.id,
     }));
   }
-
-  private isValidClassId(classId: string): boolean {
-    return isUUID(classId);
-  }
-
-  //   async getAllSubjectByClassName(className?: string) {
-  //     const query = this.classRepository
-  //       .createQueryBuilder('class')
-  //       .select(['class.id', 'class.class']);
-
-  //     if (className) {
-  //       query.where('class.class = :class', { class: className });
-  //     }
-
-  //     const classes = await query.getMany();
-
-  //     if (!classes || classes.length === 0) {
-  //       throw new NotFoundException('No class found!');
-  //     }
-
-  //     const subjectPromises = classes.map(async (classItem) => {
-  //       const subjects = await this.subjectRepository.find({
-  //         where: { class: { id: classItem.id } },
-  //         select: ['subjectName', 'id'],
-  //       });
-
-  //       return {
-  //         classId: classItem.id,
-  //         className: classItem.class,
-  //         subjects: subjects,
-  //       };
-  //     });
-
-  //     const subjectsByClass = await Promise.all(subjectPromises);
-
-  //     const responseData = subjectsByClass.flatMap((classData) =>
-  //       classData.subjects.map((subject) => ({
-  //         classId: classData.classId,
-  //         className: classData.className,
-  //         id: subject.id,
-  //         subjectName: subject.subjectName,
-  //       })),
-  //     );
-
-  //     return {
-  //       data: responseData,
-  //     };
-  //   }
 
   ///////////////////
   async getAllSubject() {
@@ -170,5 +126,78 @@ export class CommonService {
     }
 
     return dzongkhag;
+  }
+
+  //   async getDashboardItem() {
+  //     const repositories = {
+  //       schools: this.schoolRepository,
+  //       users: this.userRepository,
+  //       admins: this.adminRepository,
+  //       textbooks: this.textbookRepository,
+  //       subjects: this.subjectRepository,
+  //       roles: this.roleRepository,
+  //       permissions: this.permissionRepository,
+  //     };
+
+  //     const promises = Object.entries(repositories).map(
+  //       async ([name, repository]) => {
+  //         const [, count] = await repository.findAndCount();
+  //         return { name, count };
+  //       },
+  //     );
+
+  //     const results = await Promise.all(promises);
+
+  //     return results;
+  //   }
+
+  async getDashboardItem() {
+    const repositories = {
+      schools: {
+        repository: this.schoolRepository,
+        color: 'primary',
+        icon: 'ri-graduation-cap-line',
+      },
+      users: {
+        repository: this.userRepository,
+        color: 'secondary',
+        icon: 'ri-user-line',
+      },
+      admins: {
+        repository: this.adminRepository,
+        color: 'warning',
+        icon: 'ri-shield-user-line',
+      },
+      textbooks: {
+        repository: this.textbookRepository,
+        color: 'info',
+        icon: 'ri-book-3-line',
+      },
+      subjects: {
+        repository: this.subjectRepository,
+        color: 'success',
+        icon: 'ri-git-repository-line',
+      },
+      roles: {
+        repository: this.roleRepository,
+        color: 'error',
+        icon: 'ri-vip-crown-line',
+      },
+      permissions: {
+        repository: this.permissionRepository,
+        color: 'default',
+        icon: 'ri-key-line',
+      },
+    };
+    const promises = Object.entries(repositories).map(
+      async ([name, { repository, color, icon }]) => {
+        const [, count] = await repository.findAndCount();
+        return { name, count, color, icon };
+      },
+    );
+
+    const results = await Promise.all(promises);
+
+    return results;
   }
 }
