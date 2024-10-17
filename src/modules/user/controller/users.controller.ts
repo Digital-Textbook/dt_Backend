@@ -124,4 +124,6 @@ export class UserController {
   async getUserById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userService.getUserById(id);
   }
+
+  //////////////////////////  Get user details //////////////////////
 }

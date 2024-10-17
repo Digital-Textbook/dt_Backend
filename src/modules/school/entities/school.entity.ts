@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Dzongkhag } from './dzongkhag.entity';
 import { UserProfile } from 'src/modules/user/entities/UserProfile.entity';
+import { Gewog } from './gewog.entities';
 
 @Entity('school')
 export class School extends BaseEntity {
@@ -35,6 +36,9 @@ export class School extends BaseEntity {
   @ManyToOne(() => Dzongkhag, (dzongkhag) => dzongkhag.school)
   @JoinColumn()
   dzongkhag: Dzongkhag;
+
+  @ManyToOne(() => Gewog, (gewog) => gewog.school)
+  gewog: Gewog;
 
   @OneToMany(() => UserProfile, (userProfile) => userProfile.school)
   userProfile: UserProfile;

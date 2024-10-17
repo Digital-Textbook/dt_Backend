@@ -117,15 +117,22 @@ export class CommonService {
   }
 
   async getDzongkhag() {
-    const dzongkhag = await this.dzongkhagRepository.find({
+    const dzongkhags = await this.dzongkhagRepository.find({
       select: ['id', 'name'],
+      relations: ['gewog'],
     });
 
-    if (!dzongkhag || dzongkhag.length === 0) {
+    if (!dzongkhags || dzongkhags.length === 0) {
       throw new NotFoundException('Empty class in database!');
     }
-
-    return dzongkhag;
+    return dzongkhags.map((dzo) => ({
+      dzongkhagId: dzo.id,
+      name: dzo.name,
+      gewogs: dzo.gewog.map((geo) => ({
+        id: geo.id,
+        name: geo.name,
+      })),
+    }));
   }
 
   //   async getDashboardItem() {

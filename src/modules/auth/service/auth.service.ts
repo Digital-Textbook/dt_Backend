@@ -16,6 +16,7 @@ import { UsersJwtPayload } from '../jwt-strategy/UsersJwtPayload.interface';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
 import { AdminJwtPayload } from '../jwt-strategy/AdminJwtPayload.interface';
 import { Status } from 'src/constants/status';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -101,7 +102,7 @@ export class AuthService {
         ),
       };
 
-      //   console.log('Admin Payload::', adminPayload);
+      console.log('Admin Payload::', adminPayload);
       const adminAccessToken: string = await this.jwtService.sign(
         adminPayload,
         {
@@ -149,5 +150,17 @@ export class AuthService {
     }
 
     return profile;
+  }
+
+  async verifyToken(token: string): Promise<AdminJwtPayload> {
+    try {
+      const payload = jwt.verify(
+        token,
+        process.env.JWT_SECRET,
+      ) as AdminJwtPayload;
+      return payload;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 }

@@ -101,7 +101,9 @@ export class UserProfile extends BaseEntity {
   @JoinColumn()
   dzongkhag: Dzongkhag;
 
-  @ManyToOne(() => School, (school) => school.userProfile)
+  @ManyToOne(() => School, (school) => school.userProfile, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   school: School;
 }
