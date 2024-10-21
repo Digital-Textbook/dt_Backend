@@ -7,85 +7,103 @@ import {
   Delete,
   Get,
   ParseUUIDPipe,
-  UsePipes,
-  ValidationPipe,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { NoteService } from '../service/note.service';
 import { CreateNoteDto } from '../dto/note.dto';
 import { UpdateNoteDto } from '../dto/update-note.dto';
+import { UserAuthGuard } from 'src/modules/guard/user-auth.guard';
 
 @ApiTags('notes')
 @Controller('digital-textbook/notes')
 export class NoteController {
   constructor(private noteService: NoteService) {}
 
-  @Post('/:userId')
-  @UsePipes(ValidationPipe)
+  @Post('')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'Notes successfully created!' })
   @ApiBadRequestResponse({ description: 'Invalid data for notes!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while creating notes!',
-  })
   @ApiNotFoundResponse({ description: 'User Id invalid!' })
-  async createNote(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() noteData: CreateNoteDto,
-  ) {
-    return await this.noteService.createNote(userId, noteData);
+  @ApiUnauthorizedResponse({
+    description:
+      'The user is not authorized (e.g., missing or invalid authentication token).',
+  })
+  async createNote(@Request() req, @Body() noteData: CreateNoteDto) {
+    const id = req.user.id;
+    console.log('User token::', id);
+    return await this.noteService.createNote(id, noteData);
   }
 
-  @Get('/textbook/:textbookId')
-  @ApiOkResponse({ description: 'Notes successfully found!' })
-  @ApiBadRequestResponse({ description: 'Invalid textbook Id!' })
-  @ApiNotFoundResponse({ description: 'Textbook not found!' })
-  async getNoteByTextbookId(@Param('textbookId') textbookId: string) {
-    return await this.noteService.getNoteByTextbookId(textbookId);
-  }
-
-  @Patch('/textbook/:noteId')
+  @Patch('/:id')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Notes successfully updated!' })
   @ApiBadRequestResponse({ description: 'Invalid Note Id!' })
   @ApiNotFoundResponse({ description: 'Notes not found! ' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while updating notes!',
+  @ApiUnauthorizedResponse({
+    description:
+      'The user is not authorized (e.g., missing or invalid authentication token).',
   })
   async updateNotesById(
-    @Param('noteId') noteId: string,
+    @Param('id') id: string,
     @Body() updateNote: UpdateNoteDto,
   ) {
-    return await this.noteService.updateNotesById(noteId, updateNote);
+    return await this.noteService.updateNotesById(id, updateNote);
   }
 
-  @Delete('/:noteId')
+  @Delete('/:id')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Notes successfully deleted!' })
   @ApiBadRequestResponse({ description: 'Invalid Note ID!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while deleting notes!',
+  @ApiUnauthorizedResponse({
+    description:
+      'The user is not authorized (e.g., missing or invalid authentication token).',
   })
-  async deleteNoteById(@Param('noteId') noteId: string) {
-    return await this.noteService.deleteNoteById(noteId);
+  async deleteNoteById(@Param('id') id: string) {
+    return await this.noteService.deleteNoteById(id);
   }
 
-  @Get('/:userId/:textbookId')
-  @UsePipes(ValidationPipe)
+  @Get('')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'Notes successfully fetched!' })
   @ApiBadRequestResponse({ description: 'Invalid Note ID!' })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error while fetching notes!',
+  @ApiUnauthorizedResponse({
+    description:
+      'The user is not authorized (e.g., missing or invalid authentication token).',
+  })
+  async getNotes(@Request() req) {
+    const id = req.user.id;
+    return await this.noteService.getNotes(id);
+  }
+
+  @Get('/:textbookId')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Notes successfully fetched!' })
+  @ApiBadRequestResponse({ description: 'Invalid Note ID!' })
+  @ApiUnauthorizedResponse({
+    description:
+      'The user is not authorized (e.g., missing or invalid authentication token).',
   })
   async getNotesByUserId(
-    @Param('userId', ParseUUIDPipe) userId: string,
+    @Request() req,
     @Param('textbookId', ParseUUIDPipe) textbookId: string,
   ) {
-    return await this.noteService.getNotesByUserId(userId, textbookId);
+    const id = req.user.id;
+    return await this.noteService.getNotesByUserId(id, textbookId);
   }
 }

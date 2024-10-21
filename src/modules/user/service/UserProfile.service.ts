@@ -96,7 +96,7 @@ export class UserProfileService {
 
   async getProfileById(id: string) {
     const profile = await this.profileRepository.findOne({
-      where: { id },
+      where: { user: { id: id } },
       relations: ['school', 'dzongkhag'],
       select: ['id', 'name', 'studentCode', 'class', 'gender', 'dateOfBirth'],
     });
@@ -122,7 +122,9 @@ export class UserProfileService {
     userData: UpdateProfileDto,
     profileImage: BufferedFile,
   ): Promise<UserProfile> {
-    const profile = await this.profileRepository.findOne({ where: { id } });
+    const profile = await this.profileRepository.findOne({
+      where: { user: { id: id } },
+    });
 
     if (!profile) {
       throw new NotFoundException(`Profile with ID ${id} was not found`);
@@ -169,7 +171,10 @@ export class UserProfileService {
   }
 
   async deleteProfile(id: string) {
-    const result = await this.profileRepository.delete(id);
+    const profileId = await this.profileRepository.findOne({
+      where: { user: { id } },
+    });
+    const result = await this.profileRepository.delete(profileId.id);
 
     if (result.affected === 0) {
       throw new NotFoundException(

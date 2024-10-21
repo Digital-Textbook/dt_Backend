@@ -42,8 +42,6 @@ export class AdminService {
   }
 
   async createNewAdmin(admin: CreateAdminDto) {
-    console.log('Register Admin Data by Super Admin::', admin);
-
     const existingAdmin = await this.adminRepository.findOne({
       where: { email: admin.email },
     });
@@ -87,8 +85,6 @@ export class AdminService {
     });
 
     const savedAdmin = await this.adminRepository.save(newAdmin);
-    console.log('New Admin Created::', savedAdmin);
-
     return savedAdmin;
   }
 

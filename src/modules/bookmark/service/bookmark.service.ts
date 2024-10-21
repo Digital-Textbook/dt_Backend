@@ -22,10 +22,10 @@ export class BookmarkService {
     private textbookRepository: Repository<Textbook>,
   ) {}
 
-  async createBookmark(createBookmarkDto: CreateBookmarkDto) {
+  async createBookmark(id: string, createBookmarkDto: CreateBookmarkDto) {
     try {
-      const { pageNumber, userId, textbookId } = createBookmarkDto;
-
+      const { pageNumber, textbookId } = createBookmarkDto;
+      const userId = id;
       const [user, textbook, existingBookmark] = await Promise.all([
         this.userRepository.findOne({ where: { id: userId } }),
         this.textbookRepository.findOne({ where: { id: textbookId } }),
@@ -48,13 +48,7 @@ export class BookmarkService {
           textbook,
           isBookmark: true,
         });
-        const result = await this.bookmarkRepository.save(newBookmark);
-        if (!result) {
-          throw new InternalServerErrorException(
-            'Internal server error while creating bookmark',
-          );
-        }
-        return newBookmark;
+        return await this.bookmarkRepository.save(newBookmark);
       }
     } catch (error) {
       console.error('Error creating bookmark: ', error);
@@ -98,23 +92,6 @@ export class BookmarkService {
     return { msg: 'Bookmark deleted successfully!' };
   }
 
-  //   async getBookmarkByUserId(userId: string) {
-  //     const userBookmark = await this.bookmarkRepository.find({
-  //       where: {
-  //         user: { id: userId },
-  //       },
-  //       relations: ['textbook', 'textbook.subject'],
-  //       select: ['pageNumber', 'textbook.coverUrl', 'textbook.textbookUrl', 'subject.subjectName']
-  //     });
-
-  //     if (!userBookmark || userBookmark.length === 0) {
-  //       throw new NotFoundException(`User with ID ${userId} have no bookmark!`);
-  //     }
-  //     return {
-
-  //     };
-  //   }
-
   async getBookmarkByUserId(userId: string) {
     const userBookmarks = await this.bookmarkRepository.find({
       where: {
@@ -138,7 +115,9 @@ export class BookmarkService {
   }
 
   async getAllBookmark() {
-    const bookmarks = await this.bookmarkRepository.find();
+    const bookmarks = await this.bookmarkRepository.find({
+      relations: ['textbook', 'user'],
+    });
 
     if (!bookmarks || bookmarks.length === 0) {
       throw new NotFoundException('Bookmarks not found!');
@@ -152,17 +131,20 @@ export class BookmarkService {
       where: { id: id },
       relations: ['textbook', 'textbook.subject'],
     });
-    if (!bookmark || bookmark.isBookmark === true) {
+
+    if (!bookmark || bookmark.isBookmark === false) {
       throw new NotFoundException(`Bookmark with ID ${id} not found!`);
     }
-    const subjectName = bookmark.textbook?.subject?.subjectName || 'N/A';
-    const coverUrl = bookmark.textbook?.coverUrl || 'N/A';
+    // const subjectName = bookmark.textbook?.subject?.subjectName || 'N/A';
+    // const coverUrl = bookmark.textbook?.coverUrl || 'N/A';
 
-    return {
-      id: bookmark.id,
-      subjectName: subjectName,
-      pageNumber: bookmark.pageNumber,
-      coverUrl: coverUrl,
-    };
+    // return {
+    //   id: bookmark.id,
+    //   subjectName: subjectName,
+    //   pageNumber: bookmark.pageNumber,
+    //   coverUrl: coverUrl,
+    // };
+
+    return bookmark;
   }
 }

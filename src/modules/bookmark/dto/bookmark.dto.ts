@@ -11,14 +11,6 @@ export class CreateBookmarkDto {
   pageNumber: string;
 
   @ApiProperty({
-    description: 'User ID',
-    example: '9a674df4-0c1c-4d9b-9ad6-915fd4d1e938',
-  })
-  @IsNotEmpty({ message: 'User ID is required' })
-  @IsUUID('4', { message: 'User ID must be a valid UUID' })
-  userId: string;
-
-  @ApiProperty({
     description: 'Textbook ID',
     example: '9a674df4-0c1c-4d9b-9ad6-915fd4d1e939',
   })

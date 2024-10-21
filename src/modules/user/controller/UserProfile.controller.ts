@@ -1,21 +1,20 @@
 import {
   Body,
   Controller,
-  Param,
   Patch,
   Get,
-  UsePipes,
-  ValidationPipe,
-  ParseUUIDPipe,
   Post,
   Delete,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UserProfileService } from '../service/UserProfile.service';
 import { UpdateProfileDto } from '../dto/updateProfile.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiConsumes,
@@ -28,15 +27,16 @@ import { CreateUserProfileDto } from '../dto/createUserProfile.dto';
 import { UpdateUserProfilePassword } from '../dto/updatePassword.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BufferedFile } from 'src/minio-client/file.model';
+import { UserAuthGuard } from 'src/modules/guard/user-auth.guard';
 
 @ApiTags('user-profile')
 @Controller('digital-textbook/user-profile')
-// @UseGuards(AuthGuard())
-// @ApiBearerAuth()
 export class UserProfileController {
   constructor(private userProfileService: UserProfileService) {}
 
-  @Post('/:id')
+  @Post('')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'User profile successfully created!' })
   @ApiBadRequestResponse({ description: 'Invalid user data!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
@@ -48,10 +48,11 @@ export class UserProfileController {
   })
   @UseInterceptors(FileInterceptor('profileImage'))
   async createProfile(
-    @Param('id') id: string,
+    @Request() req,
     @UploadedFile() profileImage: BufferedFile,
     @Body() userProfileData: CreateUserProfileDto,
   ) {
+    const id = req.user.id;
     return await this.userProfileService.createUserProfile(
       id,
       userProfileData,
@@ -59,15 +60,19 @@ export class UserProfileController {
     );
   }
 
-  @Get('/:id')
-  @UsePipes(ValidationPipe)
+  @Get('')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'User profile successfully fetched!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
-  async getProfileById(@Param('id', ParseUUIDPipe) id: string) {
+  async getProfileById(@Request() req) {
+    const id = req.user.id;
     return await this.userProfileService.getProfileById(id);
   }
 
-  @Patch('/:id')
+  @Patch('')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'User profile successfully updated!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
   @ApiConflictResponse({ description: 'Duplicate entry!' })
@@ -78,10 +83,11 @@ export class UserProfileController {
     type: UpdateProfileDto,
   })
   async updateProfile(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req,
     @Body() studentData: UpdateProfileDto,
     @UploadedFile() profileImage: BufferedFile,
   ) {
+    const id = req.user.id;
     return await this.userProfileService.updateProfile(
       id,
       studentData,
@@ -89,23 +95,27 @@ export class UserProfileController {
     );
   }
 
-  @Delete('/:userId')
-  @UsePipes(ValidationPipe)
+  @Delete('')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'User profile successfully deleted!' })
   @ApiBadRequestResponse({ description: 'Invalid user Id!' })
-  async deleteUserProfile(@Param('userId', ParseUUIDPipe) userId: string) {
-    return await this.userProfileService.deleteProfile(userId);
+  async deleteUserProfile(@Request() req) {
+    const id = req.user.id;
+    return await this.userProfileService.deleteProfile(id);
   }
 
-  @Patch('/:userId/setting')
-  @UsePipes(ValidationPipe)
+  @Patch('/setting')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'User password upadted successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid data!' })
   @ApiNotFoundResponse({ description: 'User not found!' })
   async changePassword(
-    @Param('userId', ParseUUIDPipe) userId: string,
+    @Request() req,
     @Body() data: UpdateUserProfilePassword,
   ) {
-    return await this.userProfileService.changePassword(userId, data);
+    const id = req.user.id;
+    return await this.userProfileService.changePassword(id, data);
   }
 }

@@ -55,7 +55,12 @@ export class AuthService {
     );
 
     if (passwordMatches) {
-      const payload: UsersJwtPayload = { cidNo: existingUser.cidNo };
+      const payload: UsersJwtPayload = {
+        cidNo: existingUser.cidNo,
+        id: existingUser.id,
+      };
+      console.log('Payload::', payload);
+
       const accessToken: string = await this.jwtService.sign(payload);
 
       existingUser.isLoggedIn = true;
@@ -150,17 +155,5 @@ export class AuthService {
     }
 
     return profile;
-  }
-
-  async verifyToken(token: string): Promise<AdminJwtPayload> {
-    try {
-      const payload = jwt.verify(
-        token,
-        process.env.JWT_SECRET,
-      ) as AdminJwtPayload;
-      return payload;
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token');
-    }
   }
 }

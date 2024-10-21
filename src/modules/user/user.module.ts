@@ -16,7 +16,7 @@ import { Dzongkhag } from '../school/entities/dzongkhag.entity';
 import { MinioClientModule } from 'src/minio-client/minio-client.module';
 import { Class } from '../class/entities/class.entity';
 import { Subject } from '../subject/entities/subject.entity';
-import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { AdminJwtGuard } from '../guard/AdminAuthGuard';
 import { AuthGuard } from '../guard/auth.guard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
@@ -27,9 +27,9 @@ import { PermissionsGuard } from '../guard/permission.guard';
     MinioClientModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: 'topSecret51',
+      secret: process.env.JWT_SECRET || 'topSecret51',
       signOptions: {
-        expiresIn: 3600,
+        expiresIn: '60m',
       },
     }),
     TypeOrmModule.forFeature([

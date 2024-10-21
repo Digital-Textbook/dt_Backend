@@ -1,6 +1,4 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -23,12 +21,13 @@ export class NoteService {
     private textbookRepository: Repository<Textbook>,
   ) {}
 
-  async createNote(userId: string, noteData: CreateNoteDto) {
+  async createNote(id: string, noteData: CreateNoteDto) {
     const existingUser = await this.userRepository.findOne({
-      where: { id: userId },
+      where: { id: id },
     });
+
     if (!existingUser) {
-      throw new NotFoundException(`Invalid user with ID ${userId}`);
+      throw new NotFoundException(`Invalid user with ID ${id}`);
     }
 
     const existingTextbook = await this.textbookRepository.findOne({
@@ -41,7 +40,7 @@ export class NoteService {
     }
 
     const existingNotes = await this.noteRepository.findOne({
-      where: { id: userId, textbook: { id: noteData.textbookId } },
+      where: { id: id, textbook: { id: noteData.textbookId } },
       relations: ['textbook', 'textbook.subject', 'textbook.subject.class'],
     });
 
@@ -59,18 +58,6 @@ export class NoteService {
 
       return await this.noteRepository.save(newNotes);
     }
-  }
-
-  async getNoteByTextbookId(textbookId: string) {
-    const notes = await this.noteRepository.find({
-      where: { textbook: { id: textbookId } },
-    });
-
-    if (!notes || notes.length === 0) {
-      throw new NotFoundException('Their is no notes for this textbook!');
-    }
-
-    return notes;
   }
 
   async updateNotesById(noteId: string, updateNote: UpdateNoteDto) {
@@ -112,6 +99,21 @@ export class NoteService {
         user: { id: userId },
         textbook: { id: textbookId },
       },
+    });
+
+    if (!notes || notes.length === 0) {
+      throw new NotFoundException(`No notes for User with ID ${userId}!`);
+    }
+
+    return notes;
+  }
+
+  async getNotes(userId: string) {
+    const notes = await this.noteRepository.find({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['textbook'],
     });
 
     if (!notes || notes.length === 0) {

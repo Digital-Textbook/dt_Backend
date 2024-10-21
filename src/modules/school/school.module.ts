@@ -8,7 +8,7 @@ import { Dzongkhag } from './entities/dzongkhag.entity';
 import { Role } from '../role/entities/role.entity';
 import { Admin } from '../admin/entities/admin.entity';
 
-import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { AdminJwtGuard } from '../guard/AdminAuthGuard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 import { AuthGuard } from '../guard/auth.guard';
