@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { AdminJwtGuard } from 'src/modules/auth/guard/AdminAuthGuard';
+import { AdminJwtGuard } from 'src/modules/guard/AdminAuthGuard';
 import { RolesGuard } from 'src/modules/guard/role.guard';
 import { PermissionsGuard } from 'src/modules/guard/permission.guard';
 

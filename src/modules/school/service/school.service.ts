@@ -6,6 +6,7 @@ import { School } from '../entities/school.entity';
 import { CreateSchoolDto } from '../dto/school.dto';
 import { Dzongkhag } from '../entities/dzongkhag.entity';
 import { UpdateSchoolDto } from '../dto/updateSchool.dto';
+import { Gewog } from '../entities/gewog.entities';
 
 @Injectable()
 export class SchoolService {
@@ -13,21 +14,33 @@ export class SchoolService {
     @InjectRepository(School) private schoolRepository: Repository<School>,
     @InjectRepository(Dzongkhag)
     private dzongkhagRepository: Repository<Dzongkhag>,
+    @InjectRepository(Gewog)
+    private gewogRepository: Repository<Gewog>,
   ) {}
 
   async addSchool(data: CreateSchoolDto) {
     const dzongkhagEntity = await this.dzongkhagRepository.findOne({
       where: { id: data.dzongkhagId },
     });
+
+    const gewogEntity = await this.gewogRepository.findOne({
+      where: { id: data.gewogId },
+    });
+
     if (!dzongkhagEntity) {
       throw new NotFoundException(
         `Dzongkhag with ID ${data.dzongkhagId} not found!`,
       );
     }
 
+    if (!gewogEntity) {
+      throw new NotFoundException(`Gewog with ID ${data.gewogId} not found!`);
+    }
+
     const school = this.schoolRepository.create({
       schoolName: data.schoolName,
       dzongkhag: dzongkhagEntity,
+      gewog: gewogEntity,
     });
 
     return await this.schoolRepository.save(school);
@@ -54,8 +67,17 @@ export class SchoolService {
     const dzongkhag = await this.dzongkhagRepository.findOne({
       where: { id: data.dzongkhagId },
     });
+
+    const gewog = await this.gewogRepository.findOne({
+      where: { id: data.gewogId },
+    });
+
+    if (!dzongkhag || !gewog) {
+      throw new NotFoundException('Provided dzongkhag or gewog is invalid!');
+    }
     school.schoolName = data.schoolName;
     school.dzongkhag = dzongkhag;
+    school.gewog = gewog;
 
     await this.schoolRepository.save(school);
     return { msg: 'School is updated successfully', school };
@@ -80,7 +102,7 @@ export class SchoolService {
   async getSchoolById(id: string) {
     const schools = await this.schoolRepository.findOne({
       where: { id: id },
-      relations: ['dzongkhag'],
+      relations: ['dzongkhag', 'gewog'],
       select: ['id', 'schoolName'],
     });
 
@@ -93,12 +115,14 @@ export class SchoolService {
       name: schools.schoolName,
       dzongkhag: schools.dzongkhag.name,
       DzongkhagId: schools.dzongkhag.id,
+      gewog: schools.gewog.name,
+      gewogId: schools.gewog.id,
     };
   }
 
   async getAllSchool() {
     const schools = await this.schoolRepository.find({
-      relations: ['dzongkhag'],
+      relations: ['dzongkhag', 'gewog'],
       select: ['id', 'schoolName', 'createdAt'],
     });
 
@@ -108,12 +132,13 @@ export class SchoolService {
 
     return schools.map((school) => {
       const dzongkhagName = school.dzongkhag?.name || 'N/A';
-
+      const gewogName = school.gewog?.name || 'N/A';
       return {
         id: school.id,
         name: school.schoolName,
         dzongkhag: dzongkhagName,
         createdAt: school.createdAt,
+        gewog: gewogName,
       };
     });
   }

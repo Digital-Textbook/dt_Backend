@@ -2,24 +2,25 @@ import {
   BaseEntity,
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Dzongkhag } from './dzongkhag.entity';
 import { School } from './school.entity';
-import { UserProfile } from 'src/modules/user/entities/UserProfile.entity';
-import { Gewog } from './gewog.entities';
 
-@Entity('dzongkhag')
-export class Dzongkhag extends BaseEntity {
+@Entity('gewog')
+export class Gewog extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', {
     comment: 'This is the unique ID',
   })
   id: string;
 
   @ApiProperty({
-    description: 'Name of dzongkhag is required!',
-    example: 'Thimphu',
+    description: 'Name of gewog is required!',
+    example: 'Chang',
   })
   @Column({
     type: 'varchar',
@@ -39,12 +40,10 @@ export class Dzongkhag extends BaseEntity {
   })
   updatedAt: Date;
 
-  @OneToMany(() => UserProfile, (userProfile) => userProfile.dzongkhag)
-  userProfile: UserProfile[];
+  @ManyToOne(() => Dzongkhag, (dzongkhag) => dzongkhag.gewog)
+  @JoinColumn()
+  dzongkhag: Dzongkhag;
 
-  @OneToMany(() => Gewog, (gewog) => gewog.dzongkhag)
-  gewog: Gewog[];
-
-  @OneToMany(() => School, (school) => school.dzongkhag)
+  @OneToMany(() => School, (school) => school.gewog)
   school: School[];
 }

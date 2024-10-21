@@ -9,7 +9,7 @@ import { Bookmark } from '../bookmark/entities/bookmark.entities';
 import { Notes } from '../notes/entities/note.entities';
 import { ScreenTime } from '../bookmark/entities/screen-time.entities';
 import { AuthGuard } from '../guard/auth.guard';
-import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { AdminJwtGuard } from '../guard/AdminAuthGuard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 

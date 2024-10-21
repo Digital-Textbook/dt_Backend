@@ -14,6 +14,7 @@ import {
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -37,6 +38,7 @@ export class SchoolController {
   @UseGuards(AuthGuard)
   @Roles('Admin', 'Super Admin')
   @Permissions('create')
+  @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'School creacted successfully!' })
   @ApiNotFoundResponse({ description: 'Dzongkhag Id is invalid!' })
   @ApiUnauthorizedResponse({
@@ -53,6 +55,7 @@ export class SchoolController {
   @UseGuards(AuthGuard)
   @Roles('Admin', 'Super Admin')
   @Permissions('delete')
+  @ApiBearerAuth()
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School delete successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid School ID!' })
@@ -67,6 +70,7 @@ export class SchoolController {
   @UseGuards(AuthGuard)
   @Roles('Admin', 'Super Admin')
   @Permissions('update')
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'School updated successfully!' })
   @ApiBadRequestResponse({
     description: 'Invalid data. Please check input data',

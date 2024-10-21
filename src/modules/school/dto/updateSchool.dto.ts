@@ -4,11 +4,19 @@ import { ApiProperty } from '@nestjs/swagger';
 export class UpdateSchoolDto {
   @ApiProperty({
     description: 'Dzongkhag ID is required!',
-    example: '11',
+    example: 'Uuid of Dzongkhag ID',
   })
   @IsString({ message: 'Class ID is required' })
   @IsOptional()
   dzongkhagId: string;
+
+  @ApiProperty({
+    description: 'Gewog ID is required!',
+    example: 'Uuid of Gewog ID',
+  })
+  @IsString({ message: 'Gewog ID is required' })
+  @IsOptional()
+  gewogId: string;
 
   @ApiProperty({
     description: 'School name must be string',

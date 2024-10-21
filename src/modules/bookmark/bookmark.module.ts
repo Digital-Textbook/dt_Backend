@@ -8,10 +8,12 @@ import { Users } from '../user/entities/users.entity';
 import { ScreenTime } from './entities/screen-time.entities';
 import { ScreenTimeService } from './service/sreen-time.service';
 import { ScreenTimeController } from './controller/screen-time.controller';
+import { UserAuthGuard } from '../guard/user-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Bookmark, Textbook, Users, ScreenTime])],
-  providers: [BookmarkService, ScreenTimeService],
+  providers: [BookmarkService, ScreenTimeService, UserAuthGuard, JwtService],
   controllers: [BookmarkController, ScreenTimeController],
 })
 export class BookmarkModule {}

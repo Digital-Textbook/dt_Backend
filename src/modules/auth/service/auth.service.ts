@@ -16,6 +16,7 @@ import { UsersJwtPayload } from '../jwt-strategy/UsersJwtPayload.interface';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
 import { AdminJwtPayload } from '../jwt-strategy/AdminJwtPayload.interface';
 import { Status } from 'src/constants/status';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -54,7 +55,12 @@ export class AuthService {
     );
 
     if (passwordMatches) {
-      const payload: UsersJwtPayload = { cidNo: existingUser.cidNo };
+      const payload: UsersJwtPayload = {
+        cidNo: existingUser.cidNo,
+        id: existingUser.id,
+      };
+      console.log('Payload::', payload);
+
       const accessToken: string = await this.jwtService.sign(payload);
 
       existingUser.isLoggedIn = true;
@@ -101,7 +107,7 @@ export class AuthService {
         ),
       };
 
-      //   console.log('Admin Payload::', adminPayload);
+      console.log('Admin Payload::', adminPayload);
       const adminAccessToken: string = await this.jwtService.sign(
         adminPayload,
         {

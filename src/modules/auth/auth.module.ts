@@ -21,11 +21,11 @@ import { ScreenTime } from '../bookmark/entities/screen-time.entities';
 import { Bookmark } from '../bookmark/entities/bookmark.entities';
 import { Role } from '../role/entities/role.entity';
 import { Permission } from '../permission/entities/permission.entity';
-import { AdminJwtStrategy } from './jwt-strategy/AdminJwtGuard';
+import { AdminJwtStrategy } from './jwt-strategy/AdminJwtStrategy';
 import { UserJwtStrategy } from './jwt-strategy/UserJwtStrategy';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
-import { AdminJwtGuard } from './guard/AdminAuthGuard';
+import { AdminJwtGuard } from '../guard/AdminAuthGuard';
 import { AuthGuard } from '../guard/auth.guard';
 
 @Module({
@@ -33,9 +33,9 @@ import { AuthGuard } from '../guard/auth.guard';
     HttpModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: 'topSecret51',
+      secret: process.env.JWT_SECRET || 'topSecret51',
       signOptions: {
-        expiresIn: 3600,
+        expiresIn: '60m',
       },
     }),
     TypeOrmModule.forFeature([

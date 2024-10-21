@@ -16,7 +16,7 @@ import { PermissionService } from '../permission/service/permission.service';
 import { PermissionController } from '../permission/controller/permission.controller';
 import { Permission } from '../permission/entities/permission.entity';
 
-import { AdminJwtGuard } from '../auth/guard/AdminAuthGuard';
+import { AdminJwtGuard } from '../guard/AdminAuthGuard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 import { AuthGuard } from '../guard/auth.guard';
