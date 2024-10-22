@@ -14,6 +14,7 @@ import {
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
@@ -26,7 +27,7 @@ import { RoleService } from '../service/role.service';
 import { CreateRoleDto } from '../../role/dto/createRole.dto';
 import { UpdateRoleDto } from '../dto/updateRole.dto';
 import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
-import { AuthGuard } from 'src/modules/guard/auth.guard';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('roles&permission')
 @Controller('digital-textbook/role')
@@ -49,7 +50,8 @@ export class RoleController {
   }
 
   @Post('/')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('create')
   @ApiCreatedResponse({ description: 'Role created successfully!' })
@@ -61,7 +63,8 @@ export class RoleController {
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('delete')
   @ApiOkResponse({ description: 'Role deleted successfully!' })
@@ -79,7 +82,8 @@ export class RoleController {
   }
 
   @Patch(':id/permissions')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('update')
   @ApiOkResponse({ description: 'Role updated successfully!' })

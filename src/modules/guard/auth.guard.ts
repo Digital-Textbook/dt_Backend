@@ -1,10 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { AdminJwtGuard } from 'src/modules/guard/AdminAuthGuard';
+
 import { RolesGuard } from 'src/modules/guard/role.guard';
 import { PermissionsGuard } from 'src/modules/guard/permission.guard';
+import { AdminJwtGuard } from './AdminAuthGuard';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class Auth implements CanActivate {
   constructor(
     private readonly adminJwtGuard: AdminJwtGuard,
     private readonly rolesGuard: RolesGuard,
@@ -19,6 +20,7 @@ export class AuthGuard implements CanActivate {
     if (!isRoleValid) return false;
 
     const isPermissionValid = await this.permissionsGuard.canActivate(context);
+
     return isPermissionValid;
   }
 }

@@ -5,7 +5,7 @@ import { SubjectController } from './controller/subject.controller';
 import { SubjectService } from './service/subject.service';
 import { Class } from '../class/entities/class.entity';
 import { AdminJwtGuard } from '../guard/AdminAuthGuard';
-import { AuthGuard } from '../guard/auth.guard';
+import { Auth } from '../guard/auth.guard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 
@@ -15,7 +15,7 @@ import { PermissionsGuard } from '../guard/permission.guard';
   providers: [
     SubjectService,
     AdminJwtGuard,
-    AuthGuard,
+    Auth,
     RolesGuard,
     PermissionsGuard,
   ],

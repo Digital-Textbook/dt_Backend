@@ -17,7 +17,7 @@ import { MinioClientModule } from 'src/minio-client/minio-client.module';
 import { Class } from '../class/entities/class.entity';
 import { Subject } from '../subject/entities/subject.entity';
 import { AdminJwtGuard } from '../guard/AdminAuthGuard';
-import { AuthGuard } from '../guard/auth.guard';
+import { Auth } from '../guard/auth.guard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 
@@ -49,7 +49,7 @@ import { PermissionsGuard } from '../guard/permission.guard';
     UserProfileService,
 
     AdminJwtGuard,
-    AuthGuard,
+    Auth,
     RolesGuard,
     PermissionsGuard,
   ],

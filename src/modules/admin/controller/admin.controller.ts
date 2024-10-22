@@ -18,6 +18,7 @@ import { Admin } from '../entities/admin.entity';
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -25,7 +26,7 @@ import {
 } from '@nestjs/swagger';
 
 import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
-import { AuthGuard } from 'src/modules/guard/auth.guard';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('admin')
 @Controller('digital-textbook/admin')
@@ -33,7 +34,8 @@ export class AdminController {
   constructor(private adminService: AdminService) {}
 
   @Post('/register')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('create')
   @ApiCreatedResponse({ description: 'Admin registered successfully' })
@@ -59,7 +61,8 @@ export class AdminController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('update')
   @ApiOkResponse({ description: 'Admin updated successfully.' })
@@ -73,7 +76,8 @@ export class AdminController {
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('update')
   @ApiOkResponse({ description: 'Admin delete successfully.' })
@@ -113,6 +117,8 @@ export class AdminController {
   }
 
   @Patch('/:id/deactive')
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @UsePipes(ValidationPipe)
   async deactivateAccount(@Param('id', ParseUUIDPipe) id: string) {
     return await this.adminService.deactivateAccount(id);

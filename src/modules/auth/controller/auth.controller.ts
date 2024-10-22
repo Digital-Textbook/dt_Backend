@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { LoginUserDto } from '../dto/loginUser.dto';
 import { LoginAdminDto } from '../dto/admin-signin.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -21,6 +23,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Users } from 'src/modules/user/entities/users.entity';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('auth')
 @Controller('digital-textbook/auth')
@@ -66,6 +69,8 @@ export class AuthController {
   }
 
   @Get('/:id')
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   async getAdminProfile(@Param('id', ParseUUIDPipe) id: string) {
     return await this.authService.adminProfile(id);
   }

@@ -26,7 +26,7 @@ import { UserJwtStrategy } from './jwt-strategy/UserJwtStrategy';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
 import { AdminJwtGuard } from '../guard/AdminAuthGuard';
-import { AuthGuard } from '../guard/auth.guard';
+import { Auth } from '../guard/auth.guard';
 
 @Module({
   imports: [
@@ -61,7 +61,7 @@ import { AuthGuard } from '../guard/auth.guard';
     AdminJwtStrategy,
     UserJwtStrategy,
 
-    AuthGuard,
+    Auth,
     AdminJwtGuard,
     RolesGuard,
     PermissionsGuard,

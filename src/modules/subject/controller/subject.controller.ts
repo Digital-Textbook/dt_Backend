@@ -11,6 +11,7 @@ import {
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -19,7 +20,7 @@ import {
 import { SubjectService } from '../service/subject.service';
 import { CreateSubjectDto } from '../dto/createSubject.dto';
 import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
-import { AuthGuard } from 'src/modules/guard/auth.guard';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('subject')
 @Controller('digital-textbook/subject')
@@ -27,7 +28,8 @@ export class SubjectController {
   constructor(private subjectService: SubjectService) {}
 
   @Post('/')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Permissions('create')
   @Roles('Admin', 'Super Admin')
   @ApiCreatedResponse({ description: 'Subject creacted successfully!' })
@@ -40,7 +42,8 @@ export class SubjectController {
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Permissions('delete')
   @Roles('Admin', 'Super Admin')
   @ApiOkResponse({ description: 'Subject delete successfully!' })
@@ -50,7 +53,8 @@ export class SubjectController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Permissions('update')
   @Roles('Admin', 'Super Admin')
   @ApiOkResponse({ description: 'Subject updated successfully!' })

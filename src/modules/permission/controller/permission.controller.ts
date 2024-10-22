@@ -12,6 +12,7 @@ import {
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -20,7 +21,7 @@ import {
 import { PermissionService } from '../service/permission.service';
 import { CreatePermissionDto } from '../dto/createPermission.dto';
 import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
-import { AuthGuard } from 'src/modules/guard/auth.guard';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('roles&permission')
 @Controller('digital-textbook/permission')
@@ -35,7 +36,8 @@ export class PermissionController {
   }
 
   @Post('/')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('create')
   @ApiCreatedResponse({ description: 'Permission created successfully!' })
@@ -47,7 +49,8 @@ export class PermissionController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('update')
   @ApiOkResponse({ description: 'Permission updated successfully!' })
@@ -63,7 +66,8 @@ export class PermissionController {
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Super Admin')
   @Permissions('delete')
   @ApiOkResponse({ description: 'Permission deleted successfully!' })

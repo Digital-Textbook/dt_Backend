@@ -16,10 +16,12 @@ import {
   ValidationPipe,
   ParseUUIDPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
@@ -35,6 +37,8 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UpdateTextbookDto } from '../dto/updateTextbook.dto';
 import { MinioClientService } from 'src/minio-client/minio-client.service';
 import { Response } from 'express';
+import { Auth } from 'src/modules/guard/auth.guard';
+import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
 
 @ApiTags('textbook')
 @Controller('digital-textbook/textbook')
@@ -61,6 +65,10 @@ export class TextbookController {
 
   //////////////// Create Textbook ///////////////////////
   @Post('/')
+  @UseGuards(Auth)
+  @ApiBearerAuth()
+  @Permissions('create')
+  @Roles('Admin', 'Super Admin')
   @ApiCreatedResponse({ description: 'Textbook successfully uploaded!' })
   @ApiBadRequestResponse({
     description: 'Invalid data or information for uploading textbook!',
@@ -97,6 +105,10 @@ export class TextbookController {
 
   //////////////// Updated Textbook By ID ///////////////////////
   @Patch('/:id')
+  @UseGuards(Auth)
+  @ApiBearerAuth()
+  @Permissions('update')
+  @Roles('Admin', 'Super Admin')
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'Textbook successfully updated!' })
   @ApiBadRequestResponse({ description: 'Invalid textbook ID!' })
@@ -134,6 +146,10 @@ export class TextbookController {
 
   //////////////// Delete Textbook By ID ///////////////////////
   @Delete('/:id')
+  @UseGuards(Auth)
+  @ApiBearerAuth()
+  @Permissions('delete')
+  @Roles('Admin', 'Super Admin')
   @ApiOkResponse({ description: 'Textbook deleted successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid textbook ID!' })
   @ApiInternalServerErrorResponse({

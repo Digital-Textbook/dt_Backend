@@ -5,7 +5,7 @@ import { HttpModule } from '@nestjs/axios';
 import { AdminController } from './controller/admin.controller';
 import { AdminService } from './service/admin.service';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 import { AdminOtp } from './entities/admin-otp.entity';
 import { Admin } from './entities/admin.entity';
@@ -19,7 +19,7 @@ import { Permission } from '../permission/entities/permission.entity';
 import { AdminJwtGuard } from '../guard/AdminAuthGuard';
 import { RolesGuard } from '../guard/role.guard';
 import { PermissionsGuard } from '../guard/permission.guard';
-import { AuthGuard } from '../guard/auth.guard';
+import { Auth } from '../guard/auth.guard';
 
 @Module({
   imports: [
@@ -42,7 +42,7 @@ import { AuthGuard } from '../guard/auth.guard';
     AdminJwtGuard,
     RolesGuard,
     PermissionsGuard,
-    AuthGuard,
+    Auth,
   ],
 })
 export class AdminModule {}

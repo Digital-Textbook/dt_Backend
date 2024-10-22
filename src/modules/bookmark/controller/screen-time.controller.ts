@@ -1,9 +1,19 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Param,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -28,7 +38,16 @@ export class ScreenTimeController {
     description:
       'The user is not authorized (e.g., missing or invalid authentication token).',
   })
-  async createScreenTime(@Body() data: CreateScreenTimeDto) {
-    return await this.screenTimeService.createScreenTime(data);
+  async createScreenTime(@Request() req, @Body() data: CreateScreenTimeDto) {
+    const id = req.user.id;
+    return await this.screenTimeService.createScreenTime(id, data);
+  }
+
+  @Get('/:id')
+  @UseGuards(UserAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Screen time successfully fetched!' })
+  async getDailyScreenTime(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.screenTimeService.getDailyScreenTime(id);
   }
 }

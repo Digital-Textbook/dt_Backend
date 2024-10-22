@@ -2,7 +2,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,9 +21,9 @@ export class ScreenTimeService {
     private textbookRepository: Repository<Textbook>,
   ) {}
 
-  async createScreenTime(data: CreateScreenTimeDto) {
+  async createScreenTime(id: string, data: CreateScreenTimeDto) {
     try {
-      const { accessTime, endTime, userId, textbookId } = data;
+      const { accessTime, endTime, textbookId } = data;
 
       const start = new Date(accessTime);
       const end = new Date(endTime);
@@ -36,7 +35,7 @@ export class ScreenTimeService {
       const totalTime = Math.floor((end.getTime() - start.getTime()) / 1000);
 
       const [user, textbook] = await Promise.all([
-        this.userRepository.findOne({ where: { id: userId } }),
+        this.userRepository.findOne({ where: { id } }),
         this.textbookRepository.findOne({ where: { id: textbookId } }),
       ]);
       if (!user || !textbook) {
@@ -51,13 +50,7 @@ export class ScreenTimeService {
         textbook,
       });
 
-      const result = await this.screenTimeRepository.save(newScreenTime);
-      if (!result) {
-        throw new InternalServerErrorException(
-          'Internal server error while creating screen time!',
-        );
-      }
-      return newScreenTime;
+      return await this.screenTimeRepository.save(newScreenTime);
     } catch (error) {
       console.error('Error creating bookmark: ', error);
       throw new HttpException(
@@ -65,5 +58,13 @@ export class ScreenTimeService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async getDailyScreenTime(id: string) {
+    const user = await this.screenTimeRepository.findOne({
+      where: { user: { id } },
+    });
+
+    return user;
   }
 }

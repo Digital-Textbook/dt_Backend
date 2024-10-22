@@ -15,6 +15,7 @@ import {
 import { UserService } from '../service/users.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -24,7 +25,7 @@ import {
 import { CreateRegisterDto } from '../dto/createRegister.dto';
 import { UpdateUserDto } from '../dto/updateUser.dto';
 import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
-import { AuthGuard } from 'src/modules/guard/auth.guard';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('users')
 @Controller('digital-textbook/user')
@@ -84,7 +85,8 @@ export class UserController {
 
   ////////////////////////////// User Update by Admin //////////////////////
   @Patch('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Admin', 'Super Admin')
   @Permissions('update')
   @ApiOkResponse({ description: 'User updated successfully.' })
@@ -100,7 +102,8 @@ export class UserController {
 
   /////////////////////////////// Delete By Admin //////////////////////
   @Delete('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Admin', 'Super Admin')
   @Permissions('delete')
   @ApiOkResponse({ description: 'User deleted successfully.' })

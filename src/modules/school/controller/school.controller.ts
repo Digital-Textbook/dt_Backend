@@ -27,7 +27,7 @@ import { CreateSchoolDto } from '../dto/school.dto';
 import { UpdateSchoolDto } from '../dto/updateSchool.dto';
 
 import { Permissions, Roles } from 'src/modules/guard/roles.decorator';
-import { AuthGuard } from 'src/modules/guard/auth.guard';
+import { Auth } from 'src/modules/guard/auth.guard';
 
 @ApiTags('school')
 @Controller('digital-textbook/school')
@@ -35,10 +35,10 @@ export class SchoolController {
   constructor(private schoolService: SchoolService) {}
 
   @Post('/')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Admin', 'Super Admin')
   @Permissions('create')
-  @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'School creacted successfully!' })
   @ApiNotFoundResponse({ description: 'Dzongkhag Id is invalid!' })
   @ApiUnauthorizedResponse({
@@ -52,10 +52,10 @@ export class SchoolController {
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Admin', 'Super Admin')
   @Permissions('delete')
-  @ApiBearerAuth()
   @UsePipes(ValidationPipe)
   @ApiOkResponse({ description: 'School delete successfully!' })
   @ApiBadRequestResponse({ description: 'Invalid School ID!' })
@@ -67,10 +67,10 @@ export class SchoolController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
+  @UseGuards(Auth)
+  @ApiBearerAuth()
   @Roles('Admin', 'Super Admin')
   @Permissions('update')
-  @ApiBearerAuth()
   @ApiOkResponse({ description: 'School updated successfully!' })
   @ApiBadRequestResponse({
     description: 'Invalid data. Please check input data',
