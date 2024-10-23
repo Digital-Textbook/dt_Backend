@@ -117,7 +117,6 @@ export class AdminController {
   }
 
   @Patch('/:id/deactive')
-  @UseGuards(Auth)
   @ApiBearerAuth()
   @UsePipes(ValidationPipe)
   async deactivateAccount(@Param('id', ParseUUIDPipe) id: string) {
